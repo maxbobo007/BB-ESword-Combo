@@ -12,6 +12,7 @@ interface GameState {
   startGame: (puzzle: CrosswordPuzzle) => void;
   updateCell: (row: number, col: number, letter: string) => void;
   useHint: () => void;
+  checkCompletion: () => void;
   completeGame: () => void;
   loadUserProgress: () => Promise<void>;
   saveUserProgress: () => Promise<void>;
