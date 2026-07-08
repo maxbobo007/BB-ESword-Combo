@@ -1,166 +1,86 @@
-import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Dimensions,
-  Alert,
-} from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useGameStore } from '@/store/gameStore';
-import { CrosswordCell } from '@/core/types/game';
+import { PuzzleGenerator } from '@/core/engine/puzzleGenerator';
+import { getDailyPuzzle } from '@/core/daily/daily';
+import { getRandomWords } from '@/core/data/words';
+import { localDateString } from '@/core/progress/streak';
+import { RootStackParamList } from '@/navigation/types';
+import { Grid } from '@/components/Grid';
+import { Keyboard } from '@/components/Keyboard';
+import { ClueList } from '@/components/ClueList';
+import { Theme } from '@/theme/tokens';
+import { useTheme } from '@/theme/ThemeProvider';
 
-const { width } = Dimensions.get('window');
-const CELL_SIZE = Math.min((width - 40) / 15, 30);
+type Props = NativeStackScreenProps<RootStackParamList, 'Game'>;
 
-export const GameScreen: React.FC = () => {
-  const {
-    currentPuzzle,
-    currentSession,
-    updateCell,
-    useHint,
-    resetGame,
-  } = useGameStore();
-
+export const GameScreen: React.FC<Props> = ({ route, navigation }) => {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+  const { currentPuzzle, currentSession, startGame, updateCell, useHint, resetGame } =
+    useGameStore();
   const [selectedCell, setSelectedCell] = useState<{ row: number; col: number } | null>(null);
+
+  // 谜题在进入页面时生成；退出页面清空临时状态
+  useEffect(() => {
+    const params = route.params;
+    const puzzle =
+      params.mode === 'daily'
+        ? getDailyPuzzle(localDateString())
+        : new PuzzleGenerator(15).generatePuzzle(
+            getRandomWords(8, params.level, params.category),
+            params.difficulty,
+          );
+
+    if (puzzle.words.length < 4) {
+      Alert.alert('提示', '该组合的单词数量不足，请选择其他主题', [
+        { text: '返回', onPress: () => navigation.goBack() },
+      ]);
+      return;
+    }
+    startGame(puzzle);
+    return () => resetGame();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (currentSession?.isCompleted) {
       Alert.alert(
         '恭喜完成!',
         `得分: ${currentSession.score}\n错误: ${currentSession.mistakes}\n提示使用: ${currentSession.hintsUsed}`,
-        [{ text: '返回', onPress: resetGame }]
+        [{ text: '返回', onPress: () => navigation.goBack() }],
       );
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentSession?.isCompleted]);
 
   if (!currentPuzzle || !currentSession) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.title}>请从主菜单选择游戏</Text>
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>正在生成谜题…</Text>
       </View>
     );
   }
 
   const handleCellPress = (row: number, col: number) => {
     const cell = currentSession.currentCells[row][col];
-    if (!cell.correctLetter) return;
+    if (!cell.correctLetter) {
+      return;
+    }
     setSelectedCell({ row, col });
   };
 
   const handleLetterInput = (letter: string) => {
-    if (!selectedCell) return;
+    if (!selectedCell) {
+      return;
+    }
     updateCell(selectedCell.row, selectedCell.col, letter);
-  };
-
-  const renderCell = (cell: CrosswordCell) => {
-    const isSelected =
-      selectedCell?.row === cell.row && selectedCell?.col === cell.col;
-    const isEmpty = !cell.correctLetter;
-
-    return (
-      <TouchableOpacity
-        key={`${cell.row}-${cell.col}`}
-        style={[
-          styles.cell,
-          isEmpty && styles.emptyCell,
-          isSelected && styles.selectedCell,
-          cell.isFixed && styles.fixedCell,
-        ]}
-        onPress={() => handleCellPress(cell.row, cell.col)}
-        disabled={isEmpty || cell.isFixed}
-      >
-        <Text
-          style={[
-            styles.cellText,
-            cell.isFixed && styles.fixedCellText,
-          ]}
-        >
-          {cell.letter || ''}
-        </Text>
-      </TouchableOpacity>
-    );
-  };
-
-  const renderKeyboard = () => {
-    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZÑ'.split('');
-
-    return (
-      <View style={styles.keyboard}>
-        <View style={styles.keyboardRow}>
-          {alphabet.slice(0, 10).map(letter => (
-            <TouchableOpacity
-              key={letter}
-              style={styles.key}
-              onPress={() => handleLetterInput(letter)}
-            >
-              <Text style={styles.keyText}>{letter}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-        <View style={styles.keyboardRow}>
-          {alphabet.slice(10, 19).map(letter => (
-            <TouchableOpacity
-              key={letter}
-              style={styles.key}
-              onPress={() => handleLetterInput(letter)}
-            >
-              <Text style={styles.keyText}>{letter}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-        <View style={styles.keyboardRow}>
-          {alphabet.slice(19).map(letter => (
-            <TouchableOpacity
-              key={letter}
-              style={styles.key}
-              onPress={() => handleLetterInput(letter)}
-            >
-              <Text style={styles.keyText}>{letter}</Text>
-            </TouchableOpacity>
-          ))}
-          <TouchableOpacity
-            style={[styles.key, styles.deleteKey]}
-            onPress={() => handleLetterInput('')}
-          >
-            <Text style={styles.keyText}>DEL</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  };
-
-  const renderClues = () => {
-    const horizontalWords = currentPuzzle.words.filter(w => w.direction === 'horizontal');
-    const verticalWords = currentPuzzle.words.filter(w => w.direction === 'vertical');
-
-    return (
-      <View style={styles.cluesContainer}>
-        <View style={styles.clueSection}>
-          <Text style={styles.clueTitle}>横向 (Horizontal)</Text>
-          {horizontalWords.map(word => (
-            <Text key={word.id} style={styles.clue}>
-              {word.clueNumber}. {word.wordData.english} ({word.wordData.chinese})
-            </Text>
-          ))}
-        </View>
-        <View style={styles.clueSection}>
-          <Text style={styles.clueTitle}>纵向 (Vertical)</Text>
-          {verticalWords.map(word => (
-            <Text key={word.id} style={styles.clue}>
-              {word.clueNumber}. {word.wordData.english} ({word.wordData.chinese})
-            </Text>
-          ))}
-        </View>
-      </View>
-    );
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>西语填字</Text>
         <View style={styles.stats}>
           <Text style={styles.statText}>错误: {currentSession.mistakes}</Text>
           <Text style={styles.statText}>提示: {currentSession.hintsUsed}</Text>
@@ -171,155 +91,67 @@ export const GameScreen: React.FC = () => {
       </View>
 
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
-        <View style={styles.gridContainer}>
-          {currentSession.currentCells.map((row, rowIndex) => (
-            <View key={rowIndex} style={styles.row}>
-              {row.map(cell => renderCell(cell))}
-            </View>
-          ))}
-        </View>
-
-        {renderClues()}
+        <Grid
+          cells={currentSession.currentCells}
+          selectedCell={selectedCell}
+          onCellPress={handleCellPress}
+        />
+        <ClueList words={currentPuzzle.words} />
       </ScrollView>
 
-      {renderKeyboard()}
+      <Keyboard onKeyPress={handleLetterInput} onDelete={() => handleLetterInput('')} />
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  header: {
-    padding: 16,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
-  },
-  stats: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-  },
-  statText: {
-    fontSize: 14,
-    color: '#666',
-  },
-  hintButton: {
-    backgroundColor: '#4CAF50',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 4,
-    marginLeft: 'auto',
-  },
-  hintButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  content: {
-    padding: 16,
-  },
-  gridContainer: {
-    alignSelf: 'center',
-    backgroundColor: '#fff',
-    padding: 4,
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  row: {
-    flexDirection: 'row',
-  },
-  cell: {
-    width: CELL_SIZE,
-    height: CELL_SIZE,
-    borderWidth: 1,
-    borderColor: '#333',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-  },
-  emptyCell: {
-    backgroundColor: '#000',
-    borderColor: '#000',
-  },
-  selectedCell: {
-    backgroundColor: '#BBDEFB',
-  },
-  fixedCell: {
-    backgroundColor: '#E3F2FD',
-  },
-  cellText: {
-    fontSize: CELL_SIZE * 0.6,
-    fontWeight: '600',
-    color: '#333',
-  },
-  fixedCellText: {
-    color: '#1976D2',
-  },
-  cluesContainer: {
-    marginTop: 24,
-    gap: 16,
-  },
-  clueSection: {
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 8,
-  },
-  clueTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 12,
-  },
-  clue: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
-  },
-  keyboard: {
-    backgroundColor: '#fff',
-    paddingVertical: 8,
-    paddingHorizontal: 4,
-    borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
-  },
-  keyboardRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginBottom: 4,
-    gap: 4,
-  },
-  key: {
-    backgroundColor: '#e0e0e0',
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    borderRadius: 4,
-    minWidth: 32,
-    alignItems: 'center',
-  },
-  deleteKey: {
-    backgroundColor: '#ff9800',
-    paddingHorizontal: 12,
-  },
-  keyText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-  },
-});
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    loadingContainer: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    loadingText: {
+      fontSize: 18,
+      color: theme.colors.textSecondary,
+    },
+    header: {
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      backgroundColor: theme.colors.surface,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+    },
+    stats: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 16,
+    },
+    statText: {
+      fontSize: 14,
+      color: theme.colors.textSecondary,
+    },
+    hintButton: {
+      backgroundColor: theme.colors.success,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 4,
+      marginLeft: 'auto',
+    },
+    hintButtonText: {
+      color: '#fff',
+      fontSize: 14,
+      fontWeight: '600',
+    },
+    scrollView: {
+      flex: 1,
+    },
+    content: {
+      padding: 16,
+    },
+  });
