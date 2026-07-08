@@ -14,10 +14,14 @@ export type WordCategory =
   | 'technology' // 科技
   | 'culture'; // 文化
 
+export type Difficulty = 'easy' | 'medium' | 'hard';
+
+export type Direction = 'horizontal' | 'vertical';
+
 // 单词数据结构
 export interface Word {
   id: string;
-  spanish: string; // 西语单词
+  spanish: string; // 西语单词（带重音的原形）
   english: string; // 英文翻译
   chinese: string; // 中文翻译
   level: LanguageLevel;
@@ -30,8 +34,8 @@ export interface Word {
 export interface CrosswordCell {
   row: number;
   col: number;
-  letter: string | null; // 当前字母
-  correctLetter: string; // 正确字母
+  letter: string | null; // 当前字母（归一化大写）
+  correctLetter: string; // 正确字母（归一化大写，重音已去除、Ñ 保留）
   isFixed: boolean; // 是否是提示字母（固定不可修改）
   wordIds: string[]; // 所属的单词ID列表
 }
@@ -42,7 +46,7 @@ export interface CrosswordWord {
   wordData: Word;
   startRow: number;
   startCol: number;
-  direction: 'horizontal' | 'vertical';
+  direction: Direction;
   clueNumber: number; // 提示编号
   isCompleted: boolean; // 是否已完成
 }
@@ -52,10 +56,10 @@ export interface CrosswordPuzzle {
   id: string;
   level: LanguageLevel;
   category: WordCategory;
-  gridSize: number; // 网格大小（如10表示10x10）
-  words: CrosswordWord[];
+  gridSize: number; // 网格大小（如15表示15x15）
+  words: CrosswordWord[]; // 仅包含成功放入网格的单词
   cells: CrosswordCell[][];
-  difficulty: 'easy' | 'medium' | 'hard'; // 难度（基于提示字母数量）
+  difficulty: Difficulty; // 难度（基于提示字母数量）
   estimatedTime: number; // 预估完成时间（秒）
 }
 
@@ -71,7 +75,7 @@ export interface GameSession {
   score?: number;
 }
 
-// 用户进度
+// 用户进度（持久化，未来数据同步的载体）
 export interface UserProgress {
   userId: string;
   wordsLearned: string[]; // 已学单词ID
@@ -79,30 +83,23 @@ export interface UserProgress {
   currentLevel: LanguageLevel;
   totalScore: number;
   streak: number; // 连续学习天数
-  lastStudyDate: string;
+  lastStudyDate: string; // 本地日期 YYYY-MM-DD
+  dailyCompletedDates: string[]; // 已完成每日挑战的日期
+  achievements: Record<string, number>; // 成就ID → 解锁时间戳
   statistics: {
     totalGamesPlayed: number;
     totalWordsLearned: number;
     averageAccuracy: number;
     totalTimeSpent: number; // 总学习时间（秒）
+    perfectGames: number; // 零错误零提示完成的局数
   };
 }
 
-// 排行榜条目
-export interface LeaderboardEntry {
-  userId: string;
-  username: string;
-  score: number;
-  rank: number;
-  avatar?: string;
-}
-
-// 成就
-export interface Achievement {
+// 成就定义（纯数据 + 判定谓词，见 core/achievements）
+export interface AchievementDef {
   id: string;
   title: string;
   description: string;
   icon: string;
-  requirement: number;
-  unlockedAt?: number;
+  check: (progress: UserProgress) => boolean;
 }

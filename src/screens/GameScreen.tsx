@@ -9,7 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { useGameStore } from '@/store/gameStore';
-import { CrosswordCell } from '@/types/game';
+import { CrosswordCell } from '@/core/types/game';
 
 const { width } = Dimensions.get('window');
 const CELL_SIZE = Math.min((width - 40) / 15, 30);

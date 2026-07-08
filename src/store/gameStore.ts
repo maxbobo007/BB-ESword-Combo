@@ -1,31 +1,29 @@
 import { create } from 'zustand';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { GameSession, UserProgress, CrosswordPuzzle, CrosswordCell } from '@/types/game';
+import { GameSession, CrosswordPuzzle, CrosswordWord } from '@/core/types/game';
+import { computeGameResult } from '@/core/progress/scoring';
+import { useProgressStore } from '@/store/progressStore';
 
+// 游戏进行中的临时状态：不持久化，退出即清空。
 interface GameState {
   currentPuzzle: CrosswordPuzzle | null;
   currentSession: GameSession | null;
-  userProgress: UserProgress | null;
-  isLoading: boolean;
+  recentlyCompletedWord: CrosswordWord | null; // 刚填完的单词（UI 用于展示带重音原词/朗读）
 
-  // Actions
   startGame: (puzzle: CrosswordPuzzle) => void;
   updateCell: (row: number, col: number, letter: string) => void;
+  /** 内部：重算包含指定格子的单词完成状态 */
+  refreshWordCompletion: (row: number, col: number) => void;
   useHint: () => void;
   checkCompletion: () => void;
   completeGame: () => void;
-  loadUserProgress: () => Promise<void>;
-  saveUserProgress: () => Promise<void>;
+  clearRecentlyCompletedWord: () => void;
   resetGame: () => void;
 }
-
-const STORAGE_KEY = '@bb_esword_progress';
 
 export const useGameStore = create<GameState>((set, get) => ({
   currentPuzzle: null,
   currentSession: null,
-  userProgress: null,
-  isLoading: false,
+  recentlyCompletedWord: null,
 
   startGame: (puzzle: CrosswordPuzzle) => {
     const session: GameSession = {
@@ -36,200 +34,165 @@ export const useGameStore = create<GameState>((set, get) => ({
       mistakes: 0,
       isCompleted: false,
     };
-
-    set({ currentPuzzle: puzzle, currentSession: session });
+    set({ currentPuzzle: puzzle, currentSession: session, recentlyCompletedWord: null });
   },
 
   updateCell: (row: number, col: number, letter: string) => {
     const { currentSession, currentPuzzle } = get();
-    if (!currentSession || !currentPuzzle) return;
+    if (!currentSession || !currentPuzzle || currentSession.isCompleted) {
+      return;
+    }
 
     const cells = currentSession.currentCells;
     const cell = cells[row][col];
+    if (cell.isFixed) {
+      return; // 不能修改提示字母
+    }
 
-    if (cell.isFixed) return; // 不能修改提示字母
-
-    const wasCorrect = cell.letter === cell.correctLetter;
-    cell.letter = letter.toUpperCase();
+    const prevLetter = cell.letter;
+    const wasWrong = prevLetter !== null && prevLetter !== '' && prevLetter !== cell.correctLetter;
+    cell.letter = letter ? letter.toUpperCase() : null;
     const isCorrect = cell.letter === cell.correctLetter;
 
-    if (!wasCorrect && !isCorrect && letter) {
+    // 只在 空→错 / 对→错 时计一次错误；在错误字母上反复改键不重复累计
+    if (letter && !isCorrect && !wasWrong) {
       currentSession.mistakes++;
     }
+
+    set({
+      currentSession: { ...currentSession, currentCells: cells },
+    });
+
+    get().refreshWordCompletion(row, col);
+    get().checkCompletion();
+  },
+
+  // 内部：重算包含 (row, col) 的单词的完成状态，捕获"刚完成"事件
+  refreshWordCompletion(row: number, col: number) {
+    const { currentSession, currentPuzzle } = get();
+    if (!currentSession || !currentPuzzle) {
+      return;
+    }
+
+    const cellWordIds = currentSession.currentCells[row][col].wordIds;
+    let completed: CrosswordWord | null = null;
+
+    const words = currentPuzzle.words.map(word => {
+      if (!cellWordIds.includes(word.id)) {
+        return word;
+      }
+      const dr = word.direction === 'vertical' ? 1 : 0;
+      const dc = word.direction === 'horizontal' ? 1 : 0;
+      const len = word.wordData.spanish.length;
+      let isCompleted = true;
+      for (let i = 0; i < len; i++) {
+        const c = currentSession.currentCells[word.startRow + dr * i][word.startCol + dc * i];
+        if (c.letter !== c.correctLetter) {
+          isCompleted = false;
+          break;
+        }
+      }
+      if (isCompleted && !word.isCompleted) {
+        completed = { ...word, isCompleted };
+      }
+      return word.isCompleted === isCompleted ? word : { ...word, isCompleted };
+    });
+
+    set({
+      currentPuzzle: { ...currentPuzzle, words },
+      ...(completed ? { recentlyCompletedWord: completed } : {}),
+    });
+  },
+
+  useHint: () => {
+    const { currentSession, currentPuzzle } = get();
+    if (!currentSession || !currentPuzzle || currentSession.isCompleted) {
+      return;
+    }
+
+    const cells = currentSession.currentCells;
+    const wrongCells: { row: number; col: number }[] = [];
+    for (const rowCells of cells) {
+      for (const cell of rowCells) {
+        if (!cell.isFixed && cell.correctLetter && cell.letter !== cell.correctLetter) {
+          wrongCells.push({ row: cell.row, col: cell.col });
+        }
+      }
+    }
+    if (wrongCells.length === 0) {
+      return;
+    }
+
+    const target = wrongCells[Math.floor(Math.random() * wrongCells.length)];
+    const cell = cells[target.row][target.col];
+    cell.letter = cell.correctLetter;
+    cell.isFixed = true;
 
     set({
       currentSession: {
         ...currentSession,
         currentCells: cells,
+        hintsUsed: currentSession.hintsUsed + 1,
       },
     });
 
-    // 检查是否完成
+    get().refreshWordCompletion(target.row, target.col);
     get().checkCompletion();
-  },
-
-  useHint: () => {
-    const { currentSession, currentPuzzle } = get();
-    if (!currentSession || !currentPuzzle) return;
-
-    const cells = currentSession.currentCells;
-    const emptyCells: { row: number; col: number }[] = [];
-
-    for (let row = 0; row < cells.length; row++) {
-      for (let col = 0; col < cells[row].length; col++) {
-        const cell = cells[row][col];
-        if (!cell.isFixed && cell.correctLetter && cell.letter !== cell.correctLetter) {
-          emptyCells.push({ row, col });
-        }
-      }
-    }
-
-    if (emptyCells.length > 0) {
-      const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-      cells[randomCell.row][randomCell.col].letter =
-        cells[randomCell.row][randomCell.col].correctLetter;
-      cells[randomCell.row][randomCell.col].isFixed = true;
-
-      set({
-        currentSession: {
-          ...currentSession,
-          currentCells: cells,
-          hintsUsed: currentSession.hintsUsed + 1,
-        },
-      });
-    }
   },
 
   checkCompletion: () => {
     const { currentSession } = get();
-    if (!currentSession) return;
+    if (!currentSession || currentSession.isCompleted) {
+      return;
+    }
 
-    const cells = currentSession.currentCells;
-    let isCompleted = true;
-
-    for (const row of cells) {
+    for (const row of currentSession.currentCells) {
       for (const cell of row) {
         if (cell.correctLetter && cell.letter !== cell.correctLetter) {
-          isCompleted = false;
-          break;
+          return;
         }
       }
-      if (!isCompleted) break;
     }
-
-    if (isCompleted) {
-      get().completeGame();
-    }
+    get().completeGame();
   },
 
   completeGame: () => {
-    const { currentSession, currentPuzzle, userProgress } = get();
-    if (!currentSession || !currentPuzzle || currentSession.isCompleted) return;
+    const { currentSession, currentPuzzle } = get();
+    if (!currentSession || !currentPuzzle || currentSession.isCompleted) {
+      return;
+    }
 
     const endTime = Date.now();
-    const timeTaken = Math.floor((endTime - currentSession.startTime) / 1000);
-    const accuracy =
-      ((currentPuzzle.words.reduce((sum, w) => sum + w.wordData.spanish.length, 0) -
-        currentSession.mistakes) /
-        currentPuzzle.words.reduce((sum, w) => sum + w.wordData.spanish.length, 0)) *
-      100;
-
-    const score = Math.max(
-      0,
-      Math.floor(
-        1000 -
-          currentSession.mistakes * 10 -
-          currentSession.hintsUsed * 20 -
-          timeTaken * 0.5
-      )
+    const result = computeGameResult(
+      currentPuzzle,
+      currentSession.mistakes,
+      currentSession.hintsUsed,
+      currentSession.startTime,
+      endTime,
     );
 
-    const updatedSession: GameSession = {
-      ...currentSession,
-      endTime,
-      isCompleted: true,
-      score,
-    };
+    set({
+      currentSession: {
+        ...currentSession,
+        endTime,
+        isCompleted: true,
+        score: result.score,
+      },
+    });
 
-    if (userProgress) {
-      const newWordsLearned = currentPuzzle.words
-        .map(w => w.wordData.id)
-        .filter(id => !userProgress.wordsLearned.includes(id));
-
-      const updatedProgress: UserProgress = {
-        ...userProgress,
-        wordsLearned: [...userProgress.wordsLearned, ...newWordsLearned],
-        puzzlesCompleted: [...userProgress.puzzlesCompleted, currentPuzzle.id],
-        totalScore: userProgress.totalScore + score,
-        statistics: {
-          ...userProgress.statistics,
-          totalGamesPlayed: userProgress.statistics.totalGamesPlayed + 1,
-          totalWordsLearned:
-            userProgress.statistics.totalWordsLearned + newWordsLearned.length,
-          averageAccuracy:
-            (userProgress.statistics.averageAccuracy *
-              userProgress.statistics.totalGamesPlayed +
-              accuracy) /
-            (userProgress.statistics.totalGamesPlayed + 1),
-          totalTimeSpent: userProgress.statistics.totalTimeSpent + timeTaken,
-        },
-      };
-
-      set({ currentSession: updatedSession, userProgress: updatedProgress });
-      get().saveUserProgress();
-    } else {
-      set({ currentSession: updatedSession });
-    }
+    useProgressStore
+      .getState()
+      .recordGameCompletion(
+        currentPuzzle,
+        result,
+        currentSession.mistakes,
+        currentSession.hintsUsed,
+      );
   },
 
-  loadUserProgress: async () => {
-    set({ isLoading: true });
-    try {
-      const data = await AsyncStorage.getItem(STORAGE_KEY);
-      if (data) {
-        const progress: UserProgress = JSON.parse(data);
-        set({ userProgress: progress });
-      } else {
-        const defaultProgress: UserProgress = {
-          userId: `user_${Date.now()}`,
-          wordsLearned: [],
-          puzzlesCompleted: [],
-          currentLevel: 'A1',
-          totalScore: 0,
-          streak: 0,
-          lastStudyDate: new Date().toISOString().split('T')[0],
-          statistics: {
-            totalGamesPlayed: 0,
-            totalWordsLearned: 0,
-            averageAccuracy: 0,
-            totalTimeSpent: 0,
-          },
-        };
-        set({ userProgress: defaultProgress });
-        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(defaultProgress));
-      }
-    } catch (error) {
-      console.error('Failed to load user progress:', error);
-    } finally {
-      set({ isLoading: false });
-    }
-  },
-
-  saveUserProgress: async () => {
-    const { userProgress } = get();
-    if (!userProgress) return;
-
-    try {
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(userProgress));
-    } catch (error) {
-      console.error('Failed to save user progress:', error);
-    }
-  },
+  clearRecentlyCompletedWord: () => set({ recentlyCompletedWord: null }),
 
   resetGame: () => {
-    set({
-      currentPuzzle: null,
-      currentSession: null,
-    });
+    set({ currentPuzzle: null, currentSession: null, recentlyCompletedWord: null });
   },
 }));

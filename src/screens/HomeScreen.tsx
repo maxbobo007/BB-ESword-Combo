@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -8,20 +8,18 @@ import {
   Alert,
 } from 'react-native';
 import { useGameStore } from '@/store/gameStore';
-import { PuzzleGenerator } from '@/utils/puzzleGenerator';
-import { getRandomWords } from '@/data/words';
-import { LanguageLevel, WordCategory } from '@/types/game';
+import { useProgressStore } from '@/store/progressStore';
+import { PuzzleGenerator } from '@/core/engine/puzzleGenerator';
+import { getRandomWords } from '@/core/data/words';
+import { LanguageLevel, WordCategory } from '@/core/types/game';
 
 interface HomeScreenProps {
   onStartGame: () => void;
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({ onStartGame }) => {
-  const { userProgress, loadUserProgress, startGame } = useGameStore();
-
-  useEffect(() => {
-    loadUserProgress();
-  }, []);
+  const { startGame } = useGameStore();
+  const userProgress = useProgressStore(s => s.progress);
 
   const handleStartGame = (
     level: LanguageLevel,
