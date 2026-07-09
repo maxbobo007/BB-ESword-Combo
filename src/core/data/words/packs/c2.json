@@ -1,0 +1,907 @@
+{
+  "id": "builtin_c2",
+  "name": "C2 精通词库",
+  "description": "文学与地道高阶词汇",
+  "words": [
+    {
+      "id": "c2_food_01",
+      "spanish": "yantar",
+      "english": "to eat (archaic, literary)",
+      "chinese": "进食（古雅用语）",
+      "level": "C2",
+      "category": "food",
+      "exampleSentence": "En las novelas de caballerías, los hidalgos se sentaban a yantar."
+    },
+    {
+      "id": "c2_food_02",
+      "spanish": "opíparo",
+      "english": "sumptuous (of a meal)",
+      "chinese": "（宴席）丰盛的",
+      "level": "C2",
+      "category": "food",
+      "exampleSentence": "Nos ofrecieron un opíparo banquete de bodas."
+    },
+    {
+      "id": "c2_food_03",
+      "spanish": "sibarita",
+      "english": "epicure, bon vivant",
+      "chinese": "讲究吃喝享受的人",
+      "level": "C2",
+      "category": "food",
+      "exampleSentence": "Es un sibarita que solo bebe vinos de añadas excepcionales."
+    },
+    {
+      "id": "c2_food_04",
+      "spanish": "condumio",
+      "english": "grub, victuals (colloquial)",
+      "chinese": "吃食（俗语）",
+      "level": "C2",
+      "category": "food",
+      "exampleSentence": "Trajo condumio para toda la cuadrilla de segadores."
+    },
+    {
+      "id": "c2_food_05",
+      "spanish": "pitanza",
+      "english": "daily ration of food",
+      "chinese": "每日口粮",
+      "level": "C2",
+      "category": "food",
+      "exampleSentence": "Los frailes repartían la pitanza entre los pobres del convento."
+    },
+    {
+      "id": "c2_food_06",
+      "spanish": "gula",
+      "english": "gluttony",
+      "chinese": "暴食，贪吃",
+      "level": "C2",
+      "category": "food",
+      "exampleSentence": "Repitió postre tres veces, más por gula que por hambre."
+    },
+    {
+      "id": "c2_food_07",
+      "spanish": "avinagrado",
+      "english": "vinegary, soured",
+      "chinese": "变酸的；尖酸的",
+      "level": "C2",
+      "category": "food",
+      "exampleSentence": "El vino llevaba semanas abierto y sabía avinagrado."
+    },
+    {
+      "id": "c2_food_08",
+      "spanish": "escanciar",
+      "english": "to pour (wine, cider)",
+      "chinese": "斟（酒）",
+      "level": "C2",
+      "category": "food",
+      "exampleSentence": "En Asturias es todo un arte escanciar la sidra."
+    },
+    {
+      "id": "c2_food_09",
+      "spanish": "manjar",
+      "english": "delicacy",
+      "chinese": "珍馐美味",
+      "level": "C2",
+      "category": "food",
+      "exampleSentence": "Para él, unas simples migas de pastor eran un manjar."
+    },
+    {
+      "id": "c2_food_10",
+      "spanish": "inanición",
+      "english": "starvation",
+      "chinese": "饥饿衰竭",
+      "level": "C2",
+      "category": "food",
+      "exampleSentence": "Los náufragos estuvieron al borde de la inanición."
+    },
+    {
+      "id": "c2_family_01",
+      "spanish": "estirpe",
+      "english": "stock, lineage",
+      "chinese": "世系，门第",
+      "level": "C2",
+      "category": "family",
+      "exampleSentence": "Era el último varón de una estirpe de navegantes."
+    },
+    {
+      "id": "c2_family_02",
+      "spanish": "prole",
+      "english": "offspring, brood",
+      "chinese": "子女，后嗣",
+      "level": "C2",
+      "category": "family",
+      "exampleSentence": "Llegó al parque con toda su prole detrás."
+    },
+    {
+      "id": "c2_family_03",
+      "spanish": "alcurnia",
+      "english": "noble ancestry",
+      "chinese": "名门望族出身",
+      "level": "C2",
+      "category": "family",
+      "exampleSentence": "Se casó con una dama de alta alcurnia."
+    },
+    {
+      "id": "c2_family_04",
+      "spanish": "nepotismo",
+      "english": "nepotism",
+      "chinese": "裙带关系",
+      "level": "C2",
+      "category": "family",
+      "exampleSentence": "Acusaron al alcalde de nepotismo por contratar a sus sobrinos."
+    },
+    {
+      "id": "c2_family_05",
+      "spanish": "filial",
+      "english": "filial",
+      "chinese": "子女的，孝顺的",
+      "level": "C2",
+      "category": "family",
+      "exampleSentence": "Cuidó de sus padres con ejemplar devoción filial."
+    },
+    {
+      "id": "c2_family_06",
+      "spanish": "vástago",
+      "english": "scion, offspring",
+      "chinese": "后裔，子嗣",
+      "level": "C2",
+      "category": "family",
+      "exampleSentence": "El vástago menor de los duques renunció al título."
+    },
+    {
+      "id": "c2_family_07",
+      "spanish": "desavenencia",
+      "english": "discord, falling-out",
+      "chinese": "不和，龃龉",
+      "level": "C2",
+      "category": "family",
+      "exampleSentence": "Una vieja desavenencia mantiene separados a los dos hermanos."
+    },
+    {
+      "id": "c2_family_08",
+      "spanish": "matriarcado",
+      "english": "matriarchy",
+      "chinese": "母系社会，母权制",
+      "level": "C2",
+      "category": "family",
+      "exampleSentence": "En aquella aldea regía un matriarcado de hecho."
+    },
+    {
+      "id": "c2_family_09",
+      "spanish": "progenitor",
+      "english": "parent, progenitor",
+      "chinese": "父亲；祖先",
+      "level": "C2",
+      "category": "family",
+      "exampleSentence": "El juez citó a declarar a ambos progenitores; el progenitor paterno no acudió."
+    },
+    {
+      "id": "c2_family_10",
+      "spanish": "abolengo",
+      "english": "ancestry, pedigree",
+      "chinese": "世家门第",
+      "level": "C2",
+      "category": "family",
+      "exampleSentence": "Presume de un abolengo que se remonta al siglo quince."
+    },
+    {
+      "id": "c2_travel_01",
+      "spanish": "errante",
+      "english": "wandering, roving",
+      "chinese": "漂泊的",
+      "level": "C2",
+      "category": "travel",
+      "exampleSentence": "Llevó una vida errante por los puertos del Mediterráneo."
+    },
+    {
+      "id": "c2_travel_02",
+      "spanish": "periplo",
+      "english": "long journey, odyssey",
+      "chinese": "漫长旅程，周游",
+      "level": "C2",
+      "category": "travel",
+      "exampleSentence": "Su periplo por Asia duró casi dos años."
+    },
+    {
+      "id": "c2_travel_03",
+      "spanish": "vagabundear",
+      "english": "to wander, to roam",
+      "chinese": "流浪，游荡",
+      "level": "C2",
+      "category": "travel",
+      "exampleSentence": "Le gustaba vagabundear sin rumbo por ciudades desconocidas."
+    },
+    {
+      "id": "c2_travel_04",
+      "spanish": "singladura",
+      "english": "day's sailing run; course",
+      "chinese": "一昼夜航程；航向",
+      "level": "C2",
+      "category": "travel",
+      "exampleSentence": "El velero completó su primera singladura sin contratiempos."
+    },
+    {
+      "id": "c2_travel_05",
+      "spanish": "trashumancia",
+      "english": "seasonal livestock migration",
+      "chinese": "季节性游牧迁徙",
+      "level": "C2",
+      "category": "travel",
+      "exampleSentence": "La trashumancia llevaba los rebaños de Extremadura a las sierras del norte."
+    },
+    {
+      "id": "c2_travel_06",
+      "spanish": "derrotero",
+      "english": "course, route, path",
+      "chinese": "航线；人生方向",
+      "level": "C2",
+      "category": "travel",
+      "exampleSentence": "El capitán trazó un nuevo derrotero para esquivar la tormenta."
+    },
+    {
+      "id": "c2_travel_07",
+      "spanish": "andariego",
+      "english": "fond of roaming",
+      "chinese": "爱四处走动的",
+      "level": "C2",
+      "category": "travel",
+      "exampleSentence": "De espíritu andariego, recorrió a pie media península."
+    },
+    {
+      "id": "c2_travel_08",
+      "spanish": "expatriarse",
+      "english": "to expatriate oneself",
+      "chinese": "移居国外",
+      "level": "C2",
+      "category": "travel",
+      "exampleSentence": "Tras la guerra, muchos intelectuales tuvieron que expatriarse."
+    },
+    {
+      "id": "c2_travel_09",
+      "spanish": "apátrida",
+      "english": "stateless person",
+      "chinese": "无国籍者",
+      "level": "C2",
+      "category": "travel",
+      "exampleSentence": "Vivió años como apátrida, sin pasaporte de ningún país."
+    },
+    {
+      "id": "c2_travel_10",
+      "spanish": "deambular",
+      "english": "to amble, to wander about",
+      "chinese": "漫步，闲逛",
+      "level": "C2",
+      "category": "travel",
+      "exampleSentence": "Se dedicó a deambular por los muelles hasta el amanecer."
+    },
+    {
+      "id": "c2_work_01",
+      "spanish": "faena",
+      "english": "task, toil",
+      "chinese": "活计，劳作",
+      "level": "C2",
+      "category": "work",
+      "exampleSentence": "Los pescadores terminaron la faena antes del alba."
+    },
+    {
+      "id": "c2_work_02",
+      "spanish": "ajetreo",
+      "english": "hustle and bustle",
+      "chinese": "忙碌，奔忙",
+      "level": "C2",
+      "category": "work",
+      "exampleSentence": "El ajetreo de la oficina no le dejaba ni respirar."
+    },
+    {
+      "id": "c2_work_03",
+      "spanish": "sinecura",
+      "english": "sinecure, cushy job",
+      "chinese": "闲职，挂名差事",
+      "level": "C2",
+      "category": "work",
+      "exampleSentence": "Su cargo en el consejo era una sinecura bien pagada."
+    },
+    {
+      "id": "c2_work_04",
+      "spanish": "menester",
+      "english": "occupation; necessity (literary)",
+      "chinese": "职务；需要（书面语）",
+      "level": "C2",
+      "category": "work",
+      "exampleSentence": "Cada cual se aplicaba a su menester sin protestar."
+    },
+    {
+      "id": "c2_work_05",
+      "spanish": "laborioso",
+      "english": "industrious; laborious",
+      "chinese": "勤勉的；费力的",
+      "level": "C2",
+      "category": "work",
+      "exampleSentence": "La restauración del retablo fue un proceso laborioso."
+    },
+    {
+      "id": "c2_work_06",
+      "spanish": "destajo",
+      "english": "piecework",
+      "chinese": "计件工作",
+      "level": "C2",
+      "category": "work",
+      "exampleSentence": "Los temporeros cobraban a destajo por caja recogida."
+    },
+    {
+      "id": "c2_work_07",
+      "spanish": "escalafón",
+      "english": "promotion ladder, ranking",
+      "chinese": "职级序列",
+      "level": "C2",
+      "category": "work",
+      "exampleSentence": "Ascendió poco a poco en el escalafón del ministerio."
+    },
+    {
+      "id": "c2_work_08",
+      "spanish": "holgazanear",
+      "english": "to laze about, to idle",
+      "chinese": "游手好闲",
+      "level": "C2",
+      "category": "work",
+      "exampleSentence": "Prefería holgazanear a la sombra mientras los demás trabajaban."
+    },
+    {
+      "id": "c2_work_09",
+      "spanish": "prebenda",
+      "english": "perk, cushy post",
+      "chinese": "肥缺，特权好处",
+      "level": "C2",
+      "category": "work",
+      "exampleSentence": "El nuevo gobierno suprimió las prebendas de los altos cargos; ninguna prebenda quedó en pie."
+    },
+    {
+      "id": "c2_work_10",
+      "spanish": "denuedo",
+      "english": "dauntless effort, valor",
+      "chinese": "奋勇，全力以赴",
+      "level": "C2",
+      "category": "work",
+      "exampleSentence": "Defendió el proyecto con denuedo ante el comité."
+    },
+    {
+      "id": "c2_health_01",
+      "spanish": "achaque",
+      "english": "chronic ailment (esp. of age)",
+      "chinese": "（老年）小病痛",
+      "level": "C2",
+      "category": "health",
+      "exampleSentence": "A sus noventa años solo se queja de algún achaque."
+    },
+    {
+      "id": "c2_health_02",
+      "spanish": "galeno",
+      "english": "physician (literary)",
+      "chinese": "医师（雅语）",
+      "level": "C2",
+      "category": "health",
+      "exampleSentence": "El viejo galeno del pueblo atendía a domicilio."
+    },
+    {
+      "id": "c2_health_03",
+      "spanish": "postración",
+      "english": "prostration, collapse",
+      "chinese": "衰竭，委顿",
+      "level": "C2",
+      "category": "health",
+      "exampleSentence": "La fiebre lo sumió en una profunda postración."
+    },
+    {
+      "id": "c2_health_04",
+      "spanish": "matasanos",
+      "english": "quack doctor",
+      "chinese": "庸医",
+      "level": "C2",
+      "category": "health",
+      "exampleSentence": "Aquel matasanos le recetó jarabes inútiles durante meses."
+    },
+    {
+      "id": "c2_health_05",
+      "spanish": "desahuciado",
+      "english": "terminally ill, given up on",
+      "chinese": "被医生放弃治疗的",
+      "level": "C2",
+      "category": "health",
+      "exampleSentence": "Los médicos lo daban por desahuciado, pero se recuperó."
+    },
+    {
+      "id": "c2_health_06",
+      "spanish": "panacea",
+      "english": "panacea, cure-all",
+      "chinese": "万灵药",
+      "level": "C2",
+      "category": "health",
+      "exampleSentence": "El ejercicio ayuda, pero no es ninguna panacea."
+    },
+    {
+      "id": "c2_health_07",
+      "spanish": "hipocondría",
+      "english": "hypochondria",
+      "chinese": "疑病症",
+      "level": "C2",
+      "category": "health",
+      "exampleSentence": "Su hipocondría lo llevaba al médico por cualquier estornudo."
+    },
+    {
+      "id": "c2_health_08",
+      "spanish": "supurar",
+      "english": "to fester, to ooze pus",
+      "chinese": "化脓",
+      "level": "C2",
+      "category": "health",
+      "exampleSentence": "La herida empezó a supurar y hubo que drenarla."
+    },
+    {
+      "id": "c2_health_09",
+      "spanish": "enclenque",
+      "english": "sickly, frail",
+      "chinese": "体弱多病的",
+      "level": "C2",
+      "category": "health",
+      "exampleSentence": "De niño era enclenque, pero se hizo un atleta formidable."
+    },
+    {
+      "id": "c2_health_10",
+      "spanish": "paliativo",
+      "english": "palliative",
+      "chinese": "缓解性的；姑息疗法",
+      "level": "C2",
+      "category": "health",
+      "exampleSentence": "Ingresó en la unidad de cuidados paliativos; el tratamiento paliativo alivió su dolor."
+    },
+    {
+      "id": "c2_nature_01",
+      "spanish": "agreste",
+      "english": "wild, rugged",
+      "chinese": "荒野崎岖的",
+      "level": "C2",
+      "category": "nature",
+      "exampleSentence": "El sendero cruza un paisaje agreste de rocas y espinos."
+    },
+    {
+      "id": "c2_nature_02",
+      "spanish": "umbrío",
+      "english": "shady (literary)",
+      "chinese": "背阴的，幽暗的",
+      "level": "C2",
+      "category": "nature",
+      "exampleSentence": "Buscamos refugio en un valle umbrío junto al río."
+    },
+    {
+      "id": "c2_nature_03",
+      "spanish": "floresta",
+      "english": "woodland, grove (literary)",
+      "chinese": "林苑（雅语）",
+      "level": "C2",
+      "category": "nature",
+      "exampleSentence": "Los ciervos pastaban al borde de la floresta."
+    },
+    {
+      "id": "c2_nature_04",
+      "spanish": "ponzoña",
+      "english": "venom, poison",
+      "chinese": "毒液，毒物",
+      "level": "C2",
+      "category": "nature",
+      "exampleSentence": "La ponzoña de esa víbora rara vez resulta mortal."
+    },
+    {
+      "id": "c2_nature_05",
+      "spanish": "cenagal",
+      "english": "quagmire, bog",
+      "chinese": "泥沼",
+      "level": "C2",
+      "category": "nature",
+      "exampleSentence": "Las lluvias convirtieron el camino en un cenagal."
+    },
+    {
+      "id": "c2_nature_06",
+      "spanish": "borrasca",
+      "english": "storm, squall",
+      "chinese": "风暴，低气压",
+      "level": "C2",
+      "category": "nature",
+      "exampleSentence": "Una borrasca atlántica dejará lluvias en todo el litoral."
+    },
+    {
+      "id": "c2_nature_07",
+      "spanish": "yermo",
+      "english": "barren land, wasteland",
+      "chinese": "荒地；不毛的",
+      "level": "C2",
+      "category": "nature",
+      "exampleSentence": "Más allá del río solo se extendía un yermo pedregoso."
+    },
+    {
+      "id": "c2_nature_08",
+      "spanish": "alborada",
+      "english": "dawn, daybreak (literary)",
+      "chinese": "黎明（雅语）",
+      "level": "C2",
+      "category": "nature",
+      "exampleSentence": "Los pájaros saludaban la alborada desde los chopos."
+    },
+    {
+      "id": "c2_nature_09",
+      "spanish": "crepúsculo",
+      "english": "twilight, dusk",
+      "chinese": "暮色，黄昏",
+      "level": "C2",
+      "category": "nature",
+      "exampleSentence": "El crepúsculo teñía de púrpura las cumbres nevadas."
+    },
+    {
+      "id": "c2_nature_10",
+      "spanish": "marejada",
+      "english": "heavy swell (sea)",
+      "chinese": "海上涌浪",
+      "level": "C2",
+      "category": "nature",
+      "exampleSentence": "La marejada impidió que los barcos salieran del puerto."
+    },
+    {
+      "id": "c2_education_01",
+      "spanish": "erudición",
+      "english": "erudition",
+      "chinese": "博学",
+      "level": "C2",
+      "category": "education",
+      "exampleSentence": "Sus notas al pie revelan una erudición asombrosa."
+    },
+    {
+      "id": "c2_education_02",
+      "spanish": "pedagogo",
+      "english": "pedagogue, educator",
+      "chinese": "教育家",
+      "level": "C2",
+      "category": "education",
+      "exampleSentence": "El célebre pedagogo defendía el aprendizaje por el juego."
+    },
+    {
+      "id": "c2_education_03",
+      "spanish": "autodidacta",
+      "english": "self-taught person",
+      "chinese": "自学成才者",
+      "level": "C2",
+      "category": "education",
+      "exampleSentence": "Fue un autodidacta que aprendió griego sin pisar un aula."
+    },
+    {
+      "id": "c2_education_04",
+      "spanish": "compendio",
+      "english": "compendium, digest",
+      "chinese": "纲要，概略",
+      "level": "C2",
+      "category": "education",
+      "exampleSentence": "Publicó un compendio de gramática latina para principiantes."
+    },
+    {
+      "id": "c2_education_05",
+      "spanish": "disertación",
+      "english": "dissertation, formal lecture",
+      "chinese": "专题论述，学术演讲",
+      "level": "C2",
+      "category": "education",
+      "exampleSentence": "Su disertación sobre Cervantes duró más de una hora."
+    },
+    {
+      "id": "c2_education_06",
+      "spanish": "cátedra",
+      "english": "professorship, chair",
+      "chinese": "教授职位，讲席",
+      "level": "C2",
+      "category": "education",
+      "exampleSentence": "Obtuvo la cátedra de Filología a los cuarenta años."
+    },
+    {
+      "id": "c2_education_07",
+      "spanish": "escolástico",
+      "english": "scholastic",
+      "chinese": "经院哲学的",
+      "level": "C2",
+      "category": "education",
+      "exampleSentence": "El pensamiento escolástico dominó las universidades medievales."
+    },
+    {
+      "id": "c2_education_08",
+      "spanish": "lego",
+      "english": "layman, uninitiated",
+      "chinese": "门外汉",
+      "level": "C2",
+      "category": "education",
+      "exampleSentence": "Explicó la teoría de forma clara incluso para un lego en física."
+    },
+    {
+      "id": "c2_education_09",
+      "spanish": "adoctrinar",
+      "english": "to indoctrinate",
+      "chinese": "灌输思想",
+      "level": "C2",
+      "category": "education",
+      "exampleSentence": "Acusaron al régimen de adoctrinar a los escolares."
+    },
+    {
+      "id": "c2_education_10",
+      "spanish": "políglota",
+      "english": "polyglot",
+      "chinese": "通晓多种语言的人",
+      "level": "C2",
+      "category": "education",
+      "exampleSentence": "Aquella políglota traducía del ruso, del árabe y del chino."
+    },
+    {
+      "id": "c2_sports_01",
+      "spanish": "gesta",
+      "english": "heroic feat",
+      "chinese": "英雄壮举",
+      "level": "C2",
+      "category": "sports",
+      "exampleSentence": "La gesta de aquel equipo modesto aún se recuerda."
+    },
+    {
+      "id": "c2_sports_02",
+      "spanish": "pundonor",
+      "english": "fighting spirit, self-respect",
+      "chinese": "好胜心，自尊心",
+      "level": "C2",
+      "category": "sports",
+      "exampleSentence": "Jugó lesionado por puro pundonor profesional."
+    },
+    {
+      "id": "c2_sports_03",
+      "spanish": "aguerrido",
+      "english": "seasoned, battle-hardened",
+      "chinese": "久经沙场的",
+      "level": "C2",
+      "category": "sports",
+      "exampleSentence": "Se enfrentaba a un rival aguerrido con años de experiencia."
+    },
+    {
+      "id": "c2_sports_04",
+      "spanish": "codearse",
+      "english": "to rub shoulders with",
+      "chinese": "与……平起平坐",
+      "level": "C2",
+      "category": "sports",
+      "exampleSentence": "El joven ciclista ya puede codearse con la élite mundial."
+    },
+    {
+      "id": "c2_sports_05",
+      "spanish": "denodado",
+      "english": "determined, valiant",
+      "chinese": "顽强奋勇的",
+      "level": "C2",
+      "category": "sports",
+      "exampleSentence": "Hizo un denodado esfuerzo por alcanzar al grupo de cabeza."
+    },
+    {
+      "id": "c2_sports_06",
+      "spanish": "lid",
+      "english": "contest, fight (literary)",
+      "chinese": "较量，争斗（雅语）",
+      "level": "C2",
+      "category": "sports",
+      "exampleSentence": "Ambos púgiles llegaban invictos a la lid."
+    },
+    {
+      "id": "c2_sports_07",
+      "spanish": "palestra",
+      "english": "arena (also figurative)",
+      "chinese": "竞技场；论坛",
+      "level": "C2",
+      "category": "sports",
+      "exampleSentence": "El veterano campeón volvió a saltar a la palestra."
+    },
+    {
+      "id": "c2_sports_08",
+      "spanish": "proeza",
+      "english": "exploit, prowess",
+      "chinese": "英勇事迹",
+      "level": "C2",
+      "category": "sports",
+      "exampleSentence": "Cruzar el canal a nado fue una proeza sin precedentes."
+    },
+    {
+      "id": "c2_sports_09",
+      "spanish": "invicto",
+      "english": "undefeated",
+      "chinese": "不败的",
+      "level": "C2",
+      "category": "sports",
+      "exampleSentence": "El equipo sigue invicto después de veinte jornadas."
+    },
+    {
+      "id": "c2_sports_10",
+      "spanish": "contienda",
+      "english": "contest, clash",
+      "chinese": "争夺，对抗",
+      "level": "C2",
+      "category": "sports",
+      "exampleSentence": "La contienda por el título se decidirá en la última jornada."
+    },
+    {
+      "id": "c2_technology_01",
+      "spanish": "artilugio",
+      "english": "gadget, contraption",
+      "chinese": "小玩意儿，装置",
+      "level": "C2",
+      "category": "technology",
+      "exampleSentence": "Inventó un artilugio para abrir ventanas a distancia."
+    },
+    {
+      "id": "c2_technology_02",
+      "spanish": "artefacto",
+      "english": "device, artifact",
+      "chinese": "装置，器械",
+      "level": "C2",
+      "category": "technology",
+      "exampleSentence": "Los ingenieros desactivaron el extraño artefacto."
+    },
+    {
+      "id": "c2_technology_03",
+      "spanish": "engranaje",
+      "english": "gears, machinery",
+      "chinese": "齿轮装置；运转机制",
+      "level": "C2",
+      "category": "technology",
+      "exampleSentence": "Una pieza suelta bloqueó el engranaje del reloj."
+    },
+    {
+      "id": "c2_technology_04",
+      "spanish": "autómata",
+      "english": "automaton",
+      "chinese": "自动机械人",
+      "level": "C2",
+      "category": "technology",
+      "exampleSentence": "El museo exhibe un autómata del siglo dieciocho que escribe."
+    },
+    {
+      "id": "c2_technology_05",
+      "spanish": "obsoleto",
+      "english": "obsolete",
+      "chinese": "过时的，被淘汰的",
+      "level": "C2",
+      "category": "technology",
+      "exampleSentence": "Ese formato quedó obsoleto hace más de una década."
+    },
+    {
+      "id": "c2_technology_06",
+      "spanish": "cachivache",
+      "english": "piece of junk, thingamajig",
+      "chinese": "破烂玩意儿",
+      "level": "C2",
+      "category": "technology",
+      "exampleSentence": "El desván estaba lleno de cachivaches electrónicos; ningún cachivache funcionaba."
+    },
+    {
+      "id": "c2_technology_07",
+      "spanish": "maquinal",
+      "english": "mechanical (of actions)",
+      "chinese": "机械性的（动作）",
+      "level": "C2",
+      "category": "technology",
+      "exampleSentence": "Tecleaba la contraseña con un gesto maquinal."
+    },
+    {
+      "id": "c2_technology_08",
+      "spanish": "cibernética",
+      "english": "cybernetics",
+      "chinese": "控制论",
+      "level": "C2",
+      "category": "technology",
+      "exampleSentence": "La cibernética estudia la comunicación entre máquinas y organismos."
+    },
+    {
+      "id": "c2_technology_09",
+      "spanish": "ingenio",
+      "english": "ingenuity; contrivance",
+      "chinese": "巧思；机巧装置",
+      "level": "C2",
+      "category": "technology",
+      "exampleSentence": "Con gran ingenio construyó un molino con piezas de bicicleta."
+    },
+    {
+      "id": "c2_technology_10",
+      "spanish": "vanguardista",
+      "english": "cutting-edge, avant-garde",
+      "chinese": "前卫的，尖端的",
+      "level": "C2",
+      "category": "technology",
+      "exampleSentence": "El laboratorio presume de un equipamiento vanguardista."
+    },
+    {
+      "id": "c2_culture_01",
+      "spanish": "acervo",
+      "english": "cultural heritage, body of works",
+      "chinese": "文化积淀，共同财富",
+      "level": "C2",
+      "category": "culture",
+      "exampleSentence": "Estos romances forman parte del acervo popular castellano."
+    },
+    {
+      "id": "c2_culture_02",
+      "spanish": "ilustrado",
+      "english": "enlightened; learned",
+      "chinese": "启蒙的；有学识的",
+      "level": "C2",
+      "category": "culture",
+      "exampleSentence": "Los pensadores ilustrados impulsaron la reforma educativa; era un monarca ilustrado."
+    },
+    {
+      "id": "c2_culture_03",
+      "spanish": "bohemio",
+      "english": "bohemian",
+      "chinese": "放荡不羁的文化人",
+      "level": "C2",
+      "category": "culture",
+      "exampleSentence": "Llevó una vida bohemia entre cafés y buhardillas de París."
+    },
+    {
+      "id": "c2_culture_04",
+      "spanish": "costumbrismo",
+      "english": "genre depicting local customs",
+      "chinese": "风俗主义（文艺流派）",
+      "level": "C2",
+      "category": "culture",
+      "exampleSentence": "El costumbrismo retrató la vida madrileña del siglo diecinueve."
+    },
+    {
+      "id": "c2_culture_05",
+      "spanish": "barroco",
+      "english": "baroque",
+      "chinese": "巴洛克风格的",
+      "level": "C2",
+      "category": "culture",
+      "exampleSentence": "El retablo barroco deslumbra por su exuberancia dorada."
+    },
+    {
+      "id": "c2_culture_06",
+      "spanish": "quijotesco",
+      "english": "quixotic",
+      "chinese": "堂吉诃德式的",
+      "level": "C2",
+      "category": "culture",
+      "exampleSentence": "Emprendió la quijotesca tarea de traducir todo el teatro clásico."
+    },
+    {
+      "id": "c2_culture_07",
+      "spanish": "esperpento",
+      "english": "grotesque distortion (literary genre)",
+      "chinese": "怪诞讽刺（文学体裁）",
+      "level": "C2",
+      "category": "culture",
+      "exampleSentence": "Valle-Inclán llevó el esperpento a su máxima expresión."
+    },
+    {
+      "id": "c2_culture_08",
+      "spanish": "castizo",
+      "english": "authentically traditional, pure-bred",
+      "chinese": "地道传统的",
+      "level": "C2",
+      "category": "culture",
+      "exampleSentence": "Habla un español castizo aprendido en los barrios viejos de Madrid."
+    },
+    {
+      "id": "c2_culture_09",
+      "spanish": "cosmopolita",
+      "english": "cosmopolitan",
+      "chinese": "世界主义的",
+      "level": "C2",
+      "category": "culture",
+      "exampleSentence": "Buenos Aires era entonces una urbe cosmopolita y letrada."
+    },
+    {
+      "id": "c2_culture_10",
+      "spanish": "neologismo",
+      "english": "neologism",
+      "chinese": "新造词",
+      "level": "C2",
+      "category": "culture",
+      "exampleSentence": "La academia tardó años en aceptar aquel neologismo."
+    }
+  ]
+}

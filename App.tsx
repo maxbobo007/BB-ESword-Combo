@@ -1,7 +1,8 @@
 import React from 'react';
 import { StatusBar } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { ThemeProvider, useTheme } from '@/theme/ThemeProvider';
+import { useTheme } from 'react-native-paper';
+import { ThemeProvider } from '@/theme/ThemeProvider';
 import { RootNavigator } from '@/navigation/RootNavigator';
 
 function ThemedApp() {

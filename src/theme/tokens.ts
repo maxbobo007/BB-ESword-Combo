@@ -1,77 +1,48 @@
-export interface Theme {
+// 游戏棋盘专用颜色（MD3 组件色板之外的领域 token）
+export interface GameTheme {
   dark: boolean;
-  colors: {
-    background: string;
-    surface: string;
-    primary: string;
-    onPrimary: string;
-    primaryContainer: string; // 主色浅容器（提示格、信息卡）
-    textPrimary: string;
-    textSecondary: string;
+  cell: {
+    bg: string;
+    blocked: string;
+    selected: string;
+    fixedBg: string;
+    fixedText: string;
+    text: string;
     border: string;
-    cellBg: string;
-    cellBlocked: string;
-    cellSelected: string;
-    cellFixedBg: string;
-    cellFixedText: string;
-    cellText: string;
-    keyBg: string;
-    keyText: string;
-    success: string;
-    warning: string;
-    disabled: string;
-    shadow: string;
+    correctBg: string; // 已填对格子的柔和高亮
   };
+  success: string;
+  warning: string;
 }
 
-export const lightTheme: Theme = {
+export const lightGameTheme: GameTheme = {
   dark: false,
-  colors: {
-    background: '#f5f5f5',
-    surface: '#ffffff',
-    primary: '#1976D2',
-    onPrimary: '#ffffff',
-    primaryContainer: '#E3F2FD',
-    textPrimary: '#333333',
-    textSecondary: '#666666',
-    border: '#e0e0e0',
-    cellBg: '#ffffff',
-    cellBlocked: '#000000',
-    cellSelected: '#BBDEFB',
-    cellFixedBg: '#E3F2FD',
-    cellFixedText: '#1976D2',
-    cellText: '#333333',
-    keyBg: '#e0e0e0',
-    keyText: '#333333',
-    success: '#4CAF50',
-    warning: '#ff9800',
-    disabled: '#bdbdbd',
-    shadow: '#000000',
+  cell: {
+    bg: '#FFFFFF',
+    blocked: '#1A1C1E',
+    selected: '#BBDEFB',
+    fixedBg: '#D3E4FD',
+    fixedText: '#0A3060',
+    text: '#1A1C1E',
+    border: '#C4C6CF',
+    correctBg: '#E4F3E5',
   },
+  success: '#2E7D32',
+  warning: '#EF6C00',
 };
 
-export const darkTheme: Theme = {
+export const darkGameTheme: GameTheme = {
   dark: true,
-  colors: {
-    background: '#121212',
-    surface: '#1E1E1E',
-    primary: '#64B5F6',
-    onPrimary: '#0D2A45',
-    primaryContainer: '#1A3A5C',
-    textPrimary: '#E6E6E6',
-    textSecondary: '#9E9E9E',
-    border: '#333333',
-    cellBg: '#2A2A2A',
-    cellBlocked: '#000000',
-    cellSelected: '#2E5A8F',
-    cellFixedBg: '#1A3A5C',
-    cellFixedText: '#90CAF9',
-    cellText: '#E6E6E6',
-    keyBg: '#3A3A3A',
-    keyText: '#E6E6E6',
-    success: '#81C784',
-    warning: '#FFB74D',
-    disabled: '#555555',
-    shadow: '#000000',
+  cell: {
+    bg: '#23262B',
+    blocked: '#000000',
+    selected: '#2E5A8F',
+    fixedBg: '#2A4E7E',
+    fixedText: '#D3E4FD',
+    text: '#E2E2E6',
+    border: '#44474E',
+    correctBg: '#1E3B22',
   },
+  success: '#81C784',
+  warning: '#FFB74D',
 };

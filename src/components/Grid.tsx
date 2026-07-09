@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { CrosswordCell } from '@/core/types/game';
-import { Theme } from '@/theme/tokens';
-import { useTheme } from '@/theme/ThemeProvider';
+import { GameTheme } from '@/theme/tokens';
+import { useGameTheme } from '@/theme/ThemeProvider';
 
 interface GridProps {
   cells: CrosswordCell[][];
@@ -11,7 +11,7 @@ interface GridProps {
 }
 
 export const Grid: React.FC<GridProps> = ({ cells, selectedCell, onCellPress }) => {
-  const theme = useTheme();
+  const theme = useGameTheme();
   const gridSize = cells.length || 15;
   const cellSize = Math.min((Dimensions.get('window').width - 40) / gridSize, 30);
   const styles = useMemo(() => createStyles(theme, cellSize), [theme, cellSize]);
@@ -23,14 +23,17 @@ export const Grid: React.FC<GridProps> = ({ cells, selectedCell, onCellPress }) 
           {row.map(cell => {
             const isSelected = selectedCell?.row === cell.row && selectedCell?.col === cell.col;
             const isEmpty = !cell.correctLetter;
+            const isCorrect =
+              !isEmpty && !cell.isFixed && cell.letter === cell.correctLetter;
             return (
               <TouchableOpacity
                 key={`${cell.row}-${cell.col}`}
                 style={[
                   styles.cell,
                   isEmpty && styles.emptyCell,
-                  isSelected && styles.selectedCell,
+                  isCorrect && styles.correctCell,
                   cell.isFixed && styles.fixedCell,
+                  isSelected && styles.selectedCell,
                 ]}
                 onPress={() => onCellPress(cell.row, cell.col)}
                 disabled={isEmpty || cell.isFixed}
@@ -47,18 +50,18 @@ export const Grid: React.FC<GridProps> = ({ cells, selectedCell, onCellPress }) 
   );
 };
 
-const createStyles = (theme: Theme, cellSize: number) =>
+const createStyles = (theme: GameTheme, cellSize: number) =>
   StyleSheet.create({
     gridContainer: {
       alignSelf: 'center',
-      backgroundColor: theme.colors.surface,
+      backgroundColor: theme.cell.bg,
       padding: 4,
-      borderRadius: 8,
-      shadowColor: theme.colors.shadow,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-      elevation: 3,
+      borderRadius: 12,
+      elevation: 2,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.15,
+      shadowRadius: 3,
     },
     row: {
       flexDirection: 'row',
@@ -66,28 +69,31 @@ const createStyles = (theme: Theme, cellSize: number) =>
     cell: {
       width: cellSize,
       height: cellSize,
-      borderWidth: 1,
-      borderColor: theme.colors.border,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: theme.cell.border,
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: theme.colors.cellBg,
+      backgroundColor: theme.cell.bg,
     },
     emptyCell: {
-      backgroundColor: theme.colors.cellBlocked,
-      borderColor: theme.colors.cellBlocked,
+      backgroundColor: theme.cell.blocked,
+      borderColor: theme.cell.blocked,
     },
     selectedCell: {
-      backgroundColor: theme.colors.cellSelected,
+      backgroundColor: theme.cell.selected,
     },
     fixedCell: {
-      backgroundColor: theme.colors.cellFixedBg,
+      backgroundColor: theme.cell.fixedBg,
+    },
+    correctCell: {
+      backgroundColor: theme.cell.correctBg,
     },
     cellText: {
       fontSize: cellSize * 0.6,
       fontWeight: '600',
-      color: theme.colors.cellText,
+      color: theme.cell.text,
     },
     fixedCellText: {
-      color: theme.colors.cellFixedText,
+      color: theme.cell.fixedText,
     },
   });

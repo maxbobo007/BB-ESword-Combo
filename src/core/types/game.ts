@@ -18,6 +18,15 @@ export type Difficulty = 'easy' | 'medium' | 'hard';
 
 export type Direction = 'horizontal' | 'vertical';
 
+// 词库包：内置（JSON 资源）或用户导入
+export interface WordPack {
+  id: string; // builtin_a1 / custom_xxx
+  name: string;
+  description?: string;
+  builtin: boolean;
+  words: Word[];
+}
+
 // 单词数据结构
 export interface Word {
   id: string;

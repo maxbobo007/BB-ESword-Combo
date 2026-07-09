@@ -1,86 +1,73 @@
-import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Switch, ScrollView } from 'react-native';
+import React from 'react';
+import { StyleSheet, ScrollView } from 'react-native';
+import { Appbar, List, RadioButton, Switch } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSettingsStore, ThemeMode } from '@/store/settingsStore';
-import { Theme } from '@/theme/tokens';
-import { useTheme } from '@/theme/ThemeProvider';
+import { RootStackParamList } from '@/navigation/types';
 
-const THEME_OPTIONS: { mode: ThemeMode; label: string }[] = [
-  { mode: 'system', label: '跟随系统' },
-  { mode: 'light', label: '浅色' },
-  { mode: 'dark', label: '深色' },
+type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
+
+const THEME_OPTIONS: { mode: ThemeMode; label: string; icon: string }[] = [
+  { mode: 'system', label: '跟随系统', icon: 'theme-light-dark' },
+  { mode: 'light', label: '浅色', icon: 'white-balance-sunny' },
+  { mode: 'dark', label: '深色', icon: 'weather-night' },
 ];
 
-export const SettingsScreen: React.FC = () => {
-  const theme = useTheme();
-  const styles = useMemo(() => createStyles(theme), [theme]);
+export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
   const { themeMode, ttsEnabled, setThemeMode, setTtsEnabled } = useSettingsStore();
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.sectionTitle}>外观</Text>
-      <View style={styles.card}>
-        {THEME_OPTIONS.map(option => (
-          <TouchableOpacity
-            key={option.mode}
-            style={styles.optionRow}
-            onPress={() => setThemeMode(option.mode)}
-          >
-            <Text style={styles.optionLabel}>{option.label}</Text>
-            <Text style={styles.radio}>{themeMode === option.mode ? '●' : '○'}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+    <SafeAreaView style={styles.flex} edges={['top']}>
+      <Appbar.Header mode="small" elevated>
+        <Appbar.BackAction onPress={() => navigation.goBack()} />
+        <Appbar.Content title="设置" />
+      </Appbar.Header>
 
-      <Text style={styles.sectionTitle}>发音</Text>
-      <View style={styles.card}>
-        <View style={styles.optionRow}>
-          <Text style={styles.optionLabel}>完成单词时自动朗读</Text>
-          <Switch
-            value={ttsEnabled}
-            onValueChange={setTtsEnabled}
-            trackColor={{ true: theme.colors.primary }}
+      <ScrollView>
+        <List.Section>
+          <List.Subheader>外观</List.Subheader>
+          <RadioButton.Group
+            value={themeMode}
+            onValueChange={value => setThemeMode(value as ThemeMode)}
+          >
+            {THEME_OPTIONS.map(option => (
+              <List.Item
+                key={option.mode}
+                title={option.label}
+                left={props => <List.Icon {...props} icon={option.icon} />}
+                right={() => <RadioButton value={option.mode} />}
+                onPress={() => setThemeMode(option.mode)}
+              />
+            ))}
+          </RadioButton.Group>
+        </List.Section>
+
+        <List.Section>
+          <List.Subheader>发音</List.Subheader>
+          <List.Item
+            title="完成单词时自动朗读"
+            description="使用系统西语语音（es-ES）"
+            left={props => <List.Icon {...props} icon="volume-high" />}
+            right={() => <Switch value={ttsEnabled} onValueChange={setTtsEnabled} />}
           />
-        </View>
-      </View>
-    </ScrollView>
+        </List.Section>
+
+        <List.Section>
+          <List.Subheader>词库</List.Subheader>
+          <List.Item
+            title="词库管理"
+            description="开关内置词库、导入自定义词库"
+            left={props => <List.Icon {...props} icon="bookshelf" />}
+            right={props => <List.Icon {...props} icon="chevron-right" />}
+            onPress={() => navigation.navigate('WordPacks')}
+          />
+        </List.Section>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
-const createStyles = (theme: Theme) =>
-  StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: theme.colors.background,
-    },
-    content: {
-      padding: 16,
-    },
-    sectionTitle: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      color: theme.colors.textSecondary,
-      marginBottom: 8,
-      marginTop: 16,
-    },
-    card: {
-      backgroundColor: theme.colors.surface,
-      borderRadius: 12,
-      paddingHorizontal: 16,
-    },
-    optionRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingVertical: 14,
-      borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: theme.colors.border,
-    },
-    optionLabel: {
-      fontSize: 16,
-      color: theme.colors.textPrimary,
-    },
-    radio: {
-      fontSize: 18,
-      color: theme.colors.primary,
-    },
-  });
+const styles = StyleSheet.create({
+  flex: { flex: 1 },
+});

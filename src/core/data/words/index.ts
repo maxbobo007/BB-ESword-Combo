@@ -1,40 +1,47 @@
-import { Word, LanguageLevel, WordCategory } from '@/core/types/game';
+import { Word, WordPack, LanguageLevel, WordCategory } from '@/core/types/game';
 import { Rng, shuffle } from '@/core/engine/random';
-import { A1_WORDS } from './a1';
-import { A2_WORDS } from './a2';
-import { B1_WORDS } from './b1';
-import { B2_WORDS } from './b2';
-import { C1_WORDS } from './c1';
-import { C2_WORDS } from './c2';
 
-export const WORDS_BY_LEVEL: Record<LanguageLevel, Word[]> = {
-  A1: A1_WORDS,
-  A2: A2_WORDS,
-  B1: B1_WORDS,
-  B2: B2_WORDS,
-  C1: C1_WORDS,
-  C2: C2_WORDS,
-};
+// 内置词库包：JSON 资源（Metro/jest 原生支持），未来可替换为服务器下发
+/* eslint-disable @typescript-eslint/no-var-requires */
+const RAW_PACKS = [
+  require('./packs/a1.json'),
+  require('./packs/a2.json'),
+  require('./packs/b1.json'),
+  require('./packs/b2.json'),
+  require('./packs/c1.json'),
+  require('./packs/c2.json'),
+];
+/* eslint-enable @typescript-eslint/no-var-requires */
 
-export const ALL_WORDS: Word[] = Object.values(WORDS_BY_LEVEL).flat();
+export const BUILTIN_PACKS: WordPack[] = RAW_PACKS.map(p => ({
+  ...(p as Omit<WordPack, 'builtin'>),
+  builtin: true,
+}));
 
-export function getWords(level?: LanguageLevel, category?: WordCategory): Word[] {
-  let words = level ? WORDS_BY_LEVEL[level] : ALL_WORDS;
+// 每日挑战固定使用全部内置词（不受包开关影响），保证全球同题
+export const ALL_BUILTIN_WORDS: Word[] = BUILTIN_PACKS.flatMap(p => p.words);
+
+// —— 纯函数选词：词池由调用方（启用的词库包）提供 ——
+
+export function filterWords(
+  pool: Word[],
+  level?: LanguageLevel,
+  category?: WordCategory,
+): Word[] {
+  let words = pool;
+  if (level) {
+    words = words.filter(word => word.level === level);
+  }
   if (category) {
     words = words.filter(word => word.category === category);
   }
   return words;
 }
 
-export function getWordCount(level?: LanguageLevel, category?: WordCategory): number {
-  return getWords(level, category).length;
+export function countWords(pool: Word[], level?: LanguageLevel, category?: WordCategory): number {
+  return filterWords(pool, level, category).length;
 }
 
-export function getRandomWords(
-  count: number,
-  level?: LanguageLevel,
-  category?: WordCategory,
-  rng: Rng = Math.random,
-): Word[] {
-  return shuffle(getWords(level, category), rng).slice(0, count);
+export function pickRandomWords(pool: Word[], count: number, rng: Rng = Math.random): Word[] {
+  return shuffle(pool, rng).slice(0, count);
 }
