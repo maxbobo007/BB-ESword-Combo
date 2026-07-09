@@ -1,8 +1,9 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { UserProgress, CrosswordPuzzle } from '@/core/types/game';
+import { UserProgress, CrosswordPuzzle, AchievementDef } from '@/core/types/game';
 import { GameResult } from '@/core/progress/scoring';
 import { localDateString, nextStreak } from '@/core/progress/streak';
+import { getNewlyUnlocked } from '@/core/achievements/evaluate';
 import { storage } from '@/services/storage';
 
 export function createDefaultProgress(): UserProgress {
@@ -70,13 +71,13 @@ export function applyGameCompletion(
 
 interface ProgressState {
   progress: UserProgress;
+  /** 记录一局完成，返回本局新解锁的成就 */
   recordGameCompletion: (
     puzzle: CrosswordPuzzle,
     result: GameResult,
     mistakes: number,
     hintsUsed: number,
-  ) => void;
-  unlockAchievements: (ids: string[]) => void;
+  ) => AchievementDef[];
   resetProgress: () => void;
 }
 
@@ -86,30 +87,25 @@ export const useProgressStore = create<ProgressState>()(
       progress: createDefaultProgress(),
 
       recordGameCompletion: (puzzle, result, mistakes, hintsUsed) => {
-        set({
-          progress: applyGameCompletion(
-            get().progress,
-            puzzle,
-            result,
-            mistakes,
-            hintsUsed,
-            localDateString(),
-          ),
-        });
-      },
-
-      unlockAchievements: ids => {
-        if (ids.length === 0) {
-          return;
-        }
-        const { progress } = get();
-        const achievements = { ...progress.achievements };
-        for (const id of ids) {
-          if (!(id in achievements)) {
-            achievements[id] = Date.now();
+        const updated = applyGameCompletion(
+          get().progress,
+          puzzle,
+          result,
+          mistakes,
+          hintsUsed,
+          localDateString(),
+        );
+        const unlocked = getNewlyUnlocked(updated);
+        if (unlocked.length > 0) {
+          const achievements = { ...updated.achievements };
+          for (const def of unlocked) {
+            achievements[def.id] = Date.now();
           }
+          set({ progress: { ...updated, achievements } });
+        } else {
+          set({ progress: updated });
         }
-        set({ progress: { ...progress, achievements } });
+        return unlocked;
       },
 
       resetProgress: () => set({ progress: createDefaultProgress() }),

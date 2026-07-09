@@ -5,6 +5,7 @@ import { RootStackParamList } from '@/navigation/types';
 import { HomeScreen } from '@/screens/HomeScreen';
 import { GameScreen } from '@/screens/GameScreen';
 import { SettingsScreen } from '@/screens/SettingsScreen';
+import { AchievementsScreen } from '@/screens/AchievementsScreen';
 import { useTheme } from '@/theme/ThemeProvider';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -33,6 +34,11 @@ export function RootNavigator() {
       >
         <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Game" component={GameScreen} options={{ title: '西语填字' }} />
+        <Stack.Screen
+          name="Achievements"
+          component={AchievementsScreen}
+          options={{ title: '成就' }}
+        />
         <Stack.Screen name="Settings" component={SettingsScreen} options={{ title: '设置' }} />
       </Stack.Navigator>
     </NavigationContainer>

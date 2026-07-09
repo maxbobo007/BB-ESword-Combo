@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { GameSession, CrosswordPuzzle, CrosswordWord } from '@/core/types/game';
+import { GameSession, CrosswordPuzzle, CrosswordWord, AchievementDef } from '@/core/types/game';
 import { computeGameResult } from '@/core/progress/scoring';
 import { useProgressStore } from '@/store/progressStore';
 
@@ -8,6 +8,7 @@ interface GameState {
   currentPuzzle: CrosswordPuzzle | null;
   currentSession: GameSession | null;
   recentlyCompletedWord: CrosswordWord | null; // 刚填完的单词（UI 用于展示带重音原词/朗读）
+  lastUnlockedAchievements: AchievementDef[]; // 本局新解锁的成就（完成弹窗展示）
 
   startGame: (puzzle: CrosswordPuzzle) => void;
   updateCell: (row: number, col: number, letter: string) => void;
@@ -24,6 +25,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   currentPuzzle: null,
   currentSession: null,
   recentlyCompletedWord: null,
+  lastUnlockedAchievements: [],
 
   startGame: (puzzle: CrosswordPuzzle) => {
     const session: GameSession = {
@@ -34,7 +36,12 @@ export const useGameStore = create<GameState>((set, get) => ({
       mistakes: 0,
       isCompleted: false,
     };
-    set({ currentPuzzle: puzzle, currentSession: session, recentlyCompletedWord: null });
+    set({
+      currentPuzzle: puzzle,
+      currentSession: session,
+      recentlyCompletedWord: null,
+      lastUnlockedAchievements: [],
+    });
   },
 
   updateCell: (row: number, col: number, letter: string) => {
@@ -180,7 +187,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       },
     });
 
-    useProgressStore
+    const unlocked = useProgressStore
       .getState()
       .recordGameCompletion(
         currentPuzzle,
@@ -188,11 +195,17 @@ export const useGameStore = create<GameState>((set, get) => ({
         currentSession.mistakes,
         currentSession.hintsUsed,
       );
+    set({ lastUnlockedAchievements: unlocked });
   },
 
   clearRecentlyCompletedWord: () => set({ recentlyCompletedWord: null }),
 
   resetGame: () => {
-    set({ currentPuzzle: null, currentSession: null, recentlyCompletedWord: null });
+    set({
+      currentPuzzle: null,
+      currentSession: null,
+      recentlyCompletedWord: null,
+      lastUnlockedAchievements: [],
+    });
   },
 }));

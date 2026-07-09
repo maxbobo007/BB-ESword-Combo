@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useGameStore } from '@/store/gameStore';
+import { useSettingsStore } from '@/store/settingsStore';
+import { speech } from '@/services/speech';
 import { PuzzleGenerator } from '@/core/engine/puzzleGenerator';
 import { getDailyPuzzle } from '@/core/daily/daily';
 import { getRandomWords } from '@/core/data/words';
@@ -18,9 +20,40 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Game'>;
 export const GameScreen: React.FC<Props> = ({ route, navigation }) => {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const { currentPuzzle, currentSession, startGame, updateCell, useHint, resetGame } =
-    useGameStore();
+  const {
+    currentPuzzle,
+    currentSession,
+    recentlyCompletedWord,
+    startGame,
+    updateCell,
+    useHint,
+    resetGame,
+    clearRecentlyCompletedWord,
+  } = useGameStore();
+  const ttsEnabled = useSettingsStore(s => s.ttsEnabled);
   const [selectedCell, setSelectedCell] = useState<{ row: number; col: number } | null>(null);
+  const [speechReady, setSpeechReady] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    speech.init().then(ok => mounted && setSpeechReady(ok));
+    return () => {
+      mounted = false;
+      speech.stop();
+    };
+  }, []);
+
+  // 单词首次填对：按设置自动朗读带重音的原词
+  useEffect(() => {
+    if (!recentlyCompletedWord) {
+      return;
+    }
+    if (speechReady && ttsEnabled) {
+      speech.speak(recentlyCompletedWord.wordData.spanish);
+    }
+    clearRecentlyCompletedWord();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recentlyCompletedWord]);
 
   // 谜题在进入页面时生成；退出页面清空临时状态
   useEffect(() => {
@@ -46,9 +79,14 @@ export const GameScreen: React.FC<Props> = ({ route, navigation }) => {
 
   useEffect(() => {
     if (currentSession?.isCompleted) {
+      const unlocked = useGameStore.getState().lastUnlockedAchievements;
+      const achievementLines =
+        unlocked.length > 0
+          ? `\n\n🎉 解锁成就:\n${unlocked.map(a => `${a.icon} ${a.title}`).join('\n')}`
+          : '';
       Alert.alert(
         '恭喜完成!',
-        `得分: ${currentSession.score}\n错误: ${currentSession.mistakes}\n提示使用: ${currentSession.hintsUsed}`,
+        `得分: ${currentSession.score}\n错误: ${currentSession.mistakes}\n提示使用: ${currentSession.hintsUsed}${achievementLines}`,
         [{ text: '返回', onPress: () => navigation.goBack() }],
       );
     }
@@ -96,7 +134,10 @@ export const GameScreen: React.FC<Props> = ({ route, navigation }) => {
           selectedCell={selectedCell}
           onCellPress={handleCellPress}
         />
-        <ClueList words={currentPuzzle.words} />
+        <ClueList
+          words={currentPuzzle.words}
+          onSpeakWord={speechReady ? word => speech.speak(word.wordData.spanish) : undefined}
+        />
       </ScrollView>
 
       <Keyboard onKeyPress={handleLetterInput} onDelete={() => handleLetterInput('')} />
