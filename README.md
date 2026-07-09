@@ -45,11 +45,16 @@ src/
 
 ## 获取安卓 APK
 
-每次 push 后 GitHub Actions 会自动构建：
+**方式一：Releases 页直链（推荐，免登录、手机可直接下）**
+
+打开仓库 [Releases 页](https://github.com/maxbobo007/BB-ESword-Combo/releases)，下载最新版本的 `app-release.apk`。推送 `v*` tag 时 CI 会自动发布新 Release。
+
+**方式二：CI 产物（每次 push 都有，需登录 GitHub，90 天过期）**
 
 1. 打开仓库的 **Actions** 页 → 选择最新的 `android` 工作流运行
-2. 下载 **bb-esword-apk** 产物（app-release.apk）
-3. 传到手机安装（需允许安装未知来源应用），或 `adb install app-release.apk`
+2. 下载 **bb-esword-apk** 产物并解压得到 `app-release.apk`
+
+下载后传到手机安装（需允许安装未知来源应用），或 `adb install app-release.apk`。
 
 ## 本地开发
 
