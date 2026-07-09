@@ -48,8 +48,8 @@ src/
 每次 push 后 GitHub Actions 会自动构建：
 
 1. 打开仓库的 **Actions** 页 → 选择最新的 `android` 工作流运行
-2. 下载 **app-debug** 产物（app-debug.apk）
-3. 传到手机安装（需允许安装未知来源应用），或 `adb install app-debug.apk`
+2. 下载 **bb-esword-apk** 产物（app-release.apk）
+3. 传到手机安装（需允许安装未知来源应用），或 `adb install app-release.apk`
 
 ## 本地开发
 

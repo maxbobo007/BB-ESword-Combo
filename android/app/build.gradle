@@ -9,13 +9,8 @@ react {
     codegenDir = file("../../node_modules/@react-native/codegen")
     cliFile = file("../../node_modules/react-native/cli.js")
 
-    /* Variants */
-    debuggableVariants = ["liteDebug", "debug"]
-
-    /* Bundling */
-    bundleAssetName = "app.bundle"
+    /* Bundling：release 变体自动打包 JS（asset 名保持默认 index.android.bundle） */
     entryFile = file("../../index.js")
-    bundleCommand = "bundle"
 }
 
 def enableProguardInReleaseBuilds = false
@@ -66,3 +61,5 @@ dependencies {
         implementation jscFlavor
     }
 }
+
+apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)

@@ -5,10 +5,10 @@
 无需任何本地环境：
 
 1. 打开仓库 **Actions** 页 → 最新的 `android` 工作流
-2. 下载 **app-debug** 产物并解压得到 `app-debug.apk`
+2. 下载 **bb-esword-apk** 产物并解压得到 `app-release.apk`
 3. 安装到手机：
    - 方式 A：把 APK 传到手机（微信/网盘/数据线），点击安装（需允许"未知来源"）
-   - 方式 B：`adb install app-debug.apk`
+   - 方式 B：`adb install app-release.apk`
 
 ## 设备验收清单
 

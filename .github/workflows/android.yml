@@ -28,11 +28,13 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Build debug APK
-        run: ./gradlew assembleDebug --no-daemon
+      # release 变体才会把 JS bundle 打进 APK（debug 变体需要连 Metro，装到手机无法独立运行）；
+      # release 签名沿用 debug.keystore，适合个人安装，不适合上架
+      - name: Build APK
+        run: ./gradlew assembleRelease --no-daemon
         working-directory: android
 
       - uses: actions/upload-artifact@v4
         with:
-          name: app-debug
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: bb-esword-apk
+          path: android/app/build/outputs/apk/release/app-release.apk
