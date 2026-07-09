@@ -7,10 +7,12 @@ import { useGameTheme } from '@/theme/ThemeProvider';
 interface GridProps {
   cells: CrosswordCell[][];
   selectedCell: { row: number; col: number } | null;
+  /** 当前单词的格子（"row-col"），整词淡高亮 */
+  activeWordKeys?: Set<string>;
   onCellPress: (row: number, col: number) => void;
 }
 
-export const Grid: React.FC<GridProps> = ({ cells, selectedCell, onCellPress }) => {
+export const Grid: React.FC<GridProps> = ({ cells, selectedCell, activeWordKeys, onCellPress }) => {
   const theme = useGameTheme();
   const gridSize = cells.length || 15;
   const cellSize = Math.min((Dimensions.get('window').width - 40) / gridSize, 30);
@@ -25,12 +27,14 @@ export const Grid: React.FC<GridProps> = ({ cells, selectedCell, onCellPress }) 
             const isEmpty = !cell.correctLetter;
             const isCorrect =
               !isEmpty && !cell.isFixed && cell.letter === cell.correctLetter;
+            const inActiveWord = activeWordKeys?.has(`${cell.row}-${cell.col}`) ?? false;
             return (
               <TouchableOpacity
                 key={`${cell.row}-${cell.col}`}
                 style={[
                   styles.cell,
                   isEmpty && styles.emptyCell,
+                  inActiveWord && styles.activeWordCell,
                   isCorrect && styles.correctCell,
                   cell.isFixed && styles.fixedCell,
                   isSelected && styles.selectedCell,
@@ -87,6 +91,9 @@ const createStyles = (theme: GameTheme, cellSize: number) =>
     },
     correctCell: {
       backgroundColor: theme.cell.correctBg,
+    },
+    activeWordCell: {
+      backgroundColor: theme.cell.wordHighlight,
     },
     cellText: {
       fontSize: cellSize * 0.6,

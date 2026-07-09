@@ -10,6 +10,7 @@ export interface GameTheme {
     text: string;
     border: string;
     correctBg: string; // 已填对格子的柔和高亮
+    wordHighlight: string; // 当前单词整词淡高亮
   };
   success: string;
   warning: string;
@@ -26,6 +27,7 @@ export const lightGameTheme: GameTheme = {
     text: '#1A1C1E',
     border: '#C4C6CF',
     correctBg: '#E4F3E5',
+    wordHighlight: '#E8F1FC',
   },
   success: '#2E7D32',
   warning: '#EF6C00',
@@ -42,6 +44,7 @@ export const darkGameTheme: GameTheme = {
     text: '#E2E2E6',
     border: '#44474E',
     correctBg: '#1E3B22',
+    wordHighlight: '#20344E',
   },
   success: '#81C784',
   warning: '#FFB74D',

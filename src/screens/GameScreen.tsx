@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { View, StyleSheet, ScrollView, TextInput } from 'react-native';
 import {
   Appbar,
   Chip,
@@ -17,6 +17,9 @@ import { useSettingsStore } from '@/store/settingsStore';
 import { useWordPackStore, getActiveWords, findPack } from '@/store/wordPackStore';
 import { speech } from '@/services/speech';
 import { PuzzleGenerator } from '@/core/engine/puzzleGenerator';
+import { normalizeLetter } from '@/core/engine/normalize';
+import { findWordAt, nextEditableCell, wordCells } from '@/core/engine/cursor';
+import { Direction } from '@/core/types/game';
 import { getDailyPuzzle } from '@/core/daily/daily';
 import { filterWords, pickRandomWords } from '@/core/data/words';
 import { localDateString } from '@/core/progress/streak';
@@ -40,10 +43,24 @@ export const GameScreen: React.FC<Props> = ({ route, navigation }) => {
     clearRecentlyCompletedWord,
   } = useGameStore();
   const ttsEnabled = useSettingsStore(s => s.ttsEnabled);
+  const useSystemKeyboard = useSettingsStore(s => s.useSystemKeyboard);
+  const setUseSystemKeyboard = useSettingsStore(s => s.setUseSystemKeyboard);
   const [selectedCell, setSelectedCell] = useState<{ row: number; col: number } | null>(null);
+  const [direction, setDirection] = useState<Direction>('horizontal');
   const [speechReady, setSpeechReady] = useState(false);
   const [snackbar, setSnackbar] = useState('');
   const [generationFailed, setGenerationFailed] = useState(false);
+  const hiddenInputRef = useRef<TextInput>(null);
+
+  // 系统键盘模式下，选中格子即拉起输入法
+  useEffect(() => {
+    if (useSystemKeyboard && selectedCell) {
+      hiddenInputRef.current?.focus();
+    }
+    if (!useSystemKeyboard) {
+      hiddenInputRef.current?.blur();
+    }
+  }, [useSystemKeyboard, selectedCell]);
 
   useEffect(() => {
     let mounted = true;
@@ -97,18 +114,70 @@ export const GameScreen: React.FC<Props> = ({ route, navigation }) => {
 
   const completed = currentSession?.isCompleted ?? false;
 
+  // 当前单词（沿其自动跳格 + 整词高亮）
+  const activeWord = useMemo(() => {
+    if (!currentPuzzle || !selectedCell) {
+      return undefined;
+    }
+    return findWordAt(currentPuzzle.words, selectedCell.row, selectedCell.col, direction);
+  }, [currentPuzzle, selectedCell, direction]);
+
+  const activeWordKeys = useMemo(
+    () =>
+      activeWord ? new Set(wordCells(activeWord).map(p => `${p.row}-${p.col}`)) : undefined,
+    [activeWord],
+  );
+
   const handleCellPress = (row: number, col: number) => {
-    if (!currentSession) {
+    if (!currentSession || !currentPuzzle) {
       return;
     }
-    if (currentSession.currentCells[row][col].correctLetter) {
-      setSelectedCell({ row, col });
+    if (!currentSession.currentCells[row][col].correctLetter) {
+      return;
+    }
+    // 重复点同一格：在横/纵单词间切换
+    if (selectedCell?.row === row && selectedCell?.col === col) {
+      const other: Direction = direction === 'horizontal' ? 'vertical' : 'horizontal';
+      if (findWordAt(currentPuzzle.words, row, col, other)?.direction === other) {
+        setDirection(other);
+      }
+      return;
+    }
+    setSelectedCell({ row, col });
+    const word = findWordAt(currentPuzzle.words, row, col, direction);
+    if (word && word.direction !== direction) {
+      setDirection(word.direction);
     }
   };
 
   const handleLetterInput = (letter: string) => {
-    if (selectedCell) {
-      updateCell(selectedCell.row, selectedCell.col, letter);
+    if (!selectedCell || !currentSession) {
+      return;
+    }
+    updateCell(selectedCell.row, selectedCell.col, letter);
+    // 填入字母后沿当前单词跳到下一个可编辑格
+    if (letter && activeWord) {
+      const next = nextEditableCell(
+        activeWord,
+        currentSession.currentCells,
+        selectedCell.row,
+        selectedCell.col,
+      );
+      if (next) {
+        setSelectedCell(next);
+      }
+    }
+  };
+
+  // 系统键盘：隐藏输入框保持一个哨兵空格，退格触发删除、其余取末位字符归一化
+  const handleSystemInput = (text: string) => {
+    if (text.length === 0) {
+      handleLetterInput('');
+      return;
+    }
+    const ch = normalizeLetter(text[text.length - 1]);
+    if (/^[A-ZÑ]$/.test(ch)) {
+      handleLetterInput(ch);
     }
   };
 
@@ -124,6 +193,11 @@ export const GameScreen: React.FC<Props> = ({ route, navigation }) => {
       <Appbar.Header mode="small" elevated>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <Appbar.Content title={title} />
+        <Appbar.Action
+          icon={useSystemKeyboard ? 'keyboard-outline' : 'keyboard-off-outline'}
+          onPress={() => setUseSystemKeyboard(!useSystemKeyboard)}
+          accessibilityLabel="切换系统键盘"
+        />
         <Button
           mode="contained-tonal"
           compact
@@ -155,10 +229,11 @@ export const GameScreen: React.FC<Props> = ({ route, navigation }) => {
             </Chip>
           </View>
 
-          <ScrollView contentContainerStyle={styles.content}>
+          <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
             <Grid
               cells={currentSession.currentCells}
               selectedCell={selectedCell}
+              activeWordKeys={activeWordKeys}
               onCellPress={handleCellPress}
             />
             <ClueList
@@ -167,7 +242,22 @@ export const GameScreen: React.FC<Props> = ({ route, navigation }) => {
             />
           </ScrollView>
 
-          <Keyboard onKeyPress={handleLetterInput} onDelete={() => handleLetterInput('')} />
+          {useSystemKeyboard ? (
+            <TextInput
+              ref={hiddenInputRef}
+              style={styles.hiddenInput}
+              value=" "
+              onChangeText={handleSystemInput}
+              autoCapitalize="none"
+              autoCorrect={false}
+              autoComplete="off"
+              spellCheck={false}
+              caretHidden
+              contextMenuHidden
+            />
+          ) : (
+            <Keyboard onKeyPress={handleLetterInput} onDelete={() => handleLetterInput('')} />
+          )}
         </>
       )}
 
@@ -224,4 +314,11 @@ const styles = StyleSheet.create({
   centerText: { textAlign: 'center' },
   centerActions: { justifyContent: 'center' },
   achievement: { marginTop: 8 },
+  hiddenInput: {
+    position: 'absolute',
+    left: -1000,
+    width: 1,
+    height: 1,
+    opacity: 0,
+  },
 });

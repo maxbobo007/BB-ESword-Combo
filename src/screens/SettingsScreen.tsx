@@ -15,7 +15,14 @@ const THEME_OPTIONS: { mode: ThemeMode; label: string; icon: string }[] = [
 ];
 
 export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
-  const { themeMode, ttsEnabled, setThemeMode, setTtsEnabled } = useSettingsStore();
+  const {
+    themeMode,
+    ttsEnabled,
+    useSystemKeyboard,
+    setThemeMode,
+    setTtsEnabled,
+    setUseSystemKeyboard,
+  } = useSettingsStore();
 
   return (
     <SafeAreaView style={styles.flex} edges={['top']}>
@@ -50,6 +57,18 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
             description="使用系统西语语音（es-ES）"
             left={props => <List.Icon {...props} icon="volume-high" />}
             right={() => <Switch value={ttsEnabled} onValueChange={setTtsEnabled} />}
+          />
+        </List.Section>
+
+        <List.Section>
+          <List.Subheader>输入</List.Subheader>
+          <List.Item
+            title="使用系统键盘"
+            description="以手机输入法代替内置小键盘（重音字母自动归一化，ñ 可长按 N 输入）"
+            left={props => <List.Icon {...props} icon="keyboard-outline" />}
+            right={() => (
+              <Switch value={useSystemKeyboard} onValueChange={setUseSystemKeyboard} />
+            )}
           />
         </List.Section>
 
