@@ -6,7 +6,7 @@
 
 - 📚 **分级词库**: 600 词，A1-C2 六个等级 × 10 个主题，全部含西/英/中翻译和例句
 - 🗂️ **词库可选择**: 内置词库包可开关；支持粘贴 JSON/CSV 导入自定义词库并直接开局
-- 🎨 **Material Design 3**: 基于 react-native-paper 的规范化界面，浅色/深色全适配
+- 🎨 **Apple HIG 风格**: 自研 Cupertino 设计系统（大标题导航、分组列表、iOS 控件与弹窗），浅色/深色全适配
 - 🎮 **填字游戏**: 横纵交叉记忆单词，重音自动归一化（é 填 E 即可，Ñ 为独立字母）
 - 📅 **每日挑战**: 日期种子确定性谜题，每天一题全球同题
 - 🏆 **成就系统**: 11 个成就（连击、词量、完美局等）
@@ -19,7 +19,7 @@
 ## 技术栈
 
 - React Native 0.73（裸工程，非 Expo）+ TypeScript strict
-- react-native-paper v5（Material Design 3 组件库）
+- 自研 Cupertino 组件库（Apple HIG 规范：色板/字体阶梯/控件/弹窗）
 - Zustand（persist 中间件持久化）+ AsyncStorage
 - React Navigation (native-stack)
 - react-native-tts（西语发音）

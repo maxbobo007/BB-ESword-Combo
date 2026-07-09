@@ -1,4 +1,4 @@
-// 游戏棋盘专用颜色（MD3 组件色板之外的领域 token）
+// 游戏棋盘专用颜色（iOS 系统蓝色系）
 export interface GameTheme {
   dark: boolean;
   cell: {
@@ -20,32 +20,32 @@ export const lightGameTheme: GameTheme = {
   dark: false,
   cell: {
     bg: '#FFFFFF',
-    blocked: '#1A1C1E',
-    selected: '#BBDEFB',
-    fixedBg: '#D3E4FD',
-    fixedText: '#0A3060',
-    text: '#1A1C1E',
-    border: '#C4C6CF',
-    correctBg: '#E4F3E5',
-    wordHighlight: '#E8F1FC',
+    blocked: '#1C1C1E',
+    selected: 'rgba(0,122,255,0.35)',
+    fixedBg: 'rgba(0,122,255,0.12)',
+    fixedText: '#007AFF',
+    text: '#000000',
+    border: 'rgba(60,60,67,0.29)',
+    correctBg: 'rgba(52,199,89,0.16)',
+    wordHighlight: 'rgba(0,122,255,0.08)',
   },
-  success: '#2E7D32',
-  warning: '#EF6C00',
+  success: '#34C759',
+  warning: '#FF9500',
 };
 
 export const darkGameTheme: GameTheme = {
   dark: true,
   cell: {
-    bg: '#23262B',
+    bg: '#1C1C1E',
     blocked: '#000000',
-    selected: '#2E5A8F',
-    fixedBg: '#2A4E7E',
-    fixedText: '#D3E4FD',
-    text: '#E2E2E6',
-    border: '#44474E',
-    correctBg: '#1E3B22',
-    wordHighlight: '#20344E',
+    selected: 'rgba(10,132,255,0.45)',
+    fixedBg: 'rgba(10,132,255,0.22)',
+    fixedText: '#64A8FF',
+    text: '#FFFFFF',
+    border: 'rgba(84,84,88,0.60)',
+    correctBg: 'rgba(48,209,88,0.22)',
+    wordHighlight: 'rgba(10,132,255,0.12)',
   },
-  success: '#81C784',
-  warning: '#FFB74D',
+  success: '#30D158',
+  warning: '#FF9F0A',
 };

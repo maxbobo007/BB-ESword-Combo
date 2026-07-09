@@ -64,8 +64,8 @@ dependencies {
 
 apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
 
-// react-native-vector-icons：把图标字体打进 APK（只需 MD3 组件用的 MaterialCommunityIcons）
+// react-native-vector-icons：把图标字体打进 APK（Cupertino 风格用 Ionicons）
 project.ext.vectoricons = [
-    iconFontNames: ['MaterialCommunityIcons.ttf']
+    iconFontNames: ['Ionicons.ttf']
 ]
 apply from: file("../../node_modules/react-native-vector-icons/fonts.gradle")

@@ -1,15 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { View, StyleSheet, ScrollView, TextInput } from 'react-native';
-import {
-  Appbar,
-  Chip,
-  Text,
-  Button,
-  Portal,
-  Dialog,
-  Snackbar,
-  useTheme,
-} from 'react-native-paper';
+import { View, Text, StyleSheet, ScrollView, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useGameStore } from '@/store/gameStore';
@@ -27,11 +17,15 @@ import { RootStackParamList } from '@/navigation/types';
 import { Grid } from '@/components/Grid';
 import { Keyboard } from '@/components/Keyboard';
 import { ClueList } from '@/components/ClueList';
+import { useCupertino } from '@/theme/ThemeProvider';
+import { type } from '@/theme/cupertino';
+import { NavBar, NavAction } from '@/components/cupertino/NavBar';
+import { CAlert, CToast } from '@/components/cupertino/overlays';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Game'>;
 
 export const GameScreen: React.FC<Props> = ({ route, navigation }) => {
-  const theme = useTheme();
+  const { colors } = useCupertino();
   const {
     currentPuzzle,
     currentSession,
@@ -48,9 +42,18 @@ export const GameScreen: React.FC<Props> = ({ route, navigation }) => {
   const [selectedCell, setSelectedCell] = useState<{ row: number; col: number } | null>(null);
   const [direction, setDirection] = useState<Direction>('horizontal');
   const [speechReady, setSpeechReady] = useState(false);
-  const [snackbar, setSnackbar] = useState('');
+  const [toast, setToast] = useState('');
   const [generationFailed, setGenerationFailed] = useState(false);
   const hiddenInputRef = useRef<TextInput>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    speech.init().then(ok => mounted && setSpeechReady(ok));
+    return () => {
+      mounted = false;
+      speech.stop();
+    };
+  }, []);
 
   // 系统键盘模式下，选中格子即拉起输入法
   useEffect(() => {
@@ -61,15 +64,6 @@ export const GameScreen: React.FC<Props> = ({ route, navigation }) => {
       hiddenInputRef.current?.blur();
     }
   }, [useSystemKeyboard, selectedCell]);
-
-  useEffect(() => {
-    let mounted = true;
-    speech.init().then(ok => mounted && setSpeechReady(ok));
-    return () => {
-      mounted = false;
-      speech.stop();
-    };
-  }, []);
 
   // 谜题在进入页面时生成；退出页面清空临时状态
   useEffect(() => {
@@ -104,7 +98,7 @@ export const GameScreen: React.FC<Props> = ({ route, navigation }) => {
       return;
     }
     const { wordData } = recentlyCompletedWord;
-    setSnackbar(`✓ ${wordData.spanish} — ${wordData.chinese}`);
+    setToast(`✓ ${wordData.spanish} — ${wordData.chinese}`);
     if (speechReady && ttsEnabled) {
       speech.speak(wordData.spanish);
     }
@@ -123,8 +117,7 @@ export const GameScreen: React.FC<Props> = ({ route, navigation }) => {
   }, [currentPuzzle, selectedCell, direction]);
 
   const activeWordKeys = useMemo(
-    () =>
-      activeWord ? new Set(wordCells(activeWord).map(p => `${p.row}-${p.col}`)) : undefined,
+    () => (activeWord ? new Set(wordCells(activeWord).map(p => `${p.row}-${p.col}`)) : undefined),
     [activeWord],
   );
 
@@ -135,7 +128,6 @@ export const GameScreen: React.FC<Props> = ({ route, navigation }) => {
     if (!currentSession.currentCells[row][col].correctLetter) {
       return;
     }
-    // 重复点同一格：在横/纵单词间切换
     if (selectedCell?.row === row && selectedCell?.col === col) {
       const other: Direction = direction === 'horizontal' ? 'vertical' : 'horizontal';
       if (findWordAt(currentPuzzle.words, row, col, other)?.direction === other) {
@@ -155,7 +147,6 @@ export const GameScreen: React.FC<Props> = ({ route, navigation }) => {
       return;
     }
     updateCell(selectedCell.row, selectedCell.col, letter);
-    // 填入字母后沿当前单词跳到下一个可编辑格
     if (letter && activeWord) {
       const next = nextEditableCell(
         activeWord,
@@ -188,45 +179,50 @@ export const GameScreen: React.FC<Props> = ({ route, navigation }) => {
         ? '自定义词库'
         : `${route.params.level} · ${route.params.difficulty === 'easy' ? '简单' : route.params.difficulty === 'medium' ? '中等' : '困难'}`;
 
+  const stats = currentSession
+    ? [
+        { icon: '✗', text: `错误 ${currentSession.mistakes}` },
+        { icon: '💡', text: `提示 ${currentSession.hintsUsed}` },
+        {
+          icon: '✓',
+          text: `${currentPuzzle?.words.filter(w => w.isCompleted).length ?? 0}/${currentPuzzle?.words.length ?? 0}`,
+        },
+      ]
+    : [];
+
   return (
-    <SafeAreaView style={styles.flex} edges={['top']}>
-      <Appbar.Header mode="small" elevated>
-        <Appbar.BackAction onPress={() => navigation.goBack()} />
-        <Appbar.Content title={title} />
-        <Appbar.Action
-          icon={useSystemKeyboard ? 'keyboard-outline' : 'keyboard-off-outline'}
-          onPress={() => setUseSystemKeyboard(!useSystemKeyboard)}
-          accessibilityLabel="切换系统键盘"
-        />
-        <Button
-          mode="contained-tonal"
-          compact
-          icon="lightbulb-on-outline"
-          onPress={useHint}
-          disabled={!currentSession || completed}
-        >
-          提示
-        </Button>
-      </Appbar.Header>
+    <SafeAreaView style={[styles.flex, { backgroundColor: colors.background }]} edges={['top']}>
+      <NavBar
+        title={title}
+        onBack={() => navigation.goBack()}
+        right={
+          <>
+            <NavAction
+              icon={useSystemKeyboard ? 'keypad' : 'keypad-outline'}
+              onPress={() => setUseSystemKeyboard(!useSystemKeyboard)}
+              accessibilityLabel="切换系统键盘"
+            />
+            <NavAction icon="bulb-outline" onPress={useHint} accessibilityLabel="使用提示" />
+          </>
+        }
+      />
 
       {!currentPuzzle || !currentSession ? (
         <View style={styles.loading}>
-          <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant }}>
+          <Text style={[type.body, { color: colors.secondaryLabel }]}>
             {generationFailed ? '' : '正在生成谜题…'}
           </Text>
         </View>
       ) : (
         <>
           <View style={styles.statsBar}>
-            <Chip compact icon="close-circle-outline">
-              错误 {currentSession.mistakes}
-            </Chip>
-            <Chip compact icon="lightbulb-outline">
-              提示 {currentSession.hintsUsed}
-            </Chip>
-            <Chip compact icon="check-circle-outline">
-              {currentPuzzle.words.filter(w => w.isCompleted).length}/{currentPuzzle.words.length}
-            </Chip>
+            {stats.map(s => (
+              <View key={s.text} style={[styles.statPill, { backgroundColor: colors.fill }]}>
+                <Text style={[type.footnote, { color: colors.secondaryLabel }]}>
+                  {s.icon} {s.text}
+                </Text>
+              </View>
+            ))}
           </View>
 
           <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
@@ -261,42 +257,24 @@ export const GameScreen: React.FC<Props> = ({ route, navigation }) => {
         </>
       )}
 
-      <Portal>
-        <Dialog visible={completed} dismissable={false}>
-          <Dialog.Icon icon="trophy" color={theme.colors.primary} />
-          <Dialog.Title style={styles.centerText}>恭喜完成！</Dialog.Title>
-          <Dialog.Content>
-            <Text variant="bodyLarge" style={styles.centerText}>
-              得分 {currentSession?.score} · 错误 {currentSession?.mistakes} · 提示{' '}
-              {currentSession?.hintsUsed}
-            </Text>
-            {useGameStore.getState().lastUnlockedAchievements.map(a => (
-              <Text key={a.id} variant="bodyMedium" style={[styles.centerText, styles.achievement]}>
-                🎉 解锁成就：{a.icon} {a.title}
-              </Text>
-            ))}
-          </Dialog.Content>
-          <Dialog.Actions style={styles.centerActions}>
-            <Button mode="contained" onPress={() => navigation.goBack()}>
-              返回主页
-            </Button>
-          </Dialog.Actions>
-        </Dialog>
+      <CAlert
+        visible={completed}
+        title="🏆 恭喜完成！"
+        message={`得分 ${currentSession?.score} · 错误 ${currentSession?.mistakes} · 提示 ${currentSession?.hintsUsed}${useGameStore
+          .getState()
+          .lastUnlockedAchievements.map(a => `\n🎉 解锁成就：${a.icon} ${a.title}`)
+          .join('')}`}
+        actions={[{ text: '返回主页', style: 'cancel', onPress: () => navigation.goBack() }]}
+      />
 
-        <Dialog visible={generationFailed} dismissable={false}>
-          <Dialog.Title>无法生成谜题</Dialog.Title>
-          <Dialog.Content>
-            <Text variant="bodyMedium">该组合的可用单词不足，请换一个主题或词库。</Text>
-          </Dialog.Content>
-          <Dialog.Actions>
-            <Button onPress={() => navigation.goBack()}>返回</Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
+      <CAlert
+        visible={generationFailed}
+        title="无法生成谜题"
+        message="该组合的可用单词不足，请换一个主题或词库。"
+        actions={[{ text: '返回', onPress: () => navigation.goBack() }]}
+      />
 
-      <Snackbar visible={snackbar !== ''} onDismiss={() => setSnackbar('')} duration={1800}>
-        {snackbar}
-      </Snackbar>
+      <CToast message={toast} onHide={() => setToast('')} />
     </SafeAreaView>
   );
 };
@@ -310,10 +288,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
   },
+  statPill: {
+    paddingHorizontal: 12,
+    height: 28,
+    borderRadius: 14,
+    justifyContent: 'center',
+  },
   content: { padding: 16, paddingTop: 4 },
-  centerText: { textAlign: 'center' },
-  centerActions: { justifyContent: 'center' },
-  achievement: { marginTop: 8 },
   hiddenInput: {
     position: 'absolute',
     left: -1000,

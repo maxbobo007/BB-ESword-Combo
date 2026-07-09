@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { Text, TouchableRipple, useTheme } from 'react-native-paper';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { useCupertino } from '@/theme/ThemeProvider';
+import { Icon } from '@/components/cupertino/Icon';
 
-// 归一化后的谜面只含 A-Z 和 Ñ（重音在生成时去除）
+// 归一化后的谜面只含 A-Z 和 Ñ（重音在生成时去除）；样式仿 iOS 系统键盘
 const ROWS = ['ABCDEFGHIJ', 'KLMNOPQRS', 'TUVWXYZÑ'];
 
 interface KeyboardProps {
@@ -11,34 +12,37 @@ interface KeyboardProps {
 }
 
 export const Keyboard: React.FC<KeyboardProps> = ({ onKeyPress, onDelete }) => {
-  const theme = useTheme();
+  const { dark, colors } = useCupertino();
+  const keyBg = dark ? '#3A3A3C' : '#FFFFFF';
+  const deleteBg = dark ? '#2C2C2E' : '#B4BCC8';
 
   return (
-    <View style={[styles.keyboard, { backgroundColor: theme.colors.surface }]}>
+    <View style={[styles.keyboard, { backgroundColor: dark ? '#1C1C1E' : '#D1D5DB' }]}>
       {ROWS.map((row, index) => (
         <View key={row} style={styles.keyboardRow}>
           {row.split('').map(letter => (
-            <TouchableRipple
+            <Pressable
               key={letter}
-              style={[styles.key, { backgroundColor: theme.colors.surfaceVariant }]}
-              borderless
+              style={({ pressed }) => [
+                styles.key,
+                { backgroundColor: keyBg, opacity: pressed ? 0.5 : 1 },
+              ]}
               onPress={() => onKeyPress(letter)}
             >
-              <Text variant="titleMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-                {letter}
-              </Text>
-            </TouchableRipple>
+              <Text style={[styles.keyText, { color: colors.label }]}>{letter}</Text>
+            </Pressable>
           ))}
           {index === ROWS.length - 1 && (
-            <TouchableRipple
-              style={[styles.key, styles.deleteKey, { backgroundColor: theme.colors.errorContainer }]}
-              borderless
+            <Pressable
+              style={({ pressed }) => [
+                styles.key,
+                styles.deleteKey,
+                { backgroundColor: deleteBg, opacity: pressed ? 0.5 : 1 },
+              ]}
               onPress={onDelete}
             >
-              <Text variant="titleSmall" style={{ color: theme.colors.onErrorContainer }}>
-                ⌫
-              </Text>
-            </TouchableRipple>
+              <Icon name="backspace-outline" size={22} color={colors.label} />
+            </Pressable>
           )}
         </View>
       ))}
@@ -49,24 +53,33 @@ export const Keyboard: React.FC<KeyboardProps> = ({ onKeyPress, onDelete }) => {
 const styles = StyleSheet.create({
   keyboard: {
     paddingVertical: 8,
-    paddingHorizontal: 4,
-    paddingBottom: 16,
+    paddingHorizontal: 3,
+    paddingBottom: 18,
   },
   keyboardRow: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginBottom: 6,
+    marginBottom: 8,
     gap: 5,
   },
   key: {
     minWidth: 33,
-    height: 46, // MD3 最小触控高度
-    borderRadius: 8,
+    height: 44,
+    borderRadius: 6,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 6,
+    paddingHorizontal: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.25,
+    shadowRadius: 0.5,
+    elevation: 1,
+  },
+  keyText: {
+    fontSize: 20,
+    fontWeight: '400',
   },
   deleteKey: {
-    paddingHorizontal: 14,
+    paddingHorizontal: 12,
   },
 });

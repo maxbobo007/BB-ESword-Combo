@@ -1,17 +1,16 @@
 import React from 'react';
 import { StatusBar } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { useTheme } from 'react-native-paper';
-import { ThemeProvider } from '@/theme/ThemeProvider';
+import { ThemeProvider, useCupertino } from '@/theme/ThemeProvider';
 import { RootNavigator } from '@/navigation/RootNavigator';
 
 function ThemedApp() {
-  const theme = useTheme();
+  const { dark, colors } = useCupertino();
   return (
     <>
       <StatusBar
-        barStyle={theme.dark ? 'light-content' : 'dark-content'}
-        backgroundColor={theme.colors.surface}
+        barStyle={dark ? 'light-content' : 'dark-content'}
+        backgroundColor={colors.background}
       />
       <RootNavigator />
     </>
