@@ -20,6 +20,7 @@ import { ClueList } from '@/components/ClueList';
 import { useCupertino } from '@/theme/ThemeProvider';
 import { type } from '@/theme/cupertino';
 import { NavBar, NavAction } from '@/components/cupertino/NavBar';
+import { Icon } from '@/components/cupertino/Icon';
 import { CAlert, CToast } from '@/components/cupertino/overlays';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Game'>;
@@ -181,10 +182,10 @@ export const GameScreen: React.FC<Props> = ({ route, navigation }) => {
 
   const stats = currentSession
     ? [
-        { icon: '✗', text: `错误 ${currentSession.mistakes}` },
-        { icon: '💡', text: `提示 ${currentSession.hintsUsed}` },
+        { icon: 'close-circle', text: `错误 ${currentSession.mistakes}` },
+        { icon: 'bulb', text: `提示 ${currentSession.hintsUsed}` },
         {
-          icon: '✓',
+          icon: 'checkmark-circle',
           text: `${currentPuzzle?.words.filter(w => w.isCompleted).length ?? 0}/${currentPuzzle?.words.length ?? 0}`,
         },
       ]
@@ -218,9 +219,8 @@ export const GameScreen: React.FC<Props> = ({ route, navigation }) => {
           <View style={styles.statsBar}>
             {stats.map(s => (
               <View key={s.text} style={[styles.statPill, { backgroundColor: colors.fill }]}>
-                <Text style={[type.footnote, { color: colors.secondaryLabel }]}>
-                  {s.icon} {s.text}
-                </Text>
+                <Icon name={s.icon} size={13} color={colors.secondaryLabel} />
+                <Text style={[type.footnote, { color: colors.secondaryLabel }]}>{s.text}</Text>
               </View>
             ))}
           </View>
@@ -289,10 +289,12 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   statPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
     paddingHorizontal: 12,
     height: 28,
     borderRadius: 14,
-    justifyContent: 'center',
   },
   content: { padding: 16, paddingTop: 4 },
   hiddenInput: {

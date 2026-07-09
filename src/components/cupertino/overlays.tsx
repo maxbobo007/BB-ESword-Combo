@@ -30,7 +30,7 @@ export const CAlert: React.FC<CAlertProps> = ({
   wide = false,
 }) => {
   const { colors } = useCupertino();
-  const stacked = actions.length > 2 || wide;
+  const stacked = actions.length > 2;
   return (
     <Modal transparent visible={visible} animationType="fade" onRequestClose={onDismiss}>
       <Pressable style={styles.backdrop} onPress={onDismiss}>

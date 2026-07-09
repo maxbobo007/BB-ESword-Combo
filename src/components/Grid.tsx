@@ -14,13 +14,33 @@ interface GridProps {
 
 export const Grid: React.FC<GridProps> = ({ cells, selectedCell, activeWordKeys, onCellPress }) => {
   const theme = useGameTheme();
-  const gridSize = cells.length || 15;
-  const cellSize = Math.min((Dimensions.get('window').width - 40) / gridSize, 30);
+
+  // 裁剪到实际有单词的包围盒，不渲染四周的空白区域
+  const visible = useMemo(() => {
+    let minR = cells.length, maxR = -1, minC = cells.length, maxC = -1;
+    cells.forEach((row, r) =>
+      row.forEach((cell, c) => {
+        if (cell.correctLetter) {
+          minR = Math.min(minR, r);
+          maxR = Math.max(maxR, r);
+          minC = Math.min(minC, c);
+          maxC = Math.max(maxC, c);
+        }
+      }),
+    );
+    if (maxR < 0) {
+      return cells;
+    }
+    return cells.slice(minR, maxR + 1).map(row => row.slice(minC, maxC + 1));
+  }, [cells]);
+
+  const colCount = visible[0]?.length || 1;
+  const cellSize = Math.min((Dimensions.get('window').width - 56) / colCount, 40);
   const styles = useMemo(() => createStyles(theme, cellSize), [theme, cellSize]);
 
   return (
     <View style={styles.gridContainer}>
-      {cells.map((row, rowIndex) => (
+      {visible.map((row, rowIndex) => (
         <View key={rowIndex} style={styles.row}>
           {row.map(cell => {
             const isSelected = selectedCell?.row === cell.row && selectedCell?.col === cell.col;
@@ -80,8 +100,9 @@ const createStyles = (theme: GameTheme, cellSize: number) =>
       backgroundColor: theme.cell.bg,
     },
     emptyCell: {
-      backgroundColor: theme.cell.blocked,
-      borderColor: theme.cell.blocked,
+      // 稀疏布局下空档透明，只显示单词格子（避免整块黑板观感）
+      backgroundColor: 'transparent',
+      borderColor: 'transparent',
     },
     selectedCell: {
       backgroundColor: theme.cell.selected,
