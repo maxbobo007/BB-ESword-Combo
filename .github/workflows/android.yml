@@ -49,9 +49,22 @@ jobs:
           name: bb-esword-apk
           path: android/app/build/outputs/apk/release/app-release.apk
 
-      # 推送 v* tag 或手动触发填 release_tag 时，把 APK 发布为 Release asset（永久免登录直链）
-      - name: Publish release
-        if: startsWith(github.ref, 'refs/tags/v') || inputs.release_tag != ''
+      # 每次推送自动更新滚动版 latest Release（免登录直链永远指向最新 APK）
+      - name: Publish rolling release
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/')
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: 最新构建（自动发布）
+          body: |
+            每次代码推送自动构建发布，始终为最新版本。
+            直链下载：https://github.com/${{ github.repository }}/releases/download/latest/app-release.apk
+          prerelease: true
+          files: android/app/build/outputs/apk/release/app-release.apk
+
+      # 推送 v* tag 或手动触发填 release_tag 时，发布正式版本号 Release
+      - name: Publish versioned release
+        if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.release_tag != '')
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ inputs.release_tag || github.ref_name }}
