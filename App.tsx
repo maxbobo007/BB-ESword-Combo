@@ -1,26 +1,28 @@
-import React, { useState } from 'react';
-import { SafeAreaView, StatusBar, StyleSheet } from 'react-native';
-import { HomeScreen } from './src/screens/HomeScreen';
-import { GameScreen } from './src/screens/GameScreen';
+import React from 'react';
+import { StatusBar } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { ThemeProvider, useCupertino } from '@/theme/ThemeProvider';
+import { RootNavigator } from '@/navigation/RootNavigator';
 
-export default function App() {
-  const [isPlaying, setIsPlaying] = useState(false);
-
+function ThemedApp() {
+  const { dark, colors } = useCupertino();
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#1976D2" />
-      {isPlaying ? (
-        <GameScreen />
-      ) : (
-        <HomeScreen onStartGame={() => setIsPlaying(true)} />
-      )}
-    </SafeAreaView>
+    <>
+      <StatusBar
+        barStyle={dark ? 'light-content' : 'dark-content'}
+        backgroundColor={colors.background}
+      />
+      <RootNavigator />
+    </>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-});
+export default function App() {
+  return (
+    <SafeAreaProvider>
+      <ThemeProvider>
+        <ThemedApp />
+      </ThemeProvider>
+    </SafeAreaProvider>
+  );
+}
