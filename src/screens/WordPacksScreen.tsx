@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useWordPackStore, isPackEnabled } from '@/store/wordPackStore';
-import { BUILTIN_PACKS } from '@/core/data/words';
+import { LEVEL_PACKS, SCENE_PACKS } from '@/core/data/words';
 import { RootStackParamList } from '@/navigation/types';
 import { useCupertino } from '@/theme/ThemeProvider';
 import { type } from '@/theme/cupertino';
@@ -54,14 +54,32 @@ export const WordPacksScreen: React.FC<Props> = ({ navigation }) => {
       />
 
       <ScrollView contentContainerStyle={styles.content}>
-        <Group header="内置词库" footer="每日挑战始终使用全部内置词库，不受开关影响，保证全球同题。">
-          {BUILTIN_PACKS.map((pack, i) => (
+        <Group header="等级词库" footer="参与主页“等级×主题”选词。每日挑战始终使用全部内置词库，不受开关影响。">
+          {LEVEL_PACKS.map((pack, i) => (
             <Row
               key={pack.id}
               title={pack.name}
               subtitle={`${pack.description ?? ''} · ${pack.words.length} 词`}
               icon="book"
               iconColor={PACK_COLORS[i % PACK_COLORS.length]}
+              right={
+                <CSwitch
+                  value={isPackEnabled(store, pack.id)}
+                  onValueChange={() => store.togglePack(pack.id)}
+                />
+              }
+            />
+          ))}
+        </Group>
+
+        <Group header="场景词库" footer="在主页“场景练习”中整包开局，词汇跨等级。">
+          {SCENE_PACKS.map((pack, i) => (
+            <Row
+              key={pack.id}
+              title={pack.name.replace(/^场景：/, '')}
+              subtitle={`${pack.description ?? ''} · ${pack.words.length} 词`}
+              icon="sparkles"
+              iconColor={PACK_COLORS[(i + 3) % PACK_COLORS.length]}
               right={
                 <CSwitch
                   value={isPackEnabled(store, pack.id)}

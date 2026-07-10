@@ -94,6 +94,78 @@
       "exampleSentence": "Este plato tiene muy buen sabor."
     },
     {
+      "id": "a2_food_11",
+      "spanish": "jamón",
+      "english": "ham",
+      "chinese": "火腿",
+      "level": "A2",
+      "category": "food",
+      "exampleSentence": "El jamón español es famoso."
+    },
+    {
+      "id": "a2_food_12",
+      "spanish": "galleta",
+      "english": "cookie",
+      "chinese": "饼干",
+      "level": "A2",
+      "category": "food",
+      "exampleSentence": "Como una galleta con el café."
+    },
+    {
+      "id": "a2_food_13",
+      "spanish": "mantequilla",
+      "english": "butter",
+      "chinese": "黄油",
+      "level": "A2",
+      "category": "food",
+      "exampleSentence": "Pongo mantequilla en el pan."
+    },
+    {
+      "id": "a2_food_14",
+      "spanish": "aceite",
+      "english": "oil",
+      "chinese": "油",
+      "level": "A2",
+      "category": "food",
+      "exampleSentence": "Cocino con aceite de oliva."
+    },
+    {
+      "id": "a2_food_15",
+      "spanish": "botella",
+      "english": "bottle",
+      "chinese": "瓶子",
+      "level": "A2",
+      "category": "food",
+      "exampleSentence": "Compro una botella de agua."
+    },
+    {
+      "id": "a2_food_16",
+      "spanish": "receta",
+      "english": "recipe",
+      "chinese": "食谱",
+      "level": "A2",
+      "category": "food",
+      "exampleSentence": "Mi abuela tiene una receta secreta."
+    },
+    {
+      "id": "a2_food_17",
+      "spanish": "almuerzo",
+      "english": "lunch",
+      "chinese": "午餐",
+      "level": "A2",
+      "category": "food",
+      "exampleSentence": "El almuerzo es a la una."
+    },
+    {
+      "id": "a2_food_18",
+      "spanish": "refresco",
+      "english": "soft drink",
+      "chinese": "汽水",
+      "level": "A2",
+      "category": "food",
+      "exampleSentence": "Pido un refresco en el bar."
+    },
+    {
       "id": "a2_family_01",
       "spanish": "primo",
       "english": "cousin",
@@ -182,6 +254,78 @@
       "level": "A2",
       "category": "family",
       "exampleSentence": "Mi vecino es muy amable."
+    },
+    {
+      "id": "a2_family_11",
+      "spanish": "cuñado",
+      "english": "brother-in-law",
+      "chinese": "姐夫",
+      "level": "A2",
+      "category": "family",
+      "exampleSentence": "Mi cuñado trabaja en un hospital."
+    },
+    {
+      "id": "a2_family_12",
+      "spanish": "suegro",
+      "english": "father-in-law",
+      "chinese": "岳父",
+      "level": "A2",
+      "category": "family",
+      "exampleSentence": "Mi suegro cuenta historias divertidas."
+    },
+    {
+      "id": "a2_family_13",
+      "spanish": "sobrina",
+      "english": "niece",
+      "chinese": "侄女",
+      "level": "A2",
+      "category": "family",
+      "exampleSentence": "Mi sobrina empieza la escuela este año."
+    },
+    {
+      "id": "a2_family_14",
+      "spanish": "yerno",
+      "english": "son-in-law",
+      "chinese": "女婿",
+      "level": "A2",
+      "category": "family",
+      "exampleSentence": "Su yerno es de Argentina."
+    },
+    {
+      "id": "a2_family_15",
+      "spanish": "matrimonio",
+      "english": "marriage",
+      "chinese": "婚姻",
+      "level": "A2",
+      "category": "family",
+      "exampleSentence": "El matrimonio celebra veinte años juntos."
+    },
+    {
+      "id": "a2_family_16",
+      "spanish": "divorcio",
+      "english": "divorce",
+      "chinese": "离婚",
+      "level": "A2",
+      "category": "family",
+      "exampleSentence": "El divorcio fue difícil para todos."
+    },
+    {
+      "id": "a2_family_17",
+      "spanish": "apellido",
+      "english": "surname",
+      "chinese": "姓",
+      "level": "A2",
+      "category": "family",
+      "exampleSentence": "Mi apellido es muy común en España."
+    },
+    {
+      "id": "a2_family_18",
+      "spanish": "bisabuelo",
+      "english": "great-grandfather",
+      "chinese": "曾祖父",
+      "level": "A2",
+      "category": "family",
+      "exampleSentence": "Mi bisabuelo nació en un pueblo pequeño."
     },
     {
       "id": "a2_travel_01",
@@ -274,6 +418,78 @@
       "exampleSentence": "Mi equipaje pesa demasiado."
     },
     {
+      "id": "a2_travel_11",
+      "spanish": "reserva",
+      "english": "reservation",
+      "chinese": "预订",
+      "level": "A2",
+      "category": "travel",
+      "exampleSentence": "Tengo una reserva para dos noches."
+    },
+    {
+      "id": "a2_travel_12",
+      "spanish": "frontera",
+      "english": "border",
+      "chinese": "边境",
+      "level": "A2",
+      "category": "travel",
+      "exampleSentence": "Cruzamos la frontera por la mañana."
+    },
+    {
+      "id": "a2_travel_13",
+      "spanish": "aduana",
+      "english": "customs",
+      "chinese": "海关",
+      "level": "A2",
+      "category": "travel",
+      "exampleSentence": "En la aduana revisan las maletas."
+    },
+    {
+      "id": "a2_travel_14",
+      "spanish": "retraso",
+      "english": "delay",
+      "chinese": "延误",
+      "level": "A2",
+      "category": "travel",
+      "exampleSentence": "El vuelo tiene una hora de retraso."
+    },
+    {
+      "id": "a2_travel_15",
+      "spanish": "destino",
+      "english": "destination",
+      "chinese": "目的地",
+      "level": "A2",
+      "category": "travel",
+      "exampleSentence": "Nuestro destino es Sevilla."
+    },
+    {
+      "id": "a2_travel_16",
+      "spanish": "excursión",
+      "english": "excursion",
+      "chinese": "短途旅行",
+      "level": "A2",
+      "category": "travel",
+      "exampleSentence": "Mañana hacemos una excursión a la montaña."
+    },
+    {
+      "id": "a2_travel_17",
+      "spanish": "guía",
+      "english": "guide",
+      "chinese": "导游",
+      "level": "A2",
+      "category": "travel",
+      "exampleSentence": "El guía explica la historia del castillo."
+    },
+    {
+      "id": "a2_travel_18",
+      "spanish": "alojamiento",
+      "english": "accommodation",
+      "chinese": "住宿",
+      "level": "A2",
+      "category": "travel",
+      "exampleSentence": "Busco alojamiento barato en el centro."
+    },
+    {
       "id": "a2_work_01",
       "spanish": "sueldo",
       "english": "salary",
@@ -362,6 +578,78 @@
       "level": "A2",
       "category": "work",
       "exampleSentence": "Firmo el contrato esta tarde."
+    },
+    {
+      "id": "a2_work_11",
+      "spanish": "empleo",
+      "english": "job",
+      "chinese": "工作岗位",
+      "level": "A2",
+      "category": "work",
+      "exampleSentence": "Busco un empleo de media jornada."
+    },
+    {
+      "id": "a2_work_12",
+      "spanish": "empleado",
+      "english": "employee",
+      "chinese": "员工",
+      "level": "A2",
+      "category": "work",
+      "exampleSentence": "El empleado atiende a los clientes."
+    },
+    {
+      "id": "a2_work_13",
+      "spanish": "enfermera",
+      "english": "nurse",
+      "chinese": "护士",
+      "level": "A2",
+      "category": "work",
+      "exampleSentence": "La enfermera trabaja por la noche."
+    },
+    {
+      "id": "a2_work_14",
+      "spanish": "peluquero",
+      "english": "hairdresser",
+      "chinese": "理发师",
+      "level": "A2",
+      "category": "work",
+      "exampleSentence": "El peluquero corta el pelo muy bien."
+    },
+    {
+      "id": "a2_work_15",
+      "spanish": "taller",
+      "english": "workshop",
+      "chinese": "修理厂",
+      "level": "A2",
+      "category": "work",
+      "exampleSentence": "Llevo el coche al taller."
+    },
+    {
+      "id": "a2_work_16",
+      "spanish": "despacho",
+      "english": "office (private)",
+      "chinese": "办公室",
+      "level": "A2",
+      "category": "work",
+      "exampleSentence": "El jefe está en su despacho."
+    },
+    {
+      "id": "a2_work_17",
+      "spanish": "currículum",
+      "english": "résumé",
+      "chinese": "简历",
+      "level": "A2",
+      "category": "work",
+      "exampleSentence": "Envío mi currículum a la empresa."
+    },
+    {
+      "id": "a2_work_18",
+      "spanish": "secretaria",
+      "english": "secretary",
+      "chinese": "秘书",
+      "level": "A2",
+      "category": "work",
+      "exampleSentence": "La secretaria contesta el teléfono."
     },
     {
       "id": "a2_health_01",
@@ -454,6 +742,78 @@
       "exampleSentence": "Comer fruta es muy sano."
     },
     {
+      "id": "a2_health_11",
+      "spanish": "tos",
+      "english": "cough",
+      "chinese": "咳嗽",
+      "level": "A2",
+      "category": "health",
+      "exampleSentence": "Tengo tos desde el lunes."
+    },
+    {
+      "id": "a2_health_12",
+      "spanish": "resfriado",
+      "english": "cold (illness)",
+      "chinese": "感冒",
+      "level": "A2",
+      "category": "health",
+      "exampleSentence": "Estoy en casa por un resfriado."
+    },
+    {
+      "id": "a2_health_13",
+      "spanish": "dolor",
+      "english": "pain",
+      "chinese": "疼痛",
+      "level": "A2",
+      "category": "health",
+      "exampleSentence": "Tengo dolor de cabeza."
+    },
+    {
+      "id": "a2_health_14",
+      "spanish": "pastilla",
+      "english": "pill",
+      "chinese": "药片",
+      "level": "A2",
+      "category": "health",
+      "exampleSentence": "Tomo una pastilla antes de dormir."
+    },
+    {
+      "id": "a2_health_15",
+      "spanish": "vacuna",
+      "english": "vaccine",
+      "chinese": "疫苗",
+      "level": "A2",
+      "category": "health",
+      "exampleSentence": "El niño recibe una vacuna hoy."
+    },
+    {
+      "id": "a2_health_16",
+      "spanish": "cita",
+      "english": "appointment",
+      "chinese": "预约",
+      "level": "A2",
+      "category": "health",
+      "exampleSentence": "Tengo una cita con el médico."
+    },
+    {
+      "id": "a2_health_17",
+      "spanish": "dieta",
+      "english": "diet",
+      "chinese": "饮食",
+      "level": "A2",
+      "category": "health",
+      "exampleSentence": "El médico me recomienda una dieta sana."
+    },
+    {
+      "id": "a2_health_18",
+      "spanish": "sangre",
+      "english": "blood",
+      "chinese": "血",
+      "level": "A2",
+      "category": "health",
+      "exampleSentence": "El médico hace un análisis de sangre."
+    },
+    {
       "id": "a2_nature_01",
       "spanish": "bosque",
       "english": "forest",
@@ -542,6 +902,78 @@
       "level": "A2",
       "category": "nature",
       "exampleSentence": "El pájaro canta por la mañana."
+    },
+    {
+      "id": "a2_nature_11",
+      "spanish": "desierto",
+      "english": "desert",
+      "chinese": "沙漠",
+      "level": "A2",
+      "category": "nature",
+      "exampleSentence": "En el desierto hace mucho calor."
+    },
+    {
+      "id": "a2_nature_12",
+      "spanish": "lago",
+      "english": "lake",
+      "chinese": "湖",
+      "level": "A2",
+      "category": "nature",
+      "exampleSentence": "Nadamos en el lago en verano."
+    },
+    {
+      "id": "a2_nature_13",
+      "spanish": "selva",
+      "english": "jungle",
+      "chinese": "丛林",
+      "level": "A2",
+      "category": "nature",
+      "exampleSentence": "En la selva hay muchos animales."
+    },
+    {
+      "id": "a2_nature_14",
+      "spanish": "clima",
+      "english": "climate",
+      "chinese": "气候",
+      "level": "A2",
+      "category": "nature",
+      "exampleSentence": "El clima de la costa es suave."
+    },
+    {
+      "id": "a2_nature_15",
+      "spanish": "paisaje",
+      "english": "landscape",
+      "chinese": "风景",
+      "level": "A2",
+      "category": "nature",
+      "exampleSentence": "El paisaje desde el tren es precioso."
+    },
+    {
+      "id": "a2_nature_16",
+      "spanish": "oveja",
+      "english": "sheep",
+      "chinese": "绵羊",
+      "level": "A2",
+      "category": "nature",
+      "exampleSentence": "La oveja come hierba en el campo."
+    },
+    {
+      "id": "a2_nature_17",
+      "spanish": "abeja",
+      "english": "bee",
+      "chinese": "蜜蜂",
+      "level": "A2",
+      "category": "nature",
+      "exampleSentence": "La abeja vuela de flor en flor."
+    },
+    {
+      "id": "a2_nature_18",
+      "spanish": "mariposa",
+      "english": "butterfly",
+      "chinese": "蝴蝶",
+      "level": "A2",
+      "category": "nature",
+      "exampleSentence": "La mariposa tiene alas de colores."
     },
     {
       "id": "a2_education_01",
@@ -634,6 +1066,78 @@
       "exampleSentence": "Mi hermana estudia en la universidad."
     },
     {
+      "id": "a2_education_11",
+      "spanish": "asignatura",
+      "english": "school subject",
+      "chinese": "科目",
+      "level": "A2",
+      "category": "education",
+      "exampleSentence": "Mi asignatura favorita es la historia."
+    },
+    {
+      "id": "a2_education_12",
+      "spanish": "instituto",
+      "english": "high school",
+      "chinese": "中学",
+      "level": "A2",
+      "category": "education",
+      "exampleSentence": "Mi hijo estudia en el instituto."
+    },
+    {
+      "id": "a2_education_13",
+      "spanish": "traducir",
+      "english": "to translate",
+      "chinese": "翻译",
+      "level": "A2",
+      "category": "education",
+      "exampleSentence": "Puedo traducir esta frase al español."
+    },
+    {
+      "id": "a2_education_14",
+      "spanish": "repasar",
+      "english": "to review",
+      "chinese": "复习",
+      "level": "A2",
+      "category": "education",
+      "exampleSentence": "Tengo que repasar antes del examen."
+    },
+    {
+      "id": "a2_education_15",
+      "spanish": "aprobar",
+      "english": "to pass (exam)",
+      "chinese": "及格",
+      "level": "A2",
+      "category": "education",
+      "exampleSentence": "Espero aprobar todas las asignaturas."
+    },
+    {
+      "id": "a2_education_16",
+      "spanish": "suspender",
+      "english": "to fail (exam)",
+      "chinese": "不及格",
+      "level": "A2",
+      "category": "education",
+      "exampleSentence": "No quiero suspender matemáticas."
+    },
+    {
+      "id": "a2_education_17",
+      "spanish": "lectura",
+      "english": "reading",
+      "chinese": "阅读",
+      "level": "A2",
+      "category": "education",
+      "exampleSentence": "La lectura me ayuda a aprender palabras."
+    },
+    {
+      "id": "a2_education_18",
+      "spanish": "maestro",
+      "english": "schoolteacher",
+      "chinese": "教师",
+      "level": "A2",
+      "category": "education",
+      "exampleSentence": "El maestro enseña con paciencia."
+    },
+    {
       "id": "a2_sports_01",
       "spanish": "partido",
       "english": "match",
@@ -722,6 +1226,78 @@
       "level": "A2",
       "category": "sports",
       "exampleSentence": "Voy al gimnasio dos veces por semana."
+    },
+    {
+      "id": "a2_sports_11",
+      "spanish": "entrenador",
+      "english": "coach",
+      "chinese": "教练",
+      "level": "A2",
+      "category": "sports",
+      "exampleSentence": "El entrenador prepara al equipo."
+    },
+    {
+      "id": "a2_sports_12",
+      "spanish": "campeón",
+      "english": "champion",
+      "chinese": "冠军",
+      "level": "A2",
+      "category": "sports",
+      "exampleSentence": "Mi equipo es el campeón de la liga."
+    },
+    {
+      "id": "a2_sports_13",
+      "spanish": "torneo",
+      "english": "tournament",
+      "chinese": "锦标赛",
+      "level": "A2",
+      "category": "sports",
+      "exampleSentence": "El torneo empieza este fin de semana."
+    },
+    {
+      "id": "a2_sports_14",
+      "spanish": "esquiar",
+      "english": "to ski",
+      "chinese": "滑雪",
+      "level": "A2",
+      "category": "sports",
+      "exampleSentence": "En invierno vamos a esquiar."
+    },
+    {
+      "id": "a2_sports_15",
+      "spanish": "premio",
+      "english": "prize",
+      "chinese": "奖品",
+      "level": "A2",
+      "category": "sports",
+      "exampleSentence": "La ganadora recibe un premio."
+    },
+    {
+      "id": "a2_sports_16",
+      "spanish": "estadio",
+      "english": "stadium",
+      "chinese": "体育场",
+      "level": "A2",
+      "category": "sports",
+      "exampleSentence": "El estadio está lleno de gente."
+    },
+    {
+      "id": "a2_sports_17",
+      "spanish": "árbitro",
+      "english": "referee",
+      "chinese": "裁判",
+      "level": "A2",
+      "category": "sports",
+      "exampleSentence": "El árbitro pita el final del partido."
+    },
+    {
+      "id": "a2_sports_18",
+      "spanish": "raqueta",
+      "english": "racket",
+      "chinese": "球拍",
+      "level": "A2",
+      "category": "sports",
+      "exampleSentence": "Necesito una raqueta nueva para jugar."
     },
     {
       "id": "a2_technology_01",
@@ -814,6 +1390,78 @@
       "exampleSentence": "La impresora no tiene papel."
     },
     {
+      "id": "a2_technology_11",
+      "spanish": "contraseña",
+      "english": "password",
+      "chinese": "密码",
+      "level": "A2",
+      "category": "technology",
+      "exampleSentence": "No recuerdo la contraseña del correo."
+    },
+    {
+      "id": "a2_technology_12",
+      "spanish": "aplicación",
+      "english": "application (app)",
+      "chinese": "应用程序",
+      "level": "A2",
+      "category": "technology",
+      "exampleSentence": "Uso una aplicación para aprender español."
+    },
+    {
+      "id": "a2_technology_13",
+      "spanish": "descargar",
+      "english": "to download",
+      "chinese": "下载",
+      "level": "A2",
+      "category": "technology",
+      "exampleSentence": "Voy a descargar la música en casa."
+    },
+    {
+      "id": "a2_technology_14",
+      "spanish": "enchufe",
+      "english": "plug socket",
+      "chinese": "插座",
+      "level": "A2",
+      "category": "technology",
+      "exampleSentence": "¿Hay un enchufe cerca de la mesa?"
+    },
+    {
+      "id": "a2_technology_15",
+      "spanish": "altavoz",
+      "english": "speaker",
+      "chinese": "扬声器",
+      "level": "A2",
+      "category": "technology",
+      "exampleSentence": "Escuchamos música con el altavoz."
+    },
+    {
+      "id": "a2_technology_16",
+      "spanish": "red",
+      "english": "network",
+      "chinese": "网络",
+      "level": "A2",
+      "category": "technology",
+      "exampleSentence": "La red de la oficina es lenta."
+    },
+    {
+      "id": "a2_technology_17",
+      "spanish": "portátil",
+      "english": "laptop",
+      "chinese": "笔记本电脑",
+      "level": "A2",
+      "category": "technology",
+      "exampleSentence": "Llevo el portátil a la reunión."
+    },
+    {
+      "id": "a2_technology_18",
+      "spanish": "cargador",
+      "english": "charger",
+      "chinese": "充电器",
+      "level": "A2",
+      "category": "technology",
+      "exampleSentence": "Olvidé el cargador del móvil en casa."
+    },
+    {
       "id": "a2_culture_01",
       "spanish": "teatro",
       "english": "theater",
@@ -902,6 +1550,78 @@
       "level": "A2",
       "category": "culture",
       "exampleSentence": "La tradición pasa de padres a hijos."
+    },
+    {
+      "id": "a2_culture_11",
+      "spanish": "película",
+      "english": "movie",
+      "chinese": "电影",
+      "level": "A2",
+      "category": "culture",
+      "exampleSentence": "Vemos una película en casa."
+    },
+    {
+      "id": "a2_culture_12",
+      "spanish": "actor",
+      "english": "actor",
+      "chinese": "演员",
+      "level": "A2",
+      "category": "culture",
+      "exampleSentence": "El actor es muy conocido en España."
+    },
+    {
+      "id": "a2_culture_13",
+      "spanish": "cantante",
+      "english": "singer",
+      "chinese": "歌手",
+      "level": "A2",
+      "category": "culture",
+      "exampleSentence": "La cantante da un concierto mañana."
+    },
+    {
+      "id": "a2_culture_14",
+      "spanish": "festival",
+      "english": "festival",
+      "chinese": "音乐节",
+      "level": "A2",
+      "category": "culture",
+      "exampleSentence": "El festival de música dura tres días."
+    },
+    {
+      "id": "a2_culture_15",
+      "spanish": "poema",
+      "english": "poem",
+      "chinese": "诗",
+      "level": "A2",
+      "category": "culture",
+      "exampleSentence": "Aprendo un poema de memoria."
+    },
+    {
+      "id": "a2_culture_16",
+      "spanish": "escultura",
+      "english": "sculpture",
+      "chinese": "雕塑",
+      "level": "A2",
+      "category": "culture",
+      "exampleSentence": "La escultura está en la plaza mayor."
+    },
+    {
+      "id": "a2_culture_17",
+      "spanish": "guitarra",
+      "english": "guitar",
+      "chinese": "吉他",
+      "level": "A2",
+      "category": "culture",
+      "exampleSentence": "Mi amigo toca la guitarra."
+    },
+    {
+      "id": "a2_culture_18",
+      "spanish": "flamenco",
+      "english": "flamenco",
+      "chinese": "弗拉明戈",
+      "level": "A2",
+      "category": "culture",
+      "exampleSentence": "El flamenco es un baile del sur de España."
     }
   ]
 }

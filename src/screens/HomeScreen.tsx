@@ -3,8 +3,8 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useProgressStore } from '@/store/progressStore';
-import { useWordPackStore, getActiveWords, getActivePacks } from '@/store/wordPackStore';
-import { countWords } from '@/core/data/words';
+import { useWordPackStore, getActiveLevelWords, getActivePacks, isPackEnabled } from '@/store/wordPackStore';
+import { countWords, SCENE_PACKS } from '@/core/data/words';
 import { localDateString } from '@/core/progress/streak';
 import { LanguageLevel, WordCategory, Difficulty } from '@/core/types/game';
 import { RootStackParamList, GameParams } from '@/navigation/types';
@@ -42,12 +42,38 @@ const CATEGORIES: { category: WordCategory; label: string; icon: string }[] = [
 
 const MIN_WORDS = 6;
 
+const SCENE_ICONS: Record<string, string> = {
+  builtin_scene_restaurant: 'restaurant',
+  builtin_scene_transport: 'airplane',
+  builtin_scene_hotel: 'bed',
+  builtin_scene_shopping: 'cart',
+  builtin_scene_doctor: 'medkit',
+  builtin_scene_directions: 'navigate',
+  builtin_scene_numbers: 'time',
+  builtin_scene_weather: 'partly-sunny',
+};
+
+const SCENE_COLORS: Record<string, string> = {
+  builtin_scene_restaurant: '#FF9500',
+  builtin_scene_transport: '#007AFF',
+  builtin_scene_hotel: '#5856D6',
+  builtin_scene_shopping: '#FF2D55',
+  builtin_scene_doctor: '#FF3B30',
+  builtin_scene_directions: '#34C759',
+  builtin_scene_numbers: '#30B0C7',
+  builtin_scene_weather: '#FFCC00',
+};
+
 export const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const { colors } = useCupertino();
   const progress = useProgressStore(s => s.progress);
   const packState = useWordPackStore();
-  const activeWords = useMemo(() => getActiveWords(packState), [packState]);
+  const activeWords = useMemo(() => getActiveLevelWords(packState), [packState]);
   const customPacks = useMemo(() => getActivePacks(packState).filter(p => !p.builtin), [packState]);
+  const scenePacks = useMemo(
+    () => SCENE_PACKS.filter(p => isPackEnabled(packState, p.id)),
+    [packState],
+  );
   const dailyDone = progress.dailyCompletedDates.includes(localDateString());
 
   const [expandedLevel, setExpandedLevel] = useState<LanguageLevel | null>(null);
@@ -169,6 +195,24 @@ export const HomeScreen: React.FC<Props> = ({ navigation }) => {
             );
           })}
         </Group>
+
+        {/* 场景词库 */}
+        {scenePacks.length > 0 && (
+          <Group header="场景练习" footer="按真实场景整包练习，词汇跨等级。">
+            {scenePacks.map(pack => (
+              <Row
+                key={pack.id}
+                title={pack.name.replace(/^场景：/, '')}
+                subtitle={pack.description}
+                icon={SCENE_ICONS[pack.id] ?? 'sparkles'}
+                iconColor={SCENE_COLORS[pack.id] ?? '#FF9500'}
+                value={`${pack.words.length} 词`}
+                chevron
+                onPress={() => setPendingGame({ mode: 'pack', packId: pack.id })}
+              />
+            ))}
+          </Group>
+        )}
 
         {/* 自定义词库 */}
         {customPacks.length > 0 && (

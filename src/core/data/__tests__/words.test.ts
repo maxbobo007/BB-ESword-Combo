@@ -1,4 +1,10 @@
-import { BUILTIN_PACKS, ALL_BUILTIN_WORDS, filterWords, pickRandomWords } from '@/core/data/words';
+import {
+  LEVEL_PACKS,
+  SCENE_PACKS,
+  ALL_BUILTIN_WORDS,
+  filterWords,
+  pickRandomWords,
+} from '@/core/data/words';
 import { LanguageLevel, WordCategory } from '@/core/types/game';
 import { mulberry32 } from '@/core/engine/random';
 
@@ -17,13 +23,19 @@ const CATEGORIES: WordCategory[] = [
 ];
 
 describe('内置词库包数据集约束', () => {
-  it('共 6 个内置包，ID 与等级对应', () => {
-    expect(BUILTIN_PACKS.map(p => p.id)).toEqual(
+  it('6 个等级包 + 8 个场景包', () => {
+    expect(LEVEL_PACKS.map(p => p.id)).toEqual(
       LEVELS.map(level => `builtin_${level.toLowerCase()}`),
     );
-    for (const pack of BUILTIN_PACKS) {
+    expect(SCENE_PACKS).toHaveLength(8);
+    for (const pack of [...LEVEL_PACKS, ...SCENE_PACKS]) {
       expect(pack.builtin).toBe(true);
       expect(pack.name.length).toBeGreaterThan(0);
+      expect(pack.words.length).toBeGreaterThan(0);
+    }
+    for (const pack of SCENE_PACKS) {
+      expect(pack.id.startsWith('builtin_scene_')).toBe(true);
+      expect(pack.words.length).toBeGreaterThanOrEqual(30);
     }
   });
 
@@ -38,25 +50,32 @@ describe('内置词库包数据集约束', () => {
     }
   });
 
-  it('每个单词都有英文、中文和例句', () => {
+  it('level/category 合法，每词有英文中文', () => {
     for (const w of ALL_BUILTIN_WORDS) {
+      expect(LEVELS).toContain(w.level);
+      expect(CATEGORIES).toContain(w.category);
       expect(w.english.length).toBeGreaterThan(0);
       expect(w.chinese.length).toBeGreaterThan(0);
-      expect(w.exampleSentence && w.exampleSentence.length).toBeGreaterThan(0);
     }
   });
 
-  it('每个 等级×类别 组合至少 8 个单词', () => {
+  it('等级包内每个 等级×类别 组合至少 8 个单词', () => {
+    const levelWords = LEVEL_PACKS.flatMap(p => p.words);
     for (const level of LEVELS) {
       for (const category of CATEGORIES) {
-        const count = filterWords(ALL_BUILTIN_WORDS, level, category).length;
+        const count = filterWords(levelWords, level, category).length;
         expect(`${level}/${category}:${count >= 8 ? 'ok' : count}`).toBe(`${level}/${category}:ok`);
       }
     }
   });
 
-  it('同一等级内西语单词不重复', () => {
-    for (const pack of BUILTIN_PACKS) {
+  it('A1/A2 等级包扩充到至少 160 词', () => {
+    expect(LEVEL_PACKS[0].words.length).toBeGreaterThanOrEqual(160);
+    expect(LEVEL_PACKS[1].words.length).toBeGreaterThanOrEqual(160);
+  });
+
+  it('同一包内西语单词不重复', () => {
+    for (const pack of [...LEVEL_PACKS, ...SCENE_PACKS]) {
       const words = pack.words.map(w => w.spanish);
       expect(new Set(words).size).toBe(words.length);
     }

@@ -94,6 +94,78 @@
       "exampleSentence": "La carne está muy rica."
     },
     {
+      "id": "a1_food_11",
+      "spanish": "naranja",
+      "english": "orange",
+      "chinese": "橙子",
+      "level": "A1",
+      "category": "food",
+      "exampleSentence": "La naranja es dulce."
+    },
+    {
+      "id": "a1_food_12",
+      "spanish": "tomate",
+      "english": "tomato",
+      "chinese": "番茄",
+      "level": "A1",
+      "category": "food",
+      "exampleSentence": "El tomate es rojo."
+    },
+    {
+      "id": "a1_food_13",
+      "spanish": "sal",
+      "english": "salt",
+      "chinese": "盐",
+      "level": "A1",
+      "category": "food",
+      "exampleSentence": "La comida necesita sal."
+    },
+    {
+      "id": "a1_food_14",
+      "spanish": "vino",
+      "english": "wine",
+      "chinese": "葡萄酒",
+      "level": "A1",
+      "category": "food",
+      "exampleSentence": "Mi padre bebe vino."
+    },
+    {
+      "id": "a1_food_15",
+      "spanish": "pastel",
+      "english": "cake",
+      "chinese": "蛋糕",
+      "level": "A1",
+      "category": "food",
+      "exampleSentence": "El pastel de chocolate es rico."
+    },
+    {
+      "id": "a1_food_16",
+      "spanish": "plátano",
+      "english": "banana",
+      "chinese": "香蕉",
+      "level": "A1",
+      "category": "food",
+      "exampleSentence": "El plátano es amarillo."
+    },
+    {
+      "id": "a1_food_17",
+      "spanish": "zumo",
+      "english": "juice",
+      "chinese": "果汁",
+      "level": "A1",
+      "category": "food",
+      "exampleSentence": "Bebo zumo de naranja."
+    },
+    {
+      "id": "a1_food_18",
+      "spanish": "comida",
+      "english": "food",
+      "chinese": "食物",
+      "level": "A1",
+      "category": "food",
+      "exampleSentence": "La comida está lista."
+    },
+    {
       "id": "a1_family_01",
       "spanish": "madre",
       "english": "mother",
@@ -182,6 +254,78 @@
       "level": "A1",
       "category": "family",
       "exampleSentence": "El bebé duerme mucho."
+    },
+    {
+      "id": "a1_family_11",
+      "spanish": "tío",
+      "english": "uncle",
+      "chinese": "叔叔",
+      "level": "A1",
+      "category": "family",
+      "exampleSentence": "Mi tío vive en Barcelona."
+    },
+    {
+      "id": "a1_family_12",
+      "spanish": "tía",
+      "english": "aunt",
+      "chinese": "阿姨",
+      "level": "A1",
+      "category": "family",
+      "exampleSentence": "Mi tía tiene dos gatos."
+    },
+    {
+      "id": "a1_family_13",
+      "spanish": "niño",
+      "english": "boy",
+      "chinese": "男孩",
+      "level": "A1",
+      "category": "family",
+      "exampleSentence": "El niño juega en el parque."
+    },
+    {
+      "id": "a1_family_14",
+      "spanish": "niña",
+      "english": "girl",
+      "chinese": "女孩",
+      "level": "A1",
+      "category": "family",
+      "exampleSentence": "La niña canta una canción."
+    },
+    {
+      "id": "a1_family_15",
+      "spanish": "amigo",
+      "english": "friend (male)",
+      "chinese": "朋友",
+      "level": "A1",
+      "category": "family",
+      "exampleSentence": "Mi amigo se llama Juan."
+    },
+    {
+      "id": "a1_family_16",
+      "spanish": "amiga",
+      "english": "friend (female)",
+      "chinese": "女性朋友",
+      "level": "A1",
+      "category": "family",
+      "exampleSentence": "Mi amiga vive cerca."
+    },
+    {
+      "id": "a1_family_17",
+      "spanish": "hombre",
+      "english": "man",
+      "chinese": "男人",
+      "level": "A1",
+      "category": "family",
+      "exampleSentence": "El hombre es alto."
+    },
+    {
+      "id": "a1_family_18",
+      "spanish": "mujer",
+      "english": "woman",
+      "chinese": "女人",
+      "level": "A1",
+      "category": "family",
+      "exampleSentence": "La mujer trabaja en la escuela."
     },
     {
       "id": "a1_travel_01",
@@ -274,6 +418,78 @@
       "exampleSentence": "Necesito mi pasaporte para viajar."
     },
     {
+      "id": "a1_travel_11",
+      "spanish": "metro",
+      "english": "subway",
+      "chinese": "地铁",
+      "level": "A1",
+      "category": "travel",
+      "exampleSentence": "Voy al trabajo en metro."
+    },
+    {
+      "id": "a1_travel_12",
+      "spanish": "puente",
+      "english": "bridge",
+      "chinese": "桥",
+      "level": "A1",
+      "category": "travel",
+      "exampleSentence": "El puente es muy viejo."
+    },
+    {
+      "id": "a1_travel_13",
+      "spanish": "plaza",
+      "english": "square",
+      "chinese": "广场",
+      "level": "A1",
+      "category": "travel",
+      "exampleSentence": "La plaza está en el centro."
+    },
+    {
+      "id": "a1_travel_14",
+      "spanish": "país",
+      "english": "country",
+      "chinese": "国家",
+      "level": "A1",
+      "category": "travel",
+      "exampleSentence": "España es un país bonito."
+    },
+    {
+      "id": "a1_travel_15",
+      "spanish": "bicicleta",
+      "english": "bicycle",
+      "chinese": "自行车",
+      "level": "A1",
+      "category": "travel",
+      "exampleSentence": "Voy a la escuela en bicicleta."
+    },
+    {
+      "id": "a1_travel_16",
+      "spanish": "parque",
+      "english": "park",
+      "chinese": "公园",
+      "level": "A1",
+      "category": "travel",
+      "exampleSentence": "El parque tiene muchos árboles."
+    },
+    {
+      "id": "a1_travel_17",
+      "spanish": "viajar",
+      "english": "to travel",
+      "chinese": "旅行",
+      "level": "A1",
+      "category": "travel",
+      "exampleSentence": "Me gusta viajar en tren."
+    },
+    {
+      "id": "a1_travel_18",
+      "spanish": "salida",
+      "english": "exit",
+      "chinese": "出口",
+      "level": "A1",
+      "category": "travel",
+      "exampleSentence": "La salida está a la derecha."
+    },
+    {
       "id": "a1_work_01",
       "spanish": "trabajo",
       "english": "work",
@@ -362,6 +578,78 @@
       "level": "A1",
       "category": "work",
       "exampleSentence": "El cocinero prepara la cena."
+    },
+    {
+      "id": "a1_work_11",
+      "spanish": "mesa",
+      "english": "table",
+      "chinese": "桌子",
+      "level": "A1",
+      "category": "work",
+      "exampleSentence": "La mesa de la oficina es grande."
+    },
+    {
+      "id": "a1_work_12",
+      "spanish": "silla",
+      "english": "chair",
+      "chinese": "椅子",
+      "level": "A1",
+      "category": "work",
+      "exampleSentence": "La silla es cómoda."
+    },
+    {
+      "id": "a1_work_13",
+      "spanish": "puerta",
+      "english": "door",
+      "chinese": "门",
+      "level": "A1",
+      "category": "work",
+      "exampleSentence": "La puerta de la tienda está abierta."
+    },
+    {
+      "id": "a1_work_14",
+      "spanish": "llave",
+      "english": "key",
+      "chinese": "钥匙",
+      "level": "A1",
+      "category": "work",
+      "exampleSentence": "No encuentro la llave de la oficina."
+    },
+    {
+      "id": "a1_work_15",
+      "spanish": "trabajar",
+      "english": "to work",
+      "chinese": "工作",
+      "level": "A1",
+      "category": "work",
+      "exampleSentence": "Me gusta trabajar por la mañana."
+    },
+    {
+      "id": "a1_work_16",
+      "spanish": "vender",
+      "english": "to sell",
+      "chinese": "卖",
+      "level": "A1",
+      "category": "work",
+      "exampleSentence": "Quiero vender mi coche."
+    },
+    {
+      "id": "a1_work_17",
+      "spanish": "comprar",
+      "english": "to buy",
+      "chinese": "买",
+      "level": "A1",
+      "category": "work",
+      "exampleSentence": "Voy a comprar pan."
+    },
+    {
+      "id": "a1_work_18",
+      "spanish": "bolsa",
+      "english": "bag",
+      "chinese": "袋子",
+      "level": "A1",
+      "category": "work",
+      "exampleSentence": "Llevo mi bolsa al trabajo."
     },
     {
       "id": "a1_health_01",
@@ -454,6 +742,78 @@
       "exampleSentence": "Hoy estoy enfermo."
     },
     {
+      "id": "a1_health_11",
+      "spanish": "pie",
+      "english": "foot",
+      "chinese": "脚",
+      "level": "A1",
+      "category": "health",
+      "exampleSentence": "Me duele el pie."
+    },
+    {
+      "id": "a1_health_12",
+      "spanish": "nariz",
+      "english": "nose",
+      "chinese": "鼻子",
+      "level": "A1",
+      "category": "health",
+      "exampleSentence": "El niño tiene la nariz fría."
+    },
+    {
+      "id": "a1_health_13",
+      "spanish": "oreja",
+      "english": "ear",
+      "chinese": "耳朵",
+      "level": "A1",
+      "category": "health",
+      "exampleSentence": "La oreja del perro es larga."
+    },
+    {
+      "id": "a1_health_14",
+      "spanish": "pelo",
+      "english": "hair",
+      "chinese": "头发",
+      "level": "A1",
+      "category": "health",
+      "exampleSentence": "Mi pelo es negro."
+    },
+    {
+      "id": "a1_health_15",
+      "spanish": "dedo",
+      "english": "finger",
+      "chinese": "手指",
+      "level": "A1",
+      "category": "health",
+      "exampleSentence": "Me duele un dedo."
+    },
+    {
+      "id": "a1_health_16",
+      "spanish": "cara",
+      "english": "face",
+      "chinese": "脸",
+      "level": "A1",
+      "category": "health",
+      "exampleSentence": "Me lavo la cara por la mañana."
+    },
+    {
+      "id": "a1_health_17",
+      "spanish": "dormir",
+      "english": "to sleep",
+      "chinese": "睡觉",
+      "level": "A1",
+      "category": "health",
+      "exampleSentence": "Necesito dormir ocho horas."
+    },
+    {
+      "id": "a1_health_18",
+      "spanish": "comer",
+      "english": "to eat",
+      "chinese": "吃",
+      "level": "A1",
+      "category": "health",
+      "exampleSentence": "Me gusta comer fruta."
+    },
+    {
       "id": "a1_nature_01",
       "spanish": "sol",
       "english": "sun",
@@ -542,6 +902,78 @@
       "level": "A1",
       "category": "nature",
       "exampleSentence": "Hoy hay mucha lluvia."
+    },
+    {
+      "id": "a1_nature_11",
+      "spanish": "pez",
+      "english": "fish",
+      "chinese": "鱼",
+      "level": "A1",
+      "category": "nature",
+      "exampleSentence": "El pez vive en el mar."
+    },
+    {
+      "id": "a1_nature_12",
+      "spanish": "campo",
+      "english": "countryside",
+      "chinese": "乡村",
+      "level": "A1",
+      "category": "nature",
+      "exampleSentence": "Mi abuelo vive en el campo."
+    },
+    {
+      "id": "a1_nature_13",
+      "spanish": "planta",
+      "english": "plant",
+      "chinese": "植物",
+      "level": "A1",
+      "category": "nature",
+      "exampleSentence": "La planta necesita agua."
+    },
+    {
+      "id": "a1_nature_14",
+      "spanish": "hoja",
+      "english": "leaf",
+      "chinese": "叶子",
+      "level": "A1",
+      "category": "nature",
+      "exampleSentence": "La hoja del árbol es verde."
+    },
+    {
+      "id": "a1_nature_15",
+      "spanish": "estrella",
+      "english": "star",
+      "chinese": "星星",
+      "level": "A1",
+      "category": "nature",
+      "exampleSentence": "Veo una estrella en el cielo."
+    },
+    {
+      "id": "a1_nature_16",
+      "spanish": "vaca",
+      "english": "cow",
+      "chinese": "牛",
+      "level": "A1",
+      "category": "nature",
+      "exampleSentence": "La vaca come hierba."
+    },
+    {
+      "id": "a1_nature_17",
+      "spanish": "pato",
+      "english": "duck",
+      "chinese": "鸭子",
+      "level": "A1",
+      "category": "nature",
+      "exampleSentence": "El pato nada en el río."
+    },
+    {
+      "id": "a1_nature_18",
+      "spanish": "hierba",
+      "english": "grass",
+      "chinese": "草",
+      "level": "A1",
+      "category": "nature",
+      "exampleSentence": "La hierba del parque es verde."
     },
     {
       "id": "a1_education_01",
@@ -634,6 +1066,78 @@
       "exampleSentence": "Escribo en mi cuaderno."
     },
     {
+      "id": "a1_education_11",
+      "spanish": "leer",
+      "english": "to read",
+      "chinese": "读",
+      "level": "A1",
+      "category": "education",
+      "exampleSentence": "Me gusta leer libros."
+    },
+    {
+      "id": "a1_education_12",
+      "spanish": "escribir",
+      "english": "to write",
+      "chinese": "写",
+      "level": "A1",
+      "category": "education",
+      "exampleSentence": "Aprendo a escribir en español."
+    },
+    {
+      "id": "a1_education_13",
+      "spanish": "estudiar",
+      "english": "to study",
+      "chinese": "学习",
+      "level": "A1",
+      "category": "education",
+      "exampleSentence": "Tengo que estudiar para el examen."
+    },
+    {
+      "id": "a1_education_14",
+      "spanish": "aprender",
+      "english": "to learn",
+      "chinese": "学",
+      "level": "A1",
+      "category": "education",
+      "exampleSentence": "Quiero aprender español."
+    },
+    {
+      "id": "a1_education_15",
+      "spanish": "número",
+      "english": "number",
+      "chinese": "数字",
+      "level": "A1",
+      "category": "education",
+      "exampleSentence": "El número cinco es mi favorito."
+    },
+    {
+      "id": "a1_education_16",
+      "spanish": "letra",
+      "english": "letter (alphabet)",
+      "chinese": "字母",
+      "level": "A1",
+      "category": "education",
+      "exampleSentence": "La letra eñe es española."
+    },
+    {
+      "id": "a1_education_17",
+      "spanish": "mochila",
+      "english": "backpack",
+      "chinese": "书包",
+      "level": "A1",
+      "category": "education",
+      "exampleSentence": "Llevo los libros en la mochila."
+    },
+    {
+      "id": "a1_education_18",
+      "spanish": "goma",
+      "english": "eraser",
+      "chinese": "橡皮",
+      "level": "A1",
+      "category": "education",
+      "exampleSentence": "La goma está en mi mochila."
+    },
+    {
       "id": "a1_sports_01",
       "spanish": "fútbol",
       "english": "soccer",
@@ -722,6 +1226,78 @@
       "level": "A1",
       "category": "sports",
       "exampleSentence": "El equipo marca un gol."
+    },
+    {
+      "id": "a1_sports_11",
+      "spanish": "jugar",
+      "english": "to play",
+      "chinese": "玩",
+      "level": "A1",
+      "category": "sports",
+      "exampleSentence": "Me gusta jugar con la pelota."
+    },
+    {
+      "id": "a1_sports_12",
+      "spanish": "deporte",
+      "english": "sport",
+      "chinese": "运动",
+      "level": "A1",
+      "category": "sports",
+      "exampleSentence": "Mi deporte favorito es el fútbol."
+    },
+    {
+      "id": "a1_sports_13",
+      "spanish": "caminar",
+      "english": "to walk",
+      "chinese": "走路",
+      "level": "A1",
+      "category": "sports",
+      "exampleSentence": "Me gusta caminar por el parque."
+    },
+    {
+      "id": "a1_sports_14",
+      "spanish": "rápido",
+      "english": "fast",
+      "chinese": "快的",
+      "level": "A1",
+      "category": "sports",
+      "exampleSentence": "El coche es muy rápido."
+    },
+    {
+      "id": "a1_sports_15",
+      "spanish": "fuerte",
+      "english": "strong",
+      "chinese": "强壮的",
+      "level": "A1",
+      "category": "sports",
+      "exampleSentence": "Mi hermano es fuerte."
+    },
+    {
+      "id": "a1_sports_16",
+      "spanish": "lento",
+      "english": "slow",
+      "chinese": "慢的",
+      "level": "A1",
+      "category": "sports",
+      "exampleSentence": "El tren es lento hoy."
+    },
+    {
+      "id": "a1_sports_17",
+      "spanish": "patinar",
+      "english": "to skate",
+      "chinese": "滑冰",
+      "level": "A1",
+      "category": "sports",
+      "exampleSentence": "Aprendo a patinar en el parque."
+    },
+    {
+      "id": "a1_sports_18",
+      "spanish": "montar",
+      "english": "to ride",
+      "chinese": "骑",
+      "level": "A1",
+      "category": "sports",
+      "exampleSentence": "Me gusta montar en bicicleta."
     },
     {
       "id": "a1_technology_01",
@@ -814,6 +1390,78 @@
       "exampleSentence": "La máquina no funciona."
     },
     {
+      "id": "a1_technology_11",
+      "spanish": "computadora",
+      "english": "computer",
+      "chinese": "电脑",
+      "level": "A1",
+      "category": "technology",
+      "exampleSentence": "La computadora es nueva."
+    },
+    {
+      "id": "a1_technology_12",
+      "spanish": "lámpara",
+      "english": "lamp",
+      "chinese": "台灯",
+      "level": "A1",
+      "category": "technology",
+      "exampleSentence": "La lámpara está en la mesa."
+    },
+    {
+      "id": "a1_technology_13",
+      "spanish": "nevera",
+      "english": "fridge",
+      "chinese": "冰箱",
+      "level": "A1",
+      "category": "technology",
+      "exampleSentence": "La leche está en la nevera."
+    },
+    {
+      "id": "a1_technology_14",
+      "spanish": "horno",
+      "english": "oven",
+      "chinese": "烤箱",
+      "level": "A1",
+      "category": "technology",
+      "exampleSentence": "El pan está en el horno."
+    },
+    {
+      "id": "a1_technology_15",
+      "spanish": "vídeo",
+      "english": "video",
+      "chinese": "视频",
+      "level": "A1",
+      "category": "technology",
+      "exampleSentence": "Veo un vídeo en mi teléfono."
+    },
+    {
+      "id": "a1_technology_16",
+      "spanish": "correo",
+      "english": "email",
+      "chinese": "邮件",
+      "level": "A1",
+      "category": "technology",
+      "exampleSentence": "Escribo un correo a mi jefe."
+    },
+    {
+      "id": "a1_technology_17",
+      "spanish": "tableta",
+      "english": "tablet",
+      "chinese": "平板电脑",
+      "level": "A1",
+      "category": "technology",
+      "exampleSentence": "Leo libros en mi tableta."
+    },
+    {
+      "id": "a1_technology_18",
+      "spanish": "robot",
+      "english": "robot",
+      "chinese": "机器人",
+      "level": "A1",
+      "category": "technology",
+      "exampleSentence": "El robot limpia la casa."
+    },
+    {
       "id": "a1_culture_01",
       "spanish": "música",
       "english": "music",
@@ -902,6 +1550,78 @@
       "level": "A1",
       "category": "culture",
       "exampleSentence": "Compro un regalo para mi madre."
+    },
+    {
+      "id": "a1_culture_11",
+      "spanish": "rojo",
+      "english": "red",
+      "chinese": "红色的",
+      "level": "A1",
+      "category": "culture",
+      "exampleSentence": "Mi coche es rojo."
+    },
+    {
+      "id": "a1_culture_12",
+      "spanish": "azul",
+      "english": "blue",
+      "chinese": "蓝色的",
+      "level": "A1",
+      "category": "culture",
+      "exampleSentence": "El cielo es azul."
+    },
+    {
+      "id": "a1_culture_13",
+      "spanish": "verde",
+      "english": "green",
+      "chinese": "绿色的",
+      "level": "A1",
+      "category": "culture",
+      "exampleSentence": "El árbol es verde."
+    },
+    {
+      "id": "a1_culture_14",
+      "spanish": "blanco",
+      "english": "white",
+      "chinese": "白色的",
+      "level": "A1",
+      "category": "culture",
+      "exampleSentence": "El papel es blanco."
+    },
+    {
+      "id": "a1_culture_15",
+      "spanish": "negro",
+      "english": "black",
+      "chinese": "黑色的",
+      "level": "A1",
+      "category": "culture",
+      "exampleSentence": "Mi gato es negro."
+    },
+    {
+      "id": "a1_culture_16",
+      "spanish": "cantar",
+      "english": "to sing",
+      "chinese": "唱歌",
+      "level": "A1",
+      "category": "culture",
+      "exampleSentence": "Me gusta cantar en casa."
+    },
+    {
+      "id": "a1_culture_17",
+      "spanish": "dibujo",
+      "english": "drawing",
+      "chinese": "图画",
+      "level": "A1",
+      "category": "culture",
+      "exampleSentence": "El niño hace un dibujo."
+    },
+    {
+      "id": "a1_culture_18",
+      "spanish": "pintar",
+      "english": "to paint",
+      "chinese": "画画",
+      "level": "A1",
+      "category": "culture",
+      "exampleSentence": "Me gusta pintar flores."
     }
   ]
 }

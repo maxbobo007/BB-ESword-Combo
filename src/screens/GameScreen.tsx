@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useGameStore } from '@/store/gameStore';
 import { useSettingsStore } from '@/store/settingsStore';
-import { useWordPackStore, getActiveWords, findPack } from '@/store/wordPackStore';
+import { useWordPackStore, getActiveLevelWords, findPack } from '@/store/wordPackStore';
 import { speech } from '@/services/speech';
 import { PuzzleGenerator } from '@/core/engine/puzzleGenerator';
 import { normalizeLetter } from '@/core/engine/normalize';
@@ -80,7 +80,7 @@ export const GameScreen: React.FC<Props> = ({ route, navigation }) => {
         params.difficulty,
       );
     } else {
-      const pool = filterWords(getActiveWords(packState), params.level, params.category);
+      const pool = filterWords(getActiveLevelWords(packState), params.level, params.category);
       puzzle = new PuzzleGenerator(15).generatePuzzle(pickRandomWords(pool, 8), params.difficulty);
     }
 
@@ -173,12 +173,17 @@ export const GameScreen: React.FC<Props> = ({ route, navigation }) => {
     }
   };
 
-  const title =
-    route.params.mode === 'daily'
-      ? '今日挑战'
-      : route.params.mode === 'pack'
-        ? '自定义词库'
-        : `${route.params.level} · ${route.params.difficulty === 'easy' ? '简单' : route.params.difficulty === 'medium' ? '中等' : '困难'}`;
+  const title = useMemo(() => {
+    const params = route.params;
+    if (params.mode === 'daily') {
+      return '今日挑战';
+    }
+    if (params.mode === 'pack') {
+      const name = findPack(useWordPackStore.getState(), params.packId)?.name ?? '词库练习';
+      return name.replace(/^场景：/, '');
+    }
+    return `${params.level} · ${params.difficulty === 'easy' ? '简单' : params.difficulty === 'medium' ? '中等' : '困难'}`;
+  }, [route.params]);
 
   const stats = currentSession
     ? [

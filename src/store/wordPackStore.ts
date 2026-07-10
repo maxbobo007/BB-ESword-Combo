@@ -67,9 +67,19 @@ export function getActivePacks(state: WordPackState): WordPack[] {
   return getAllPacks(state).filter(p => isPackEnabled(state, p.id));
 }
 
-/** 当前启用的全部单词（自由模式选词的词池） */
+/** 当前启用的全部单词 */
 export function getActiveWords(state: WordPackState): Word[] {
   return getActivePacks(state).flatMap(p => p.words);
+}
+
+/**
+ * 等级×主题模式的词池：启用的等级词库 + 自定义词库。
+ * 场景词库只整包开局，不混入等级选词（避免场景词干扰等级词数统计）。
+ */
+export function getActiveLevelWords(state: WordPackState): Word[] {
+  return getActivePacks(state)
+    .filter(p => !p.id.startsWith('builtin_scene_'))
+    .flatMap(p => p.words);
 }
 
 export function findPack(state: WordPackState, id: string): WordPack | undefined {
