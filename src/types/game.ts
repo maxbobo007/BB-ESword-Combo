@@ -22,9 +22,13 @@ export interface Word {
   chinese: string; // 中文翻译
   level: LanguageLevel;
   category: WordCategory;
+  gender?: 'm' | 'f'; // 名词阴阳性（m = el, f = la）
   pronunciation?: string; // 发音（IPA）
   exampleSentence?: string; // 例句
 }
+
+export type Difficulty = 'easy' | 'medium' | 'hard';
+export type Direction = 'horizontal' | 'vertical';
 
 // 填字游戏单元格
 export interface CrosswordCell {
@@ -42,8 +46,8 @@ export interface CrosswordWord {
   wordData: Word;
   startRow: number;
   startCol: number;
-  direction: 'horizontal' | 'vertical';
-  clueNumber: number; // 提示编号
+  direction: Direction;
+  clueNumber: number; // 提示编号（按标准填字规则：从左到右、从上到下编号）
   isCompleted: boolean; // 是否已完成
 }
 
@@ -52,10 +56,12 @@ export interface CrosswordPuzzle {
   id: string;
   level: LanguageLevel;
   category: WordCategory;
-  gridSize: number; // 网格大小（如10表示10x10）
+  rows: number; // 网格行数（已裁剪到单词范围）
+  cols: number; // 网格列数
   words: CrosswordWord[];
   cells: CrosswordCell[][];
-  difficulty: 'easy' | 'medium' | 'hard'; // 难度（基于提示字母数量）
+  difficulty: Difficulty; // 难度（提示字母比例；困难模式要求精确输入重音）
+  unplacedWordIds: string[]; // 无法放进网格的单词
   estimatedTime: number; // 预估完成时间（秒）
 }
 
@@ -67,6 +73,8 @@ export interface GameSession {
   currentCells: CrosswordCell[][];
   hintsUsed: number;
   mistakes: number;
+  totalEntries: number; // 输入次数（用于计算准确率）
+  hintedWordIds: string[]; // 使用过提示的单词（不计入「已学会」）
   isCompleted: boolean;
   score?: number;
 }

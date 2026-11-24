@@ -1,4 +1,11 @@
 {
-  "name": "BBESwordCombo",
-  "displayName": "BB ESword Combo"
+  "expo": {
+    "name": "BB ESword",
+    "slug": "bb-esword-combo",
+    "version": "0.2.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": { "supportsTablet": true, "bundleIdentifier": "com.bbesword" },
+    "android": { "package": "com.bbesword" }
+  }
 }
