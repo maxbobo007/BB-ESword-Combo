@@ -630,7 +630,7 @@ export const GameScreen: React.FC = () => {
           const review = session.wrongWordIds.includes(w.id) || session.hintedWordIds.includes(w.id);
           return (
             <View key={w.id} style={styles.resultRow}>
-              <Text style={[styles.resultEs, latin(800)]} lang="es">
+              <Text style={[styles.resultEs, latin(800)]} accessibilityLanguage="es-ES">
                 {w.wordData.spanish}
               </Text>
               <Text style={styles.resultZh}>
