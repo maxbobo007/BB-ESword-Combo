@@ -10,7 +10,7 @@ export default function App() {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#1976D2" />
       {isPlaying ? (
-        <GameScreen />
+        <GameScreen onExit={() => setIsPlaying(false)} />
       ) : (
         <HomeScreen onStartGame={() => setIsPlaying(true)} />
       )}

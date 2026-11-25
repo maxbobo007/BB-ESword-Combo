@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   ScrollView,
   Dimensions,
   Alert,
+  BackHandler,
 } from 'react-native';
 import { useGameStore } from '@/store/gameStore';
 import { CrosswordCell } from '@/types/game';
@@ -14,7 +15,11 @@ import { CrosswordCell } from '@/types/game';
 const { width } = Dimensions.get('window');
 const CELL_SIZE = Math.min((width - 40) / 15, 30);
 
-export const GameScreen: React.FC = () => {
+interface GameScreenProps {
+  onExit: () => void;
+}
+
+export const GameScreen: React.FC<GameScreenProps> = ({ onExit }) => {
   const {
     currentPuzzle,
     currentSession,
@@ -25,12 +30,45 @@ export const GameScreen: React.FC = () => {
 
   const [selectedCell, setSelectedCell] = useState<{ row: number; col: number } | null>(null);
 
+  const exitToHome = () => {
+    resetGame();
+    onExit();
+  };
+
+  const confirmExit = () => {
+    Alert.alert('退出本局?', '当前进度不会保存', [
+      { text: '继续游戏', style: 'cancel' },
+      { text: '退出', style: 'destructive', onPress: exitToHome },
+    ]);
+  };
+
+  // Android 返回键：游戏中先确认，没有进行中的关卡则直接回主页
+  useEffect(() => {
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (currentSession && !currentSession.isCompleted) {
+        confirmExit();
+      } else {
+        exitToHome();
+      }
+      return true;
+    });
+    return () => sub.remove();
+  });
+
+  // 每个单词起点格子对应的题号，用于在网格左上角显示
+  const clueNumberAt = useMemo(() => {
+    const map = new Map<string, number>();
+    currentPuzzle?.words.forEach(w => map.set(`${w.startRow}-${w.startCol}`, w.clueNumber));
+    return map;
+  }, [currentPuzzle]);
+
   useEffect(() => {
     if (currentSession?.isCompleted) {
       Alert.alert(
         '恭喜完成!',
         `得分: ${currentSession.score}\n错误: ${currentSession.mistakes}\n提示使用: ${currentSession.hintsUsed}`,
-        [{ text: '返回', onPress: resetGame }]
+        [{ text: '返回主页', onPress: exitToHome }],
+        { cancelable: false }
       );
     }
   }, [currentSession?.isCompleted]);
@@ -39,6 +77,9 @@ export const GameScreen: React.FC = () => {
     return (
       <View style={styles.container}>
         <Text style={styles.title}>请从主菜单选择游戏</Text>
+        <TouchableOpacity style={styles.backButton} onPress={exitToHome}>
+          <Text style={styles.backButtonText}>返回主页</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -58,6 +99,7 @@ export const GameScreen: React.FC = () => {
     const isSelected =
       selectedCell?.row === cell.row && selectedCell?.col === cell.col;
     const isEmpty = !cell.correctLetter;
+    const clueNumber = clueNumberAt.get(`${cell.row}-${cell.col}`);
 
     return (
       <TouchableOpacity
@@ -71,6 +113,7 @@ export const GameScreen: React.FC = () => {
         onPress={() => handleCellPress(cell.row, cell.col)}
         disabled={isEmpty || cell.isFixed}
       >
+        {clueNumber !== undefined && <Text style={styles.clueNumber}>{clueNumber}</Text>}
         <Text
           style={[
             styles.cellText,
@@ -132,8 +175,9 @@ export const GameScreen: React.FC = () => {
   };
 
   const renderClues = () => {
-    const horizontalWords = currentPuzzle.words.filter(w => w.direction === 'horizontal');
-    const verticalWords = currentPuzzle.words.filter(w => w.direction === 'vertical');
+    const byNumber = [...currentPuzzle.words].sort((a, b) => a.clueNumber - b.clueNumber);
+    const horizontalWords = byNumber.filter(w => w.direction === 'horizontal');
+    const verticalWords = byNumber.filter(w => w.direction === 'vertical');
 
     return (
       <View style={styles.cluesContainer}>
@@ -160,7 +204,15 @@ export const GameScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>西语填字</Text>
+        <View style={styles.titleRow}>
+          <Text style={styles.title}>西语填字</Text>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={confirmExit}
+          >
+            <Text style={styles.backButtonText}>退出</Text>
+          </TouchableOpacity>
+        </View>
         <View style={styles.stats}>
           <Text style={styles.statText}>错误: {currentSession.mistakes}</Text>
           <Text style={styles.statText}>提示: {currentSession.hintsUsed}</Text>
@@ -203,6 +255,23 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
     marginBottom: 8,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  backButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#1976D2',
+  },
+  backButtonText: {
+    color: '#1976D2',
+    fontSize: 14,
+    fontWeight: '600',
   },
   stats: {
     flexDirection: 'row',
@@ -263,6 +332,14 @@ const styles = StyleSheet.create({
   },
   fixedCell: {
     backgroundColor: '#E3F2FD',
+  },
+  clueNumber: {
+    position: 'absolute',
+    top: 0,
+    left: 1,
+    fontSize: Math.max(7, CELL_SIZE * 0.3),
+    lineHeight: Math.max(8, CELL_SIZE * 0.34),
+    color: '#555',
   },
   cellText: {
     fontSize: CELL_SIZE * 0.6,

@@ -12,6 +12,7 @@ interface GameState {
   startGame: (puzzle: CrosswordPuzzle) => void;
   updateCell: (row: number, col: number, letter: string) => void;
   useHint: () => void;
+  checkCompletion: () => void;
   completeGame: () => void;
   loadUserProgress: () => Promise<void>;
   saveUserProgress: () => Promise<void>;
@@ -19,6 +20,15 @@ interface GameState {
 }
 
 const STORAGE_KEY = '@bb_esword_progress';
+
+// 去掉重音符号（Á→A、Ü→U），但保留 Ñ，因为 Ñ 在西语里是独立字母
+const baseLetter = (ch: string): string => {
+  const upper = ch.toUpperCase();
+  if (upper === 'Ñ') return upper;
+  return upper.normalize('NFD').replace(/[̀-ͯ]/g, '');
+};
+
+const isSameLetter = (a: string, b: string): boolean => baseLetter(a) === baseLetter(b);
 
 export const useGameStore = create<GameState>((set, get) => ({
   currentPuzzle: null,
@@ -43,23 +53,27 @@ export const useGameStore = create<GameState>((set, get) => ({
     const { currentSession, currentPuzzle } = get();
     if (!currentSession || !currentPuzzle) return;
 
-    const cells = currentSession.currentCells;
-    const cell = cells[row][col];
+    const cell = currentSession.currentCells[row][col];
 
-    if (cell.isFixed) return; // 不能修改提示字母
+    if (cell.isFixed || !cell.correctLetter) return; // 不能修改提示字母或空白格
 
     const wasCorrect = cell.letter === cell.correctLetter;
-    cell.letter = letter.toUpperCase();
-    const isCorrect = cell.letter === cell.correctLetter;
+    // 键盘没有重音字母：输入 E 可匹配 É，答对后显示带重音的正确字母
+    const input = letter ? letter.toUpperCase() : null;
+    const isCorrect = input !== null && isSameLetter(input, cell.correctLetter);
+    const newLetter = isCorrect ? cell.correctLetter : input;
 
-    if (!wasCorrect && !isCorrect && letter) {
-      currentSession.mistakes++;
-    }
+    const isMistake = !wasCorrect && !isCorrect && input !== null;
+
+    const cells = currentSession.currentCells.map((r, ri) =>
+      ri === row ? r.map((c, ci) => (ci === col ? { ...c, letter: newLetter } : c)) : r
+    );
 
     set({
       currentSession: {
         ...currentSession,
         currentCells: cells,
+        mistakes: currentSession.mistakes + (isMistake ? 1 : 0),
       },
     });
 
@@ -84,18 +98,25 @@ export const useGameStore = create<GameState>((set, get) => ({
     }
 
     if (emptyCells.length > 0) {
-      const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-      cells[randomCell.row][randomCell.col].letter =
-        cells[randomCell.row][randomCell.col].correctLetter;
-      cells[randomCell.row][randomCell.col].isFixed = true;
+      const target = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+      const newCells = cells.map((r, ri) =>
+        ri === target.row
+          ? r.map((c, ci) =>
+              ci === target.col ? { ...c, letter: c.correctLetter, isFixed: true } : c
+            )
+          : r
+      );
 
       set({
         currentSession: {
           ...currentSession,
-          currentCells: cells,
+          currentCells: newCells,
           hintsUsed: currentSession.hintsUsed + 1,
         },
       });
+
+      // 用提示填上最后一格时也要判定通关
+      get().checkCompletion();
     }
   },
 

@@ -41,6 +41,9 @@ export class PuzzleGenerator {
       this.placeWord(sortedWords[i]);
     }
 
+    // 按格子位置重新编号（从上到下、从左到右），同一起点的横纵单词共用一个编号
+    this.assignClueNumbers();
+
     // 生成单元格数据
     const cells = this.generateCells(difficulty);
 
@@ -65,6 +68,21 @@ export class PuzzleGenerator {
       difficulty,
       estimatedTime: this.estimateCompletionTime(crosswordWords, difficulty),
     };
+  }
+
+  private assignClueNumbers() {
+    const starts = new Map<string, { row: number; col: number }>();
+    for (const pw of this.placedWords) {
+      starts.set(`${pw.startRow},${pw.startCol}`, { row: pw.startRow, col: pw.startCol });
+    }
+
+    const ordered = [...starts.values()].sort((a, b) => a.row - b.row || a.col - b.col);
+    const numberAt = new Map<string, number>();
+    ordered.forEach((pos, i) => numberAt.set(`${pos.row},${pos.col}`, i + 1));
+
+    for (const pw of this.placedWords) {
+      pw.clueNumber = numberAt.get(`${pw.startRow},${pw.startCol}`)!;
+    }
   }
 
   private reset() {
