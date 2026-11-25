@@ -216,3 +216,15 @@ export const getRandomWords = (count: number, level?: string, category?: string)
   const shuffled = [...filtered].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, count);
 };
+
+// 一局至少需要的单词数
+export const MIN_WORDS_PER_PUZZLE = 5;
+
+// 某个等级下，单词数量足够开一局的主题
+export const getPlayableCategories = (level: string): string[] => {
+  const counts = new Map<string, number>();
+  for (const word of SAMPLE_WORDS) {
+    if (word.level === level) counts.set(word.category, (counts.get(word.category) ?? 0) + 1);
+  }
+  return [...counts.entries()].filter(([, n]) => n >= MIN_WORDS_PER_PUZZLE).map(([c]) => c);
+};

@@ -1,53 +1,106 @@
-import { Word, CrosswordPuzzle, CrosswordWord, CrosswordCell } from '@/types/game';
+import { CrosswordCell, CrosswordPuzzle, CrosswordWord, Word } from '@/types/game';
+import { toGridWord } from '@/utils/letters';
+
+type Direction = 'horizontal' | 'vertical';
+type Difficulty = 'easy' | 'medium' | 'hard';
 
 interface PlacedWord {
   word: Word;
+  letters: string[];
   startRow: number;
   startCol: number;
-  direction: 'horizontal' | 'vertical';
+  direction: Direction;
   clueNumber: number;
 }
 
-export class PuzzleGenerator {
-  private gridSize: number;
-  private grid: string[][];
-  private placedWords: PlacedWord[] = [];
-  private clueCounter = 1;
+interface Candidate {
+  row: number;
+  col: number;
+  direction: Direction;
+  intersections: number;
+}
 
-  constructor(gridSize: number = 15) {
-    this.gridSize = gridSize;
-    this.grid = Array(gridSize)
-      .fill(null)
-      .map(() => Array(gridSize).fill(''));
+export interface GenerateOptions {
+  difficulty?: Difficulty;
+  // 相同的种子 + 相同的词 = 相同的关卡（以后多设备同步同一关时需要）
+  seed?: number;
+  // 工作网格边长；生成后会裁剪到实际用到的区域
+  maxSize?: number;
+}
+
+// 小而稳定的伪随机数生成器（mulberry32），保证可复现
+export const createRng = (seed: number) => {
+  let t = seed >>> 0;
+  return () => {
+    t = (t + 0x6d2b79f5) >>> 0;
+    let r = Math.imul(t ^ (t >>> 15), 1 | t);
+    r = (r + Math.imul(r ^ (r >>> 7), 61 | r)) ^ r;
+    return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+  };
+};
+
+const step = (direction: Direction) => (direction === 'horizontal' ? [0, 1] : [1, 0]);
+
+export class PuzzleGenerator {
+  private size: number;
+  private grid: string[][] = [];
+  // 记录每个格子被哪个方向的单词占用，防止两个同方向单词重叠
+  private usedDirections: Set<Direction>[][] = [];
+  private placedWords: PlacedWord[] = [];
+  private rng: () => number = Math.random;
+
+  constructor(maxSize: number = 15) {
+    this.size = maxSize;
   }
 
-  // 生成填字游戏
-  generatePuzzle(
-    words: Word[],
-    difficulty: 'easy' | 'medium' | 'hard' = 'medium'
-  ): CrosswordPuzzle {
-    this.reset();
+  generatePuzzle(words: Word[], options: GenerateOptions | Difficulty = {}): CrosswordPuzzle {
+    const opts: GenerateOptions = typeof options === 'string' ? { difficulty: options } : options;
+    const difficulty = opts.difficulty ?? 'medium';
+    const seed = opts.seed ?? Math.floor(Math.random() * 2 ** 31);
+    if (opts.maxSize) this.size = opts.maxSize;
 
-    // 按单词长度排序（长的优先）
-    const sortedWords = [...words].sort((a, b) => b.spanish.length - a.spanish.length);
+    this.reset(seed);
 
-    // 放置第一个单词（水平居中）
-    if (sortedWords.length > 0) {
-      this.placeFirstWord(sortedWords[0]);
+    // 长词优先放，交叉机会更多；同长度时按随机数打散
+    const queue = words
+      .map(word => ({ word, letters: toGridWord(word.spanish), r: this.rng() }))
+      .filter(item => item.letters.length >= 2)
+      .sort((a, b) => b.letters.length - a.letters.length || a.r - b.r);
+
+    const unplaced: Word[] = words.filter(w => toGridWord(w.spanish).length < 2);
+    let pending = queue.filter(item => item.letters.length <= this.size);
+    unplaced.push(...queue.filter(item => item.letters.length > this.size).map(i => i.word));
+
+    if (pending.length > 0) {
+      const first = pending.shift()!;
+      const row = Math.floor(this.size / 2);
+      const col = Math.floor((this.size - first.letters.length) / 2);
+      this.placeAt(first.word, first.letters, row, col, 'horizontal');
     }
 
-    // 尝试放置其他单词
-    for (let i = 1; i < sortedWords.length; i++) {
-      this.placeWord(sortedWords[i]);
+    // 多轮尝试：前面放不下的词，可能在别的词放好后找到交叉点
+    for (let pass = 0; pass < 3 && pending.length > 0; pass++) {
+      const stillPending: typeof pending = [];
+      for (const item of pending) {
+        const best = this.findBestPlacement(item.letters);
+        if (best) {
+          this.placeAt(item.word, item.letters, best.row, best.col, best.direction);
+        } else {
+          stillPending.push(item);
+        }
+      }
+      if (stillPending.length === pending.length) {
+        pending = stillPending;
+        break;
+      }
+      pending = stillPending;
     }
+    unplaced.push(...pending.map(i => i.word));
 
-    // 按格子位置重新编号（从上到下、从左到右），同一起点的横纵单词共用一个编号
+    const { rows, cols } = this.cropToContent();
     this.assignClueNumbers();
+    const cells = this.buildCells(rows, cols, difficulty);
 
-    // 生成单元格数据
-    const cells = this.generateCells(difficulty);
-
-    // 构建CrosswordWord数组
     const crosswordWords: CrosswordWord[] = this.placedWords.map(pw => ({
       id: pw.word.id,
       wordData: pw.word,
@@ -59,259 +112,189 @@ export class PuzzleGenerator {
     }));
 
     return {
-      id: `puzzle_${Date.now()}`,
+      id: `puzzle_${seed}`,
       level: words[0]?.level || 'A1',
       category: words[0]?.category || 'food',
-      gridSize: this.gridSize,
+      rows,
+      cols,
       words: crosswordWords,
+      unplacedWords: unplaced,
       cells,
       difficulty,
       estimatedTime: this.estimateCompletionTime(crosswordWords, difficulty),
     };
   }
 
-  private assignClueNumbers() {
-    const starts = new Map<string, { row: number; col: number }>();
-    for (const pw of this.placedWords) {
-      starts.set(`${pw.startRow},${pw.startCol}`, { row: pw.startRow, col: pw.startCol });
+  private reset(seed: number) {
+    this.rng = createRng(seed);
+    this.grid = Array.from({ length: this.size }, () => Array(this.size).fill(''));
+    this.usedDirections = Array.from({ length: this.size }, () =>
+      Array.from({ length: this.size }, () => new Set<Direction>())
+    );
+    this.placedWords = [];
+  }
+
+  private inBounds(row: number, col: number) {
+    return row >= 0 && col >= 0 && row < this.size && col < this.size;
+  }
+
+  private letterAt(row: number, col: number) {
+    return this.inBounds(row, col) ? this.grid[row][col] : '';
+  }
+
+  // 遍历所有"已有字母 = 新词某个字母"的交叉点，按交叉数选最优位置
+  private findBestPlacement(letters: string[]): Candidate | null {
+    const candidates: Candidate[] = [];
+    const seen = new Set<string>();
+
+    for (let r = 0; r < this.size; r++) {
+      for (let c = 0; c < this.size; c++) {
+        const existing = this.grid[r][c];
+        if (!existing) continue;
+        for (let i = 0; i < letters.length; i++) {
+          if (letters[i] !== existing) continue;
+          for (const direction of ['horizontal', 'vertical'] as Direction[]) {
+            const [dr, dc] = step(direction);
+            const row = r - dr * i;
+            const col = c - dc * i;
+            const key = `${row},${col},${direction}`;
+            if (seen.has(key)) continue;
+            seen.add(key);
+            const intersections = this.validate(letters, row, col, direction);
+            if (intersections > 0) candidates.push({ row, col, direction, intersections });
+          }
+        }
+      }
     }
 
-    const ordered = [...starts.values()].sort((a, b) => a.row - b.row || a.col - b.col);
-    const numberAt = new Map<string, number>();
-    ordered.forEach((pos, i) => numberAt.set(`${pos.row},${pos.col}`, i + 1));
+    if (candidates.length === 0) return null;
+    const most = Math.max(...candidates.map(c => c.intersections));
+    const best = candidates.filter(c => c.intersections === most);
+    return best[Math.floor(this.rng() * best.length)];
+  }
 
+  // 按标准填字规则检查位置，合法时返回交叉格数量，不合法返回 0
+  private validate(letters: string[], row: number, col: number, direction: Direction): number {
+    const [dr, dc] = step(direction);
+    const endRow = row + dr * (letters.length - 1);
+    const endCol = col + dc * (letters.length - 1);
+    if (!this.inBounds(row, col) || !this.inBounds(endRow, endCol)) return 0;
+
+    // 单词前后一格必须为空，否则会和别的字母连成更长的"伪单词"
+    if (this.letterAt(row - dr, col - dc) || this.letterAt(endRow + dr, endCol + dc)) return 0;
+
+    let intersections = 0;
+    for (let i = 0; i < letters.length; i++) {
+      const r = row + dr * i;
+      const c = col + dc * i;
+      const existing = this.grid[r][c];
+
+      if (existing) {
+        // 交叉格：字母必须完全一致（É 不和 E 交叉），且不能和同方向单词重叠
+        if (existing !== letters[i] || this.usedDirections[r][c].has(direction)) return 0;
+        intersections++;
+      } else {
+        // 新填的格子：垂直方向两侧必须为空，避免贴边形成伪单词
+        if (this.letterAt(r + dc, c + dr) || this.letterAt(r - dc, c - dr)) return 0;
+      }
+    }
+
+    // 所有格子都是交叉格说明完全覆盖了已有单词，也不允许
+    if (intersections === letters.length) return 0;
+    return intersections;
+  }
+
+  private placeAt(word: Word, letters: string[], row: number, col: number, direction: Direction) {
+    const [dr, dc] = step(direction);
+    letters.forEach((letter, i) => {
+      this.grid[row + dr * i][col + dc * i] = letter;
+      this.usedDirections[row + dr * i][col + dc * i].add(direction);
+    });
+    this.placedWords.push({ word, letters, startRow: row, startCol: col, direction, clueNumber: 0 });
+  }
+
+  // 裁剪掉四周的空行空列，手机上格子能更大
+  private cropToContent(): { rows: number; cols: number } {
+    if (this.placedWords.length === 0) {
+      this.grid = [];
+      return { rows: 0, cols: 0 };
+    }
+    let minR = this.size, minC = this.size, maxR = -1, maxC = -1;
+    for (let r = 0; r < this.size; r++) {
+      for (let c = 0; c < this.size; c++) {
+        if (this.grid[r][c]) {
+          minR = Math.min(minR, r);
+          minC = Math.min(minC, c);
+          maxR = Math.max(maxR, r);
+          maxC = Math.max(maxC, c);
+        }
+      }
+    }
+    this.grid = this.grid.slice(minR, maxR + 1).map(row => row.slice(minC, maxC + 1));
+    for (const pw of this.placedWords) {
+      pw.startRow -= minR;
+      pw.startCol -= minC;
+    }
+    return { rows: maxR - minR + 1, cols: maxC - minC + 1 };
+  }
+
+  // 按位置编号（从上到下、从左到右），同一起点的横纵单词共用一个编号
+  private assignClueNumbers() {
+    const starts = [...new Set(this.placedWords.map(pw => `${pw.startRow},${pw.startCol}`))]
+      .map(key => key.split(',').map(Number))
+      .sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    const numberAt = new Map(starts.map(([r, c], i) => [`${r},${c}`, i + 1]));
     for (const pw of this.placedWords) {
       pw.clueNumber = numberAt.get(`${pw.startRow},${pw.startCol}`)!;
     }
   }
 
-  private reset() {
-    this.grid = Array(this.gridSize)
-      .fill(null)
-      .map(() => Array(this.gridSize).fill(''));
-    this.placedWords = [];
-    this.clueCounter = 1;
-  }
+  private buildCells(rows: number, cols: number, difficulty: Difficulty): CrosswordCell[][] {
+    const cells: CrosswordCell[][] = Array.from({ length: rows }, (_, row) =>
+      Array.from({ length: cols }, (_, col) => ({
+        row,
+        col,
+        letter: null,
+        correctLetter: this.grid[row][col] || '',
+        isFixed: false,
+        wordIds: [],
+      }))
+    );
 
-  // 放置第一个单词
-  private placeFirstWord(word: Word) {
-    const wordLength = word.spanish.length;
-    const startRow = Math.floor(this.gridSize / 2);
-    const startCol = Math.floor((this.gridSize - wordLength) / 2);
-
-    this.placeWordAt(word, startRow, startCol, 'horizontal');
-  }
-
-  // 尝试放置单词
-  private placeWord(word: Word): boolean {
-    const wordLength = word.spanish.length;
-    const attempts = 100;
-
-    for (let attempt = 0; attempt < attempts; attempt++) {
-      // 随机选择方向
-      const direction = Math.random() > 0.5 ? 'horizontal' : 'vertical';
-
-      // 尝试找到交叉点
-      for (const placedWord of this.placedWords) {
-        const intersection = this.findIntersection(word.spanish, placedWord.word.spanish);
-
-        if (intersection) {
-          const { newWordIndex, existingWordIndex } = intersection;
-
-          let startRow: number, startCol: number;
-
-          if (placedWord.direction === 'horizontal' && direction === 'vertical') {
-            startRow = placedWord.startRow - newWordIndex;
-            startCol = placedWord.startCol + existingWordIndex;
-          } else if (placedWord.direction === 'vertical' && direction === 'horizontal') {
-            startRow = placedWord.startRow + existingWordIndex;
-            startCol = placedWord.startCol - newWordIndex;
-          } else {
-            continue;
-          }
-
-          if (this.canPlaceWord(word.spanish, startRow, startCol, direction)) {
-            this.placeWordAt(word, startRow, startCol, direction);
-            return true;
-          }
-        }
-      }
+    for (const pw of this.placedWords) {
+      const [dr, dc] = step(pw.direction);
+      pw.letters.forEach((_, i) => {
+        cells[pw.startRow + dr * i][pw.startCol + dc * i].wordIds.push(pw.word.id);
+      });
     }
 
-    return false;
-  }
-
-  // 查找两个单词的交叉点
-  private findIntersection(
-    word1: string,
-    word2: string
-  ): { newWordIndex: number; existingWordIndex: number } | null {
-    for (let i = 0; i < word1.length; i++) {
-      for (let j = 0; j < word2.length; j++) {
-        if (word1[i].toLowerCase() === word2[j].toLowerCase()) {
-          return { newWordIndex: i, existingWordIndex: j };
-        }
-      }
-    }
-    return null;
-  }
-
-  // 检查是否可以放置单词
-  private canPlaceWord(
-    word: string,
-    startRow: number,
-    startCol: number,
-    direction: 'horizontal' | 'vertical'
-  ): boolean {
-    const wordLength = word.length;
-
-    if (direction === 'horizontal') {
-      if (startCol < 0 || startCol + wordLength > this.gridSize || startRow < 0 || startRow >= this.gridSize) {
-        return false;
-      }
-
-      for (let i = 0; i < wordLength; i++) {
-        const currentCell = this.grid[startRow][startCol + i];
-        if (currentCell !== '' && currentCell.toLowerCase() !== word[i].toLowerCase()) {
-          return false;
-        }
-      }
-    } else {
-      if (startRow < 0 || startRow + wordLength > this.gridSize || startCol < 0 || startCol >= this.gridSize) {
-        return false;
-      }
-
-      for (let i = 0; i < wordLength; i++) {
-        const currentCell = this.grid[startRow + i][startCol];
-        if (currentCell !== '' && currentCell.toLowerCase() !== word[i].toLowerCase()) {
-          return false;
-        }
-      }
-    }
-
-    return true;
-  }
-
-  // 在指定位置放置单词
-  private placeWordAt(
-    word: Word,
-    startRow: number,
-    startCol: number,
-    direction: 'horizontal' | 'vertical'
-  ) {
-    const wordText = word.spanish;
-
-    if (direction === 'horizontal') {
-      for (let i = 0; i < wordText.length; i++) {
-        this.grid[startRow][startCol + i] = wordText[i].toUpperCase();
-      }
-    } else {
-      for (let i = 0; i < wordText.length; i++) {
-        this.grid[startRow + i][startCol] = wordText[i].toUpperCase();
-      }
-    }
-
-    this.placedWords.push({
-      word,
-      startRow,
-      startCol,
-      direction,
-      clueNumber: this.clueCounter++,
-    });
-  }
-
-  // 生成单元格数据
-  private generateCells(difficulty: 'easy' | 'medium' | 'hard'): CrosswordCell[][] {
-    const cells: CrosswordCell[][] = Array(this.gridSize)
-      .fill(null)
-      .map(() =>
-        Array(this.gridSize)
-          .fill(null)
-          .map(() => ({
-            row: 0,
-            col: 0,
-            letter: null,
-            correctLetter: '',
-            isFixed: false,
-            wordIds: [],
-          }))
-      );
-
-    // 填充单元格
-    for (let row = 0; row < this.gridSize; row++) {
-      for (let col = 0; col < this.gridSize; col++) {
-        const letter = this.grid[row][col];
-        cells[row][col] = {
-          row,
-          col,
-          letter: null,
-          correctLetter: letter || '',
-          isFixed: false,
-          wordIds: this.getWordIdsForCell(row, col),
-        };
-      }
-    }
-
-    // 根据难度添加提示字母
     this.addHintLetters(cells, difficulty);
-
     return cells;
   }
 
-  // 获取单元格所属的单词ID
-  private getWordIdsForCell(row: number, col: number): string[] {
-    const wordIds: string[] = [];
-
-    for (const pw of this.placedWords) {
-      if (pw.direction === 'horizontal') {
-        if (
-          pw.startRow === row &&
-          col >= pw.startCol &&
-          col < pw.startCol + pw.word.spanish.length
-        ) {
-          wordIds.push(pw.word.id);
-        }
-      } else {
-        if (
-          pw.startCol === col &&
-          row >= pw.startRow &&
-          row < pw.startRow + pw.word.spanish.length
-        ) {
-          wordIds.push(pw.word.id);
-        }
-      }
-    }
-
-    return wordIds;
-  }
-
-  // 添加提示字母
-  private addHintLetters(cells: CrosswordCell[][], difficulty: 'easy' | 'medium' | 'hard') {
+  private addHintLetters(cells: CrosswordCell[][], difficulty: Difficulty) {
     const hintRatio = difficulty === 'easy' ? 0.4 : difficulty === 'medium' ? 0.25 : 0.15;
 
     for (const pw of this.placedWords) {
-      const wordLength = pw.word.spanish.length;
-      const hintsCount = Math.max(1, Math.floor(wordLength * hintRatio));
-
-      const indices = Array.from({ length: wordLength }, (_, i) => i);
-      const shuffled = indices.sort(() => Math.random() - 0.5);
-      const hintIndices = shuffled.slice(0, hintsCount);
-
-      for (const idx of hintIndices) {
-        const row = pw.direction === 'horizontal' ? pw.startRow : pw.startRow + idx;
-        const col = pw.direction === 'horizontal' ? pw.startCol + idx : pw.startCol;
-
-        cells[row][col].isFixed = true;
-        cells[row][col].letter = cells[row][col].correctLetter;
+      const [dr, dc] = step(pw.direction);
+      const hintsCount = Math.max(1, Math.floor(pw.letters.length * hintRatio));
+      const indices = pw.letters.map((_, i) => i);
+      // Fisher–Yates 洗牌，用可复现的随机数
+      for (let i = indices.length - 1; i > 0; i--) {
+        const j = Math.floor(this.rng() * (i + 1));
+        [indices[i], indices[j]] = [indices[j], indices[i]];
+      }
+      for (const idx of indices.slice(0, hintsCount)) {
+        const cell = cells[pw.startRow + dr * idx][pw.startCol + dc * idx];
+        cell.isFixed = true;
+        cell.letter = cell.correctLetter;
       }
     }
   }
 
-  // 估算完成时间
-  private estimateCompletionTime(words: CrosswordWord[], difficulty: string): number {
-    const totalLetters = words.reduce((sum, w) => sum + w.wordData.spanish.length, 0);
-    const baseTime = totalLetters * 3; // 每个字母3秒
-    const difficultyMultiplier = difficulty === 'easy' ? 0.8 : difficulty === 'medium' ? 1.0 : 1.3;
-    return Math.floor(baseTime * difficultyMultiplier);
+  private estimateCompletionTime(words: CrosswordWord[], difficulty: Difficulty): number {
+    const totalLetters = words.reduce((sum, w) => sum + toGridWord(w.wordData.spanish).length, 0);
+    const multiplier = difficulty === 'easy' ? 0.8 : difficulty === 'medium' ? 1.0 : 1.3;
+    return Math.floor(totalLetters * 3 * multiplier);
   }
 }

@@ -52,8 +52,10 @@ export interface CrosswordPuzzle {
   id: string;
   level: LanguageLevel;
   category: WordCategory;
-  gridSize: number; // 网格大小（如10表示10x10）
+  rows: number; // 裁剪后的网格行数
+  cols: number; // 裁剪后的网格列数
   words: CrosswordWord[];
+  unplacedWords: Word[]; // 没能放进网格的单词（之后用于"快速补练"）
   cells: CrosswordCell[][];
   difficulty: 'easy' | 'medium' | 'hard'; // 难度（基于提示字母数量）
   estimatedTime: number; // 预估完成时间（秒）

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { GameSession, UserProgress, CrosswordPuzzle, CrosswordCell } from '@/types/game';
+import { GameSession, UserProgress, CrosswordPuzzle } from '@/types/game';
+import { isSameLetter } from '@/utils/letters';
 
 interface GameState {
   currentPuzzle: CrosswordPuzzle | null;
@@ -11,7 +12,7 @@ interface GameState {
   // Actions
   startGame: (puzzle: CrosswordPuzzle) => void;
   updateCell: (row: number, col: number, letter: string) => void;
-  useHint: () => void;
+  revealHint: () => void;
   checkCompletion: () => void;
   completeGame: () => void;
   loadUserProgress: () => Promise<void>;
@@ -20,15 +21,6 @@ interface GameState {
 }
 
 const STORAGE_KEY = '@bb_esword_progress';
-
-// 去掉重音符号（Á→A、Ü→U），但保留 Ñ，因为 Ñ 在西语里是独立字母
-const baseLetter = (ch: string): string => {
-  const upper = ch.toUpperCase();
-  if (upper === 'Ñ') return upper;
-  return upper.normalize('NFD').replace(/[̀-ͯ]/g, '');
-};
-
-const isSameLetter = (a: string, b: string): boolean => baseLetter(a) === baseLetter(b);
 
 export const useGameStore = create<GameState>((set, get) => ({
   currentPuzzle: null,
@@ -81,7 +73,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     get().checkCompletion();
   },
 
-  useHint: () => {
+  revealHint: () => {
     const { currentSession, currentPuzzle } = get();
     if (!currentSession || !currentPuzzle) return;
 
@@ -148,11 +140,14 @@ export const useGameStore = create<GameState>((set, get) => ({
 
     const endTime = Date.now();
     const timeTaken = Math.floor((endTime - currentSession.startTime) / 1000);
+    // 每个字母格只算一次（交叉格不重复计算）
+    const totalLetters = currentSession.currentCells
+      .flat()
+      .filter(cell => cell.correctLetter).length;
     const accuracy =
-      ((currentPuzzle.words.reduce((sum, w) => sum + w.wordData.spanish.length, 0) -
-        currentSession.mistakes) /
-        currentPuzzle.words.reduce((sum, w) => sum + w.wordData.spanish.length, 0)) *
-      100;
+      totalLetters > 0
+        ? (Math.max(0, totalLetters - currentSession.mistakes) / totalLetters) * 100
+        : 0;
 
     const score = Math.max(
       0,
