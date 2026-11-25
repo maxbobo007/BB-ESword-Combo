@@ -10,6 +10,7 @@ const makeWord = (id: string, spanish: string): Word => ({
   chinese: spanish,
   level: 'A1',
   category: 'food',
+  pos: 'noun',
 });
 
 // 混入长的动词变位形式和带重音的词，模拟以后变位填字的压力

@@ -35,20 +35,33 @@ describe('HomeScreen', () => {
     await render(<HomeScreen />);
     expect(screen.getByText('食物')).toBeTruthy();
     expect(screen.getByText('家庭')).toBeTruthy();
-    expect(screen.queryByText('旅行')).toBeNull(); // A1 没有旅行词
+    expect(screen.queryByText('工作')).toBeNull(); // A1 没有工作类的词
 
     await fireEvent.press(screen.getByText('A2'));
-    expect(screen.getByText('旅行')).toBeTruthy();
+    expect(screen.getByText('工作')).toBeTruthy();
 
+    await fireEvent.press(screen.getByText('旅行'));
     await fireEvent.press(screen.getByLabelText(/^开始，A2 旅行/));
     expect(mockPush).toHaveBeenCalledWith('/game');
     const puzzle = useGameStore.getState().currentPuzzle!;
     expect(puzzle.words.every(w => w.wordData.level === 'A2')).toBe(true);
-    expect(useGameStore.getState().currentSettings).toEqual({
+    expect(useGameStore.getState().currentSettings).toMatchObject({
+      mode: 'noun',
       level: 'A2',
-      category: 'travel',
+      topic: 'travel',
       difficulty: 'medium',
     });
+    expect(puzzle.rows).toBe(puzzle.cols);
+  });
+
+  it('动词模式按词尾分组，只出动词', async () => {
+    await render(<HomeScreen />);
+    await fireEvent.press(screen.getByText('动词'));
+    expect(screen.getByText('-AR 动词')).toBeTruthy();
+    await fireEvent.press(screen.getByText('-ER 动词'));
+    await fireEvent.press(screen.getByLabelText(/^开始，A1 -ER 动词/));
+    const puzzle = useGameStore.getState().currentPuzzle!;
+    expect(puzzle.words.every(w => w.wordData.pos === 'verb' && w.wordData.spanish.endsWith('er'))).toBe(true);
   });
 
   it('点"建设中"的等级只给提示，不切换', async () => {
@@ -69,9 +82,20 @@ describe('GameScreen', () => {
   });
 
   it('通过线索列表选词、用屏幕键盘填完所有单词后显示结果页', async () => {
-    const words = SAMPLE_WORDS.filter(w => w.level === 'A1' && w.category === 'food');
-    const puzzle = new PuzzleGenerator().generatePuzzle(words, { seed: 11, difficulty: 'easy' });
-    useGameStore.getState().startGame(puzzle, { level: 'A1', category: 'food', difficulty: 'easy' });
+    const words = SAMPLE_WORDS.filter(w => w.level === 'A1' && w.category === 'food').slice(0, 6);
+    const puzzle = new PuzzleGenerator(9).generatePuzzle([], {
+      seed: 11,
+      difficulty: 'easy',
+      square: true,
+      fillers: words,
+    });
+    useGameStore.getState().startGame(puzzle, {
+      mode: 'noun',
+      level: 'A1',
+      topic: 'food',
+      difficulty: 'easy',
+      boardSize: 9,
+    });
     await render(<GameScreen />);
 
     for (const word of [...puzzle.words].sort((a, b) => a.clueNumber - b.clueNumber)) {
@@ -104,5 +128,6 @@ describe('GameScreen', () => {
     expect(next.currentSession!.isCompleted).toBe(false);
     expect(next.currentPuzzle!.id).not.toBe(puzzle.id);
     expect(next.currentPuzzle!.words.every(w => w.wordData.category === 'food')).toBe(true);
+    expect(next.currentPuzzle!.rows).toBe(9);
   });
 });

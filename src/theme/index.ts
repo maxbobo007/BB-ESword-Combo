@@ -46,6 +46,11 @@ export const colors = {
   tileCorrectText: '#2F4A16',
   tileCorrectEdge: '#4F7A28',
 
+  // 正方形棋盘：深胡桃木底板，空格是底板上的凹槽
+  board: '#5A4A3F',
+  boardEdge: '#3E322A',
+  boardWell: '#4A3C33',
+
   overlay: 'rgba(43,36,32,0.45)',
 } as const;
 

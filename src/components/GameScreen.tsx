@@ -27,6 +27,7 @@ type Direction = CrosswordWord['direction'];
 
 const KEY_ROWS = ['QWERTYUIOP', 'ASDFGHJKLÑ', 'ZXCVBNM'].map(r => r.split(''));
 const WIDE_BREAKPOINT = 768;
+const BOARD_PAD = 6;
 const DIR_NAME: Record<Direction, string> = { horizontal: '横', vertical: '纵' };
 
 
@@ -270,7 +271,7 @@ export const GameScreen: React.FC = () => {
 
   const playAgain = () => {
     if (!currentSettings) return goHome();
-    const next = generateForSettings(currentSettings, width < 400);
+    const next = generateForSettings(currentSettings);
     if (!next) return goHome();
     setSelected(null);
     startGame(next, currentSettings);
@@ -285,7 +286,8 @@ export const GameScreen: React.FC = () => {
 
   const rows = puzzle?.rows ?? 1;
   const cols = puzzle?.cols ?? 1;
-  const fit = (box: number, n: number, g: number) => Math.floor((box - space.lg - g * (n - 1)) / n);
+  const fit = (box: number, n: number, g: number) =>
+    Math.floor((box - space.lg - BOARD_PAD * 2 - g * (n - 1)) / n);
   let gap = 4;
   let cellSize = Math.min(48, fit(gridBox.width, cols, gap), fit(gridBox.height, rows, gap));
   if (cellSize < 32) {
@@ -345,13 +347,19 @@ export const GameScreen: React.FC = () => {
   const renderGrid = () => (
     <View style={styles.gridArea} onLayout={onGridLayout}>
       {gridBox.width > 0 && (
-        <View style={{ gap }} role="grid" aria-label="填字网格">
+        <View style={[styles.board, { gap }]} role="grid" aria-label={`填字棋盘，${rows} 乘 ${cols}`}>
           {cells.map((row, r) => (
             <View key={r} style={[styles.row, { gap }]}>
               {row.map(cell => {
                 const key = `${cell.row}-${cell.col}`;
                 if (!cell.correctLetter) {
-                  return <View key={key} style={{ width: cellSize, height: cellSize }} />;
+                  // 没有字母的格子：棋盘上的凹槽，拼成完整的正方形
+                  return (
+                    <View
+                      key={key}
+                      style={[styles.blocked, { width: cellSize, height: cellSize, borderRadius: Math.round(cellSize * 0.16) }]}
+                    />
+                  );
                 }
                 const state = cellState(cell);
                 return (
@@ -695,6 +703,14 @@ const styles = StyleSheet.create({
   playColumnWide: { maxWidth: 560 },
   gridArea: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: space.sm },
   row: { flexDirection: 'row' },
+  board: {
+    padding: BOARD_PAD,
+    borderRadius: radius.lg,
+    backgroundColor: colors.board,
+    borderBottomWidth: 4,
+    borderBottomColor: colors.boardEdge,
+  },
+  blocked: { backgroundColor: colors.boardWell },
 
   tray: {
     backgroundColor: colors.surfaceAlt,

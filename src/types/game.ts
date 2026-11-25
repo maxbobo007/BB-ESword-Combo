@@ -14,6 +14,9 @@ export type WordCategory =
   | 'technology' // 科技
   | 'culture'; // 文化
 
+// 词性
+export type PartOfSpeech = 'noun' | 'verb';
+
 // 单词数据结构
 export interface Word {
   id: string;
@@ -21,7 +24,9 @@ export interface Word {
   english: string; // 英文翻译
   chinese: string; // 中文翻译
   level: LanguageLevel;
-  category: WordCategory;
+  category: WordCategory; // 名词按主题分类；动词也保留一个大致主题
+  pos: PartOfSpeech; // 词性
+  gender?: 'm' | 'f'; // 名词的阴阳性
   pronunciation?: string; // 发音（IPA）
   exampleSentence?: string; // 例句
 }
@@ -78,10 +83,14 @@ export interface GameSession {
 }
 
 // 开局设置，用于"再来一局"
+export type BoardSize = 7 | 9 | 11;
+
 export interface GameSettings {
+  mode: PartOfSpeech; // 名词模式 / 动词模式
   level: LanguageLevel;
-  category: WordCategory;
+  topic: string; // 名词：WordCategory；动词：'ar' | 'er' | 'ir'
   difficulty: 'easy' | 'medium' | 'hard';
+  boardSize: BoardSize; // 正方形棋盘边长
 }
 
 // 用户进度

@@ -10,6 +10,7 @@ jest.mock('@react-native-async-storage/async-storage', () =>
 
 const word = (id: string, spanish: string): Word => ({
   id, spanish, english: spanish, chinese: spanish, level: 'A1', category: 'food',
+  pos: 'noun',
 });
 
 const start = (seed = 3) => {

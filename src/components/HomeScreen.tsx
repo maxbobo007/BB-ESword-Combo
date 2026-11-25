@@ -10,9 +10,9 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useGameStore } from '@/store/gameStore';
-import { generateForSettings } from '@/utils/newPuzzle';
-import { getPlayableCategories, SAMPLE_WORDS } from '@/data/words';
-import { GameSettings, LanguageLevel, WordCategory } from '@/types/game';
+import { BOARD_SIZES, generateForSettings } from '@/utils/newPuzzle';
+import { getTopics, Mode } from '@/data/words';
+import { BoardSize, GameSettings, LanguageLevel } from '@/types/game';
 import { colors, latin, webFocus, radius, shadow, space, type } from '@/theme';
 import { LetterTile, TileState } from '@/components/LetterTile';
 import { Sheet } from '@/components/Sheet';
@@ -29,18 +29,10 @@ const LEVELS: { id: LanguageLevel; description: string }[] = [
   { id: 'C2', description: '完全掌握' },
 ];
 
-const CATEGORY_NAMES: Record<WordCategory, string> = {
-  food: '食物',
-  family: '家庭',
-  travel: '旅行',
-  work: '工作',
-  health: '健康',
-  nature: '自然',
-  education: '教育',
-  sports: '运动',
-  technology: '科技',
-  culture: '文化',
-};
+const MODES: { id: Mode; label: string; hint: string }[] = [
+  { id: 'noun', label: '名词', hint: '按主题记名词，例如"苹果 → MANZANA"' },
+  { id: 'verb', label: '动词', hint: '先记动词原形，例如"吃 → COMER"；变位练习即将推出' },
+];
 
 const DIFFICULTY_NAMES: Record<Difficulty, string> = { easy: '简单', medium: '中等', hard: '困难' };
 const DIFFICULTY_HINTS: Record<Difficulty, string> = {
@@ -66,8 +58,10 @@ export const HomeScreen: React.FC = () => {
   const { width } = useWindowDimensions();
   const { userProgress, loadUserProgress, startGame } = useGameStore();
 
+  const [mode, setMode] = useState<Mode>('noun');
   const [level, setLevel] = useState<LanguageLevel>('A1');
-  const [category, setCategory] = useState<WordCategory | null>(null);
+  const [topic, setTopic] = useState<string | null>(null);
+  const [boardSize, setBoardSize] = useState<BoardSize>(width < 400 ? 9 : 11);
   const [difficulty, setDifficulty] = useState<Difficulty>('medium');
   const [helpOpen, setHelpOpen] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
@@ -85,22 +79,26 @@ export const HomeScreen: React.FC = () => {
   // 能玩的等级排前面，"建设中"的排在最后
   const levels = useMemo(
     () =>
-      LEVELS.map(l => ({ ...l, playable: getPlayableCategories(l.id).length > 0 })).sort(
+      LEVELS.map(l => ({ ...l, playable: getTopics(mode, l.id).length > 0 })).sort(
         (a, b) => Number(b.playable) - Number(a.playable)
       ),
-    []
+    [mode]
   );
-  const categories = useMemo(() => getPlayableCategories(level) as WordCategory[], [level]);
-  const selectedCategory =
-    category && categories.includes(category) ? category : (categories[0] ?? null);
-
-  const wordCount = (c: WordCategory) =>
-    SAMPLE_WORDS.filter(w => w.level === level && w.category === c).length;
+  // 切换模式后，原来选的等级可能没词了，自动落到第一个能玩的等级
+  const activeLevel = levels.find(l => l.id === level && l.playable)?.id ?? levels[0].id;
+  const topics = useMemo(() => getTopics(mode, activeLevel), [mode, activeLevel]);
+  const selectedTopic = topics.find(t => t.id === topic) ?? topics[0] ?? null;
 
   const handleStart = () => {
-    if (!selectedCategory) return;
-    const settings: GameSettings = { level, category: selectedCategory, difficulty };
-    const puzzle = generateForSettings(settings, width < 400);
+    if (!selectedTopic) return;
+    const settings: GameSettings = {
+      mode,
+      level: activeLevel,
+      topic: selectedTopic.id,
+      difficulty,
+      boardSize,
+    };
+    const puzzle = generateForSettings(settings);
     if (!puzzle) {
       setNotice('这个组合的单词还不够，换一个试试');
       return;
@@ -157,6 +155,15 @@ export const HomeScreen: React.FC = () => {
           )}
         </View>
 
+        <SectionLabel zh="模式" es="MODO" />
+        <Segmented
+          label="模式"
+          options={MODES.map(m => ({ id: m.id, label: m.label }))}
+          value={mode}
+          onChange={id => setMode(id as Mode)}
+        />
+        <Text style={styles.difficultyHint}>{MODES.find(m => m.id === mode)!.hint}</Text>
+
         <SectionLabel zh="等级" es="NIVEL" />
         <ScrollView
           horizontal
@@ -166,7 +173,7 @@ export const HomeScreen: React.FC = () => {
           aria-label="等级"
         >
           {levels.map(l => {
-            const selected = level === l.id;
+            const selected = activeLevel === l.id;
             return (
               <Pressable
                 key={l.id}
@@ -202,55 +209,60 @@ export const HomeScreen: React.FC = () => {
           })}
         </ScrollView>
 
-        <SectionLabel zh="主题" es="TEMA" />
+        <SectionLabel zh={mode === 'verb' ? '词尾' : '主题'} es={mode === 'verb' ? 'GRUPO' : 'TEMA'} />
         <View style={styles.topicGrid} role="radiogroup" aria-label="主题">
-          {categories.map(c => {
-            const selected = selectedCategory === c;
+          {topics.map(t => {
+            const selected = selectedTopic?.id === t.id;
             return (
               <Pressable
-                key={c}
+                key={t.id}
                 role="radio"
                 aria-checked={selected}
-                aria-label={`${CATEGORY_NAMES[c]}，${wordCount(c)} 个单词`}
-                onPress={() => setCategory(c)}
+                aria-label={`${t.name}，${t.count} 个单词`}
+                onPress={() => setTopic(t.id)}
                 style={s => [
                   styles.topicCard,
+                  width >= 600 && styles.topicCardWide,
                   selected && styles.optionSelected,
                   s.pressed && styles.optionPressed,
                   webFocus(s),
                 ]}
               >
-                <Text style={[styles.topicName, selected && styles.textSelected]}>
-                  {CATEGORY_NAMES[c]}
-                </Text>
+                <Text style={[styles.topicName, selected && styles.textSelected]}>{t.name}</Text>
                 <Text style={[styles.optionSub, selected && styles.subSelected]}>
-                  {wordCount(c)} 个单词
+                  {t.count} 个单词
                 </Text>
               </Pressable>
             );
           })}
         </View>
 
+        <SectionLabel zh="棋盘" es="TABLERO" />
+        <Segmented
+          label="棋盘大小"
+          options={BOARD_SIZES.map(b => ({
+            id: String(b.size),
+            label: `${b.label} ${b.size}×${b.size}`,
+            a11y: `${b.label}棋盘，${b.size} 乘 ${b.size}，最多 ${b.maxWords} 个词`,
+          }))}
+          value={String(boardSize)}
+          onChange={id => setBoardSize(Number(id) as BoardSize)}
+        />
+        <Text style={styles.difficultyHint}>
+          最多放 {BOARD_SIZES.find(b => b.size === boardSize)!.maxWords} 个词
+        </Text>
+
         <SectionLabel zh="难度" es="DIFICULTAD" />
-        <View style={styles.segmented} role="radiogroup" aria-label="难度">
-          {(Object.keys(DIFFICULTY_NAMES) as Difficulty[]).map(d => {
-            const selected = difficulty === d;
-            return (
-              <Pressable
-                key={d}
-                role="radio"
-                aria-checked={selected}
-                aria-label={`${DIFFICULTY_NAMES[d]}，${DIFFICULTY_HINTS[d]}`}
-                onPress={() => setDifficulty(d)}
-                style={s => [styles.segment, selected && styles.segmentSelected, webFocus(s)]}
-              >
-                <Text style={[styles.segmentText, selected && styles.segmentTextSelected]}>
-                  {DIFFICULTY_NAMES[d]}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
+        <Segmented
+          label="难度"
+          options={(Object.keys(DIFFICULTY_NAMES) as Difficulty[]).map(d => ({
+            id: d,
+            label: DIFFICULTY_NAMES[d],
+            a11y: `${DIFFICULTY_NAMES[d]}，${DIFFICULTY_HINTS[d]}`,
+          }))}
+          value={difficulty}
+          onChange={id => setDifficulty(id as Difficulty)}
+        />
         <Text style={styles.difficultyHint}>{DIFFICULTY_HINTS[difficulty]}</Text>
       </ScrollView>
 
@@ -262,21 +274,21 @@ export const HomeScreen: React.FC = () => {
         ) : null}
         <Pressable
           role="button"
-          aria-label={`开始，${level} ${selectedCategory ? CATEGORY_NAMES[selectedCategory] : ''}，${DIFFICULTY_NAMES[difficulty]}`}
-          aria-disabled={!selectedCategory}
-          disabled={!selectedCategory}
+          aria-label={`开始，${activeLevel} ${selectedTopic?.name ?? ''}，${boardSize}×${boardSize}，${DIFFICULTY_NAMES[difficulty]}`}
+          aria-disabled={!selectedTopic}
+          disabled={!selectedTopic}
           onPress={handleStart}
           style={s => [
             styles.startButton,
             s.pressed && styles.startPressed,
-            !selectedCategory && styles.startDisabled,
+            !selectedTopic && styles.startDisabled,
             webFocus(s),
           ]}
         >
           <Text style={styles.startText}>开始</Text>
-          {selectedCategory && (
+          {selectedTopic && (
             <Text style={styles.startMeta}>
-              {level} · {CATEGORY_NAMES[selectedCategory]} · {DIFFICULTY_NAMES[difficulty]}
+              {activeLevel} · {selectedTopic.name} · {boardSize}×{boardSize} · {DIFFICULTY_NAMES[difficulty]}
             </Text>
           )}
         </Pressable>
@@ -288,6 +300,33 @@ export const HomeScreen: React.FC = () => {
     </SafeAreaView>
   );
 };
+
+interface SegmentedProps {
+  label: string;
+  options: { id: string; label: string; a11y?: string }[];
+  value: string;
+  onChange: (id: string) => void;
+}
+
+const Segmented: React.FC<SegmentedProps> = ({ label, options, value, onChange }) => (
+  <View style={styles.segmented} role="radiogroup" aria-label={label}>
+    {options.map(o => {
+      const selected = value === o.id;
+      return (
+        <Pressable
+          key={o.id}
+          role="radio"
+          aria-checked={selected}
+          aria-label={o.a11y ?? o.label}
+          onPress={() => onChange(o.id)}
+          style={s => [styles.segment, selected && styles.segmentSelected, webFocus(s)]}
+        >
+          <Text style={[styles.segmentText, selected && styles.segmentTextSelected]}>{o.label}</Text>
+        </Pressable>
+      );
+    })}
+  </View>
+);
 
 const SectionLabel: React.FC<{ zh: string; es: string }> = ({ zh, es }) => (
   <Text role="heading" style={styles.sectionLabel}>
@@ -381,6 +420,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     justifyContent: 'center',
   },
+  topicCardWide: { flexBasis: '30%' },
   topicName: { ...type.heading, color: colors.ink },
   segmented: {
     flexDirection: 'row',

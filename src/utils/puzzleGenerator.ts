@@ -26,6 +26,12 @@ export interface GenerateOptions {
   seed?: number;
   // 工作网格边长；生成后会裁剪到实际用到的区域
   maxSize?: number;
+  // 正方形棋盘：输出固定 maxSize × maxSize，内容居中，不裁剪
+  square?: boolean;
+  // 补位词：必选词放完后，用这些词尽量把棋盘铺满（不保证全部放入，也不算进 unplacedWords）
+  fillers?: Word[];
+  // 棋盘上最多放多少个词（含必选词和补位词）
+  maxWords?: number;
 }
 
 // 小而稳定的伪随机数生成器（mulberry32），保证可复现
@@ -97,7 +103,33 @@ export class PuzzleGenerator {
     }
     unplaced.push(...pending.map(i => i.word));
 
-    const { rows, cols } = this.cropToContent();
+    // 用补位词铺满棋盘：打乱后多轮尝试，优先交叉多的位置
+    const maxWords = opts.maxWords ?? Infinity;
+    const usedIds = new Set(words.map(w => w.id));
+    let fillers = (opts.fillers ?? [])
+      .filter(w => !usedIds.has(w.id))
+      .map(word => ({ word, letters: toGridWord(word.spanish), r: this.rng() }))
+      .filter(item => item.letters.length >= 2 && item.letters.length <= this.size)
+      .sort((a, b) => a.r - b.r);
+    for (let pass = 0; pass < 3 && fillers.length > 0; pass++) {
+      const rest: typeof fillers = [];
+      for (const item of fillers) {
+        if (this.placedWords.length >= maxWords) break;
+        if (this.placedWords.length === 0) {
+          const row = Math.floor(this.size / 2);
+          const col = Math.floor((this.size - item.letters.length) / 2);
+          this.placeAt(item.word, item.letters, row, col, 'horizontal');
+          continue;
+        }
+        const best = this.findBestPlacement(item.letters);
+        if (best) this.placeAt(item.word, item.letters, best.row, best.col, best.direction);
+        else rest.push(item);
+      }
+      if (rest.length === fillers.length || this.placedWords.length >= maxWords) break;
+      fillers = rest;
+    }
+
+    const { rows, cols } = opts.square ? this.centerInBoard() : this.cropToContent();
     this.assignClueNumbers();
     const cells = this.buildCells(rows, cols, difficulty);
 
@@ -236,6 +268,35 @@ export class PuzzleGenerator {
       pw.startCol -= minC;
     }
     return { rows: maxR - minR + 1, cols: maxC - minC + 1 };
+  }
+
+  // 正方形棋盘：保持 size × size，把内容整体移到正中间
+  private centerInBoard(): { rows: number; cols: number } {
+    const n = this.size;
+    if (this.placedWords.length === 0) return { rows: n, cols: n };
+    let minR = n, minC = n, maxR = -1, maxC = -1;
+    for (let r = 0; r < n; r++) {
+      for (let c = 0; c < n; c++) {
+        if (this.grid[r][c]) {
+          minR = Math.min(minR, r);
+          minC = Math.min(minC, c);
+          maxR = Math.max(maxR, r);
+          maxC = Math.max(maxC, c);
+        }
+      }
+    }
+    const dr = Math.floor((n - (maxR - minR + 1)) / 2) - minR;
+    const dc = Math.floor((n - (maxC - minC + 1)) / 2) - minC;
+    const next: string[][] = Array.from({ length: n }, () => Array(n).fill(''));
+    for (let r = minR; r <= maxR; r++) {
+      for (let c = minC; c <= maxC; c++) next[r + dr][c + dc] = this.grid[r][c];
+    }
+    this.grid = next;
+    for (const pw of this.placedWords) {
+      pw.startRow += dr;
+      pw.startCol += dc;
+    }
+    return { rows: n, cols: n };
   }
 
   // 按位置编号（从上到下、从左到右），同一起点的横纵单词共用一个编号
