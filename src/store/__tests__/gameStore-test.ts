@@ -1,6 +1,7 @@
 import { useGameStore } from '@/store/gameStore';
 import { PuzzleGenerator } from '@/utils/puzzleGenerator';
 import { Word } from '@/types/game';
+import { wordCells } from '@/utils/wordState';
 
 jest.mock('@react-native-async-storage/async-storage', () =>
   // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -40,14 +41,53 @@ describe('gameStore', () => {
     expect(useGameStore.getState().currentSession!.mistakes).toBe(0);
   });
 
-  it('填错计一次错误，不修改原状态对象', () => {
-    start();
+  it('不逐字判错：整词填满且不对时才按错误字母数计错，且不修改原状态对象', () => {
+    const puzzle = start();
     const before = useGameStore.getState().currentSession!;
+    const word = puzzle.words[0];
+    const editable = wordCells(word).filter(p => !before.currentCells[p.row][p.col].isFixed);
+    const wrongLetter = (p: { row: number; col: number }) =>
+      before.currentCells[p.row][p.col].correctLetter === 'Z' ? 'X' : 'Z';
+
+    // 先填到只差一格：还不计错
+    for (const p of editable.slice(0, -1)) useGameStore.getState().updateCell(p.row, p.col, wrongLetter(p));
+    expect(useGameStore.getState().currentSession!.mistakes).toBe(0);
+
+    // 填满：一次性计入所有错误字母
+    const last = editable[editable.length - 1];
+    useGameStore.getState().updateCell(last.row, last.col, wrongLetter(last));
+    const after = useGameStore.getState().currentSession!;
+    expect(after.mistakes).toBe(editable.length);
+    expect(after.wrongWordIds).toContain(word.id);
+    expect(before.currentCells[editable[0].row][editable[0].col].letter).toBeNull();
+  });
+
+  it('答对的单词被锁定，不能再改', () => {
+    const puzzle = start();
+    const word = puzzle.words[0];
+    for (const p of wordCells(word)) {
+      const c = useGameStore.getState().currentSession!.currentCells[p.row][p.col];
+      if (!c.isFixed) useGameStore.getState().updateCell(p.row, p.col, c.correctLetter);
+    }
+    const p = wordCells(word).find(
+      q => !puzzle.cells[q.row][q.col].isFixed
+    )!;
+    useGameStore.getState().updateCell(p.row, p.col, 'Z');
+    const cell = useGameStore.getState().currentSession!.currentCells[p.row][p.col];
+    expect(cell.letter).toBe(cell.correctLetter);
+  });
+
+  it('提示可以指定格子，并记录用过提示的单词', () => {
+    const puzzle = start();
     const target = editableCells()[0];
-    const wrong = target.correctLetter === 'Z' ? 'X' : 'Z';
-    useGameStore.getState().updateCell(target.row, target.col, wrong);
-    expect(useGameStore.getState().currentSession!.mistakes).toBe(1);
-    expect(before.currentCells[target.row][target.col].letter).toBeNull();
+    const pos = useGameStore.getState().revealHint({ row: target.row, col: target.col });
+    expect(pos).toEqual({ row: target.row, col: target.col });
+    const session = useGameStore.getState().currentSession!;
+    const cell = session.currentCells[target.row][target.col];
+    expect(cell.letter).toBe(cell.correctLetter);
+    expect(cell.revealed).toBe(true);
+    expect(session.hintedWordIds).toEqual(expect.arrayContaining(cell.wordIds));
+    expect(puzzle.words.length).toBeGreaterThan(0);
   });
 
   it('全部填对后自动完成', () => {

@@ -1,18 +1,21 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { GameSession, UserProgress, CrosswordPuzzle } from '@/types/game';
+import { CrosswordPuzzle, GameSession, GameSettings, UserProgress } from '@/types/game';
 import { isSameLetter } from '@/utils/letters';
+import { CellPos, isCellLocked, isWordCorrect, wordCells, wordStatus } from '@/utils/wordState';
 
 interface GameState {
   currentPuzzle: CrosswordPuzzle | null;
   currentSession: GameSession | null;
+  currentSettings: GameSettings | null;
   userProgress: UserProgress | null;
   isLoading: boolean;
 
   // Actions
-  startGame: (puzzle: CrosswordPuzzle) => void;
+  startGame: (puzzle: CrosswordPuzzle, settings?: GameSettings) => void;
   updateCell: (row: number, col: number, letter: string) => void;
-  revealHint: () => void;
+  // 揭示指定格子；不传则揭示任意一个未答对的格子
+  revealHint: (target?: CellPos) => CellPos | null;
   checkCompletion: () => void;
   completeGame: () => void;
   loadUserProgress: () => Promise<void>;
@@ -22,114 +25,114 @@ interface GameState {
 
 const STORAGE_KEY = '@bb_esword_progress';
 
+const replaceCell = <T,>(grid: T[][], row: number, col: number, next: T) =>
+  grid.map((r, ri) => (ri === row ? r.map((c, ci) => (ci === col ? next : c)) : r));
+
 export const useGameStore = create<GameState>((set, get) => ({
   currentPuzzle: null,
   currentSession: null,
+  currentSettings: null,
   userProgress: null,
   isLoading: false,
 
-  startGame: (puzzle: CrosswordPuzzle) => {
+  startGame: (puzzle, settings) => {
     const session: GameSession = {
       puzzleId: puzzle.id,
       startTime: Date.now(),
       currentCells: JSON.parse(JSON.stringify(puzzle.cells)),
       hintsUsed: 0,
       mistakes: 0,
+      wrongWordIds: [],
+      hintedWordIds: [],
       isCompleted: false,
     };
 
-    set({ currentPuzzle: puzzle, currentSession: session });
+    set({
+      currentPuzzle: puzzle,
+      currentSession: session,
+      currentSettings: settings ?? get().currentSettings,
+    });
   },
 
-  updateCell: (row: number, col: number, letter: string) => {
+  updateCell: (row, col, letter) => {
     const { currentSession, currentPuzzle } = get();
-    if (!currentSession || !currentPuzzle) return;
+    if (!currentSession || !currentPuzzle || currentSession.isCompleted) return;
 
-    const cell = currentSession.currentCells[row][col];
+    const before = currentSession.currentCells;
+    const cell = before[row][col];
+    if (!cell.correctLetter || isCellLocked(before, currentPuzzle.words, { row, col })) return;
 
-    if (cell.isFixed || !cell.correctLetter) return; // 不能修改提示字母或空白格
-
-    const wasCorrect = cell.letter === cell.correctLetter;
     // 键盘没有重音字母：输入 E 可匹配 É，答对后显示带重音的正确字母
     const input = letter ? letter.toUpperCase() : null;
-    const isCorrect = input !== null && isSameLetter(input, cell.correctLetter);
-    const newLetter = isCorrect ? cell.correctLetter : input;
+    const newLetter = input !== null && isSameLetter(input, cell.correctLetter) ? cell.correctLetter : input;
+    if (newLetter === cell.letter) return;
 
-    const isMistake = !wasCorrect && !isCorrect && input !== null;
+    const cells = replaceCell(before, row, col, { ...cell, letter: newLetter });
 
-    const cells = currentSession.currentCells.map((r, ri) =>
-      ri === row ? r.map((c, ci) => (ci === col ? { ...c, letter: newLetter } : c)) : r
-    );
+    // 不逐字判错：只有当一个单词刚好被填满且不正确时，才按错误字母数计错
+    let mistakes = currentSession.mistakes;
+    const wrongWordIds = [...currentSession.wrongWordIds];
+    for (const word of currentPuzzle.words) {
+      if (!cell.wordIds.includes(word.id)) continue;
+      if (wordStatus(cells, word) === 'wrong') {
+        mistakes += wordCells(word).filter(
+          p => cells[p.row][p.col].letter !== cells[p.row][p.col].correctLetter
+        ).length;
+        if (!wrongWordIds.includes(word.id)) wrongWordIds.push(word.id);
+      }
+    }
+
+    set({ currentSession: { ...currentSession, currentCells: cells, mistakes, wrongWordIds } });
+    get().checkCompletion();
+  },
+
+  revealHint: target => {
+    const { currentSession, currentPuzzle } = get();
+    if (!currentSession || !currentPuzzle || currentSession.isCompleted) return null;
+    const cells = currentSession.currentCells;
+
+    const canReveal = (p: CellPos) => {
+      const c = cells[p.row]?.[p.col];
+      return !!c && !!c.correctLetter && !c.isFixed && c.letter !== c.correctLetter;
+    };
+
+    let pos: CellPos | null = target && canReveal(target) ? target : null;
+    if (!pos && !target) {
+      const candidates = cells.flat().filter(c => canReveal(c));
+      if (candidates.length > 0) {
+        const c = candidates[Math.floor(Math.random() * candidates.length)];
+        pos = { row: c.row, col: c.col };
+      }
+    }
+    if (!pos) return null;
+
+    const cell = cells[pos.row][pos.col];
+    const newCells = replaceCell(cells, pos.row, pos.col, {
+      ...cell,
+      letter: cell.correctLetter,
+      isFixed: true,
+      revealed: true,
+    });
+    const hintedWordIds = [...new Set([...currentSession.hintedWordIds, ...cell.wordIds])];
 
     set({
       currentSession: {
         ...currentSession,
-        currentCells: cells,
-        mistakes: currentSession.mistakes + (isMistake ? 1 : 0),
+        currentCells: newCells,
+        hintsUsed: currentSession.hintsUsed + 1,
+        hintedWordIds,
       },
     });
 
-    // 检查是否完成
+    // 用提示填上最后一格时也要判定通关
     get().checkCompletion();
-  },
-
-  revealHint: () => {
-    const { currentSession, currentPuzzle } = get();
-    if (!currentSession || !currentPuzzle) return;
-
-    const cells = currentSession.currentCells;
-    const emptyCells: { row: number; col: number }[] = [];
-
-    for (let row = 0; row < cells.length; row++) {
-      for (let col = 0; col < cells[row].length; col++) {
-        const cell = cells[row][col];
-        if (!cell.isFixed && cell.correctLetter && cell.letter !== cell.correctLetter) {
-          emptyCells.push({ row, col });
-        }
-      }
-    }
-
-    if (emptyCells.length > 0) {
-      const target = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-      const newCells = cells.map((r, ri) =>
-        ri === target.row
-          ? r.map((c, ci) =>
-              ci === target.col ? { ...c, letter: c.correctLetter, isFixed: true } : c
-            )
-          : r
-      );
-
-      set({
-        currentSession: {
-          ...currentSession,
-          currentCells: newCells,
-          hintsUsed: currentSession.hintsUsed + 1,
-        },
-      });
-
-      // 用提示填上最后一格时也要判定通关
-      get().checkCompletion();
-    }
+    return pos;
   },
 
   checkCompletion: () => {
-    const { currentSession } = get();
-    if (!currentSession) return;
-
-    const cells = currentSession.currentCells;
-    let isCompleted = true;
-
-    for (const row of cells) {
-      for (const cell of row) {
-        if (cell.correctLetter && cell.letter !== cell.correctLetter) {
-          isCompleted = false;
-          break;
-        }
-      }
-      if (!isCompleted) break;
-    }
-
-    if (isCompleted) {
+    const { currentSession, currentPuzzle } = get();
+    if (!currentSession || !currentPuzzle) return;
+    if (currentPuzzle.words.every(w => isWordCorrect(currentSession.currentCells, w))) {
       get().completeGame();
     }
   },
@@ -164,6 +167,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       endTime,
       isCompleted: true,
       score,
+      accuracy: Math.round(accuracy),
     };
 
     if (userProgress) {

@@ -1,5 +1,7 @@
-import React from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect } from 'react';
+import { Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { colors, webFocus, radius, shadow, space, type } from '@/theme';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 
 export interface DialogAction {
   label: string;
@@ -15,69 +17,105 @@ interface DialogProps {
   onRequestClose?: () => void;
 }
 
-// React Native 的 Alert 在 Web 上不工作，用 Modal 自己做一个三端一致的对话框
-export const Dialog: React.FC<DialogProps> = ({ visible, title, message, actions, onRequestClose }) => (
-  <Modal transparent animationType="fade" visible={visible} onRequestClose={onRequestClose}>
-    <View style={styles.backdrop}>
-      <View style={styles.card} accessibilityRole="alert">
-        <Text style={styles.title}>{title}</Text>
-        {message ? <Text style={styles.message}>{message}</Text> : null}
-        <View style={styles.actions}>
-          {actions.map(action => (
-            <Pressable
-              key={action.label}
-              accessibilityRole="button"
-              onPress={action.onPress}
-              style={({ pressed }) => [
-                styles.button,
-                action.variant === 'primary' && styles.primary,
-                action.variant === 'danger' && styles.danger,
-                pressed && styles.pressed,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.buttonText,
-                  (action.variant === 'primary' || action.variant === 'danger') && styles.buttonTextLight,
-                ]}
-              >
-                {action.label}
-              </Text>
-            </Pressable>
-          ))}
+// React Native 的 Alert 在 Web 上不工作，用 Modal 做一个三端一致的对话框
+export const Dialog: React.FC<DialogProps> = ({ visible, title, message, actions, onRequestClose }) => {
+  const reducedMotion = useReducedMotion();
+  useEscape(visible, onRequestClose);
+
+  return (
+    <Modal
+      transparent
+      animationType={reducedMotion ? 'none' : 'fade'}
+      visible={visible}
+      onRequestClose={onRequestClose}
+    >
+      <View style={styles.backdrop}>
+        <View style={styles.card} role="alertdialog" aria-modal aria-label={title}>
+          <Text role="heading" style={styles.title}>
+            {title}
+          </Text>
+          {message ? <Text style={styles.message}>{message}</Text> : null}
+          <View style={styles.actions}>
+            {actions.map(action => (
+              <Button key={action.label} {...action} />
+            ))}
+          </View>
         </View>
       </View>
-    </View>
-  </Modal>
+    </Modal>
+  );
+};
+
+export const Button: React.FC<DialogAction & { compact?: boolean }> = ({
+  label,
+  onPress,
+  variant = 'secondary',
+  compact,
+}) => (
+  <Pressable
+    role="button"
+    aria-label={label}
+    onPress={onPress}
+    style={state => [
+      styles.button,
+      compact && styles.compact,
+      variant === 'primary' && styles.primary,
+      variant === 'danger' && styles.danger,
+      variant === 'secondary' && styles.secondary,
+      state.pressed && (variant === 'secondary' ? styles.secondaryPressed : styles.solidPressed),
+      webFocus(state),
+    ]}
+  >
+    <Text style={[styles.buttonText, variant !== 'secondary' && styles.buttonTextLight]}>
+      {label}
+    </Text>
+  </Pressable>
 );
+
+// Web 上按 Esc 关闭
+export const useEscape = (active: boolean, onClose?: () => void) => {
+  useEffect(() => {
+    if (!active || !onClose || Platform.OS !== 'web' || typeof document === 'undefined') return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [active, onClose]);
+};
 
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.45)',
+    backgroundColor: colors.overlay,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 24,
+    padding: space.xl,
   },
   card: {
     width: '100%',
-    maxWidth: 360,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 20,
+    maxWidth: 340,
+    backgroundColor: colors.surface,
+    borderRadius: radius.xl,
+    padding: space.xl,
+    boxShadow: shadow.raised,
   },
-  title: { fontSize: 18, fontWeight: '700', color: '#222', marginBottom: 8 },
-  message: { fontSize: 15, color: '#555', lineHeight: 22, marginBottom: 16 },
-  actions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 8, marginTop: 4 },
+  title: { ...type.title, color: colors.ink, marginBottom: space.sm },
+  message: { ...type.body, color: colors.inkMuted, marginBottom: space.lg },
+  actions: { gap: space.sm, marginTop: space.xs },
   button: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
-    backgroundColor: '#eee',
+    minHeight: 48,
+    paddingHorizontal: space.lg,
+    borderRadius: radius.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  primary: { backgroundColor: '#1976D2' },
-  danger: { backgroundColor: '#D32F2F' },
-  pressed: { opacity: 0.75 },
-  buttonText: { fontSize: 15, fontWeight: '600', color: '#333' },
-  buttonTextLight: { color: '#fff' },
+  compact: { minHeight: 44, borderRadius: radius.md },
+  primary: { backgroundColor: colors.primary, boxShadow: shadow.primary },
+  danger: { backgroundColor: colors.danger },
+  secondary: { backgroundColor: colors.surface, borderWidth: 1.5, borderColor: colors.primary },
+  secondaryPressed: { backgroundColor: colors.primarySoft },
+  solidPressed: { opacity: 0.88, transform: [{ scale: 0.98 }] },
+  buttonText: { fontSize: 16, fontWeight: '700', color: colors.primary },
+  buttonTextLight: { color: colors.onPrimary },
 });

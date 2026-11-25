@@ -33,6 +33,7 @@ export interface CrosswordCell {
   letter: string | null; // 当前字母
   correctLetter: string; // 正确字母
   isFixed: boolean; // 是否是提示字母（固定不可修改）
+  revealed?: boolean; // 是否是游戏中用"提示"揭示出来的（区别于开局给出的字母）
   wordIds: string[]; // 所属的单词ID列表
 }
 
@@ -68,9 +69,19 @@ export interface GameSession {
   endTime?: number;
   currentCells: CrosswordCell[][];
   hintsUsed: number;
-  mistakes: number;
+  mistakes: number; // 整词填满但不正确时，按错误字母数累计
+  wrongWordIds: string[]; // 本局出过错的单词
+  hintedWordIds: string[]; // 本局用过提示的单词
   isCompleted: boolean;
   score?: number;
+  accuracy?: number; // 0–100
+}
+
+// 开局设置，用于"再来一局"
+export interface GameSettings {
+  level: LanguageLevel;
+  category: WordCategory;
+  difficulty: 'easy' | 'medium' | 'hard';
 }
 
 // 用户进度
