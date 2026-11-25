@@ -1,4 +1,43 @@
 {
-  "name": "BBESwordCombo",
-  "displayName": "BB ESword Combo"
+  "expo": {
+    "name": "BB ESword",
+    "slug": "bb-esword",
+    "scheme": "bbesword",
+    "version": "0.2.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.bbesword"
+    },
+    "android": {
+      "package": "com.bbesword",
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "output": "single"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-status-bar",
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "c794109f-d5bc-41a0-94df-d4c3ab66cd4c"
+      }
+    },
+    "owner": "megaw"
+  }
 }

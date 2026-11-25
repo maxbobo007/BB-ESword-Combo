@@ -12,7 +12,15 @@ export type WordCategory =
   | 'education' // 教育
   | 'sports' // 运动
   | 'technology' // 科技
-  | 'culture'; // 文化
+  | 'culture' // 文化
+  | 'home' // 家居
+  | 'clothing' // 服装
+  | 'city' // 城市与场所
+  | 'time' // 时间
+  | 'professions'; // 职业
+
+// 词性
+export type PartOfSpeech = 'noun' | 'verb';
 
 // 单词数据结构
 export interface Word {
@@ -21,9 +29,13 @@ export interface Word {
   english: string; // 英文翻译
   chinese: string; // 中文翻译
   level: LanguageLevel;
-  category: WordCategory;
+  category: WordCategory; // 名词按主题分类；动词也保留一个大致主题
+  pos: PartOfSpeech; // 词性
+  gender?: 'm' | 'f'; // 名词的阴阳性
   pronunciation?: string; // 发音（IPA）
   exampleSentence?: string; // 例句
+  exampleTranslation?: string; // 例句的中文翻译
+  exampleHighlight?: string; // 例句里要高亮的部分（通常就是答案或完整变位形式）
 }
 
 // 填字游戏单元格
@@ -33,6 +45,7 @@ export interface CrosswordCell {
   letter: string | null; // 当前字母
   correctLetter: string; // 正确字母
   isFixed: boolean; // 是否是提示字母（固定不可修改）
+  revealed?: boolean; // 是否是游戏中用"提示"揭示出来的（区别于开局给出的字母）
   wordIds: string[]; // 所属的单词ID列表
 }
 
@@ -52,8 +65,10 @@ export interface CrosswordPuzzle {
   id: string;
   level: LanguageLevel;
   category: WordCategory;
-  gridSize: number; // 网格大小（如10表示10x10）
+  rows: number; // 裁剪后的网格行数
+  cols: number; // 裁剪后的网格列数
   words: CrosswordWord[];
+  unplacedWords: Word[]; // 没能放进网格的单词（之后用于"快速补练"）
   cells: CrosswordCell[][];
   difficulty: 'easy' | 'medium' | 'hard'; // 难度（基于提示字母数量）
   estimatedTime: number; // 预估完成时间（秒）
@@ -66,9 +81,25 @@ export interface GameSession {
   endTime?: number;
   currentCells: CrosswordCell[][];
   hintsUsed: number;
-  mistakes: number;
+  mistakes: number; // 整词填满但不正确时，按错误字母数累计
+  wrongWordIds: string[]; // 本局出过错的单词
+  hintedWordIds: string[]; // 本局用过提示的单词
   isCompleted: boolean;
   score?: number;
+  accuracy?: number; // 0–100
+}
+
+// 开局设置，用于"再来一局"
+export type BoardSize = 7 | 9 | 11;
+
+export type GameMode = 'noun' | 'verb' | 'conj';
+
+export interface GameSettings {
+  mode: GameMode; // 名词 / 动词原形 / 动词变位
+  level: LanguageLevel;
+  topic: string; // 名词：WordCategory；动词和变位：'ar' | 'er' | 'ir'（变位还有 'irr' 不规则）
+  difficulty: 'easy' | 'medium' | 'hard';
+  boardSize: BoardSize; // 正方形棋盘边长
 }
 
 // 用户进度
