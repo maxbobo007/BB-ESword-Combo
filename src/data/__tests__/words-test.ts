@@ -26,6 +26,18 @@ describe('词库', () => {
     expect(a1 + a2).toBeGreaterThanOrEqual(950);
   });
 
+  it('同一模式、等级、主题里，中文提示不重复（否则填字时没法判断该填哪个词）', () => {
+    const seen = new Map<string, string>();
+    const clashes: string[] = [];
+    for (const w of SAMPLE_WORDS) {
+      const topic = w.pos === 'verb' ? verbGroupOf(w.spanish) : w.category;
+      const key = `${w.pos}|${w.level}|${topic}|${w.chinese}`;
+      if (seen.has(key)) clashes.push(`${seen.get(key)} / ${w.spanish}：${w.chinese}`);
+      else seen.set(key, w.spanish);
+    }
+    expect(clashes).toEqual([]);
+  });
+
   it('A1 和 A2 的每个名词主题都能开局', () => {
     expect(getTopics('noun', 'A1').length).toBeGreaterThanOrEqual(13);
     expect(getTopics('noun', 'A2').length).toBe(15);
