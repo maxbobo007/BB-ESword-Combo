@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#F2F2F7" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="西语填字" />
+<meta name="description" content="用填字游戏学西班牙语：1000+ 词库、场景练习、每日挑战" />
+<link rel="manifest" href="./manifest.webmanifest" />
+<link rel="icon" type="image/png" href="./icon-192.png" />
+<link rel="apple-touch-icon" href="./icon-192.png" />
+<title>BB 西语填字</title>
+<style>
+  @font-face {
+    font-family: 'Ionicons';
+    src: url('./Ionicons.ttf') format('truetype');
+  }
+  html, body { height: 100%; margin: 0; background: #F2F2F7; }
+  @media (prefers-color-scheme: dark) { html, body { background: #000; } }
+  body { overscroll-behavior: none; -webkit-font-smoothing: antialiased;
+         font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', Roboto, sans-serif; }
+  /* 桌面端：内容居中为手机宽度的单列，两侧留白 */
+  #root { height: 100%; display: flex; flex-direction: column; align-items: center; }
+  #root > div { flex: 1; display: flex; flex-direction: column; width: 100%; max-width: 520px; }
+  @media (min-width: 600px) {
+    #root > div { box-shadow: 0 0 0 1px rgba(128,128,128,.18), 0 12px 48px rgba(0,0,0,.14); }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="./bundle.js"></script>
+<script>
+  // PWA：离线缓存（仅 https 或 localhost）
+  if ('serviceWorker' in navigator &&
+      (location.protocol === 'https:' || location.hostname === 'localhost')) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('./sw.js').catch(function () {});
+    });
+  }
+</script>
+</body>
+</html>
