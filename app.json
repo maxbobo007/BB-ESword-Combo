@@ -32,6 +32,12 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "c794109f-d5bc-41a0-94df-d4c3ab66cd4c"
+      }
+    },
+    "owner": "megaw"
   }
 }
