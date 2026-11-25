@@ -1,0 +1,81 @@
+import { AchievementDef } from '@/core/types/game';
+
+export const ACHIEVEMENTS: AchievementDef[] = [
+  {
+    id: 'first_game',
+    title: '初来乍到',
+    description: '完成第一局填字游戏',
+    icon: '🎯',
+    check: p => p.statistics.totalGamesPlayed >= 1,
+  },
+  {
+    id: 'words_10',
+    title: '小试牛刀',
+    description: '累计学会 10 个单词',
+    icon: '📖',
+    check: p => p.statistics.totalWordsLearned >= 10,
+  },
+  {
+    id: 'words_50',
+    title: '词汇新星',
+    description: '累计学会 50 个单词',
+    icon: '📚',
+    check: p => p.statistics.totalWordsLearned >= 50,
+  },
+  {
+    id: 'words_200',
+    title: '词汇大师',
+    description: '累计学会 200 个单词',
+    icon: '🏆',
+    check: p => p.statistics.totalWordsLearned >= 200,
+  },
+  {
+    id: 'streak_3',
+    title: '三日之约',
+    description: '连续学习 3 天',
+    icon: '🔥',
+    check: p => p.streak >= 3,
+  },
+  {
+    id: 'streak_7',
+    title: '七日坚持',
+    description: '连续学习 7 天',
+    icon: '💪',
+    check: p => p.streak >= 7,
+  },
+  {
+    id: 'streak_30',
+    title: '月度冠军',
+    description: '连续学习 30 天',
+    icon: '👑',
+    check: p => p.streak >= 30,
+  },
+  {
+    id: 'first_daily',
+    title: '每日一练',
+    description: '完成第一个每日挑战',
+    icon: '📅',
+    check: p => p.dailyCompletedDates.length >= 1,
+  },
+  {
+    id: 'daily_5',
+    title: '挑战常客',
+    description: '完成 5 个每日挑战',
+    icon: '🗓️',
+    check: p => p.dailyCompletedDates.length >= 5,
+  },
+  {
+    id: 'score_1000',
+    title: '千分达人',
+    description: '累计得分达到 1000',
+    icon: '⭐',
+    check: p => p.totalScore >= 1000,
+  },
+  {
+    id: 'perfect_game',
+    title: '完美一局',
+    description: '零错误零提示完成一局',
+    icon: '💎',
+    check: p => p.statistics.perfectGames >= 1,
+  },
+];

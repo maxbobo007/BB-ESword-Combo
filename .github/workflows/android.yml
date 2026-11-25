@@ -1,0 +1,72 @@
+name: android
+
+on:
+  push:
+    branches: ['**']
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: '发布为 Release 的 tag（如 v0.2.0；留空则只构建不发布）'
+        required: false
+        default: ''
+
+permissions:
+  contents: write # 打 v* tag 时创建 Release 需要
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # 自带 Android SDK
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Type check
+        run: npm run type-check
+
+      - name: Unit tests
+        run: npm test -- --ci
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      # release 变体才会把 JS bundle 打进 APK（debug 变体需要连 Metro，装到手机无法独立运行）；
+      # release 签名沿用 debug.keystore，适合个人安装，不适合上架
+      - name: Build APK
+        run: ./gradlew assembleRelease --no-daemon
+        working-directory: android
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bb-esword-apk
+          path: android/app/build/outputs/apk/release/app-release.apk
+
+      # 每次推送自动更新滚动版 latest Release（免登录直链永远指向最新 APK）
+      - name: Publish rolling release
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/')
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: 最新构建（自动发布）
+          body: |
+            每次代码推送自动构建发布，始终为最新版本。
+            直链下载：https://github.com/${{ github.repository }}/releases/download/latest/app-release.apk
+          prerelease: true
+          files: android/app/build/outputs/apk/release/app-release.apk
+
+      # 推送 v* tag 或手动触发填 release_tag 时，发布正式版本号 Release
+      - name: Publish versioned release
+        if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.release_tag != '')
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.release_tag || github.ref_name }}
+          files: android/app/build/outputs/apk/release/app-release.apk
+          generate_release_notes: true
