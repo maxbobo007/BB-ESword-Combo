@@ -10,7 +10,7 @@
 - 📊 **学习追踪**: 记录学习进度、已学单词、完成关卡
 - 🏆 **成就系统**: 积分、连续学习天数、准确率统计
 - 💾 **离线支持**: 本地存储，无需联网即可学习
-- 🌐 **跨平台**: 支持Android和iOS（当前优先Android）
+- 🌐 **跨平台**: Android、iOS 和 Web（浏览器）共用同一套代码
 
 ## 技术栈
 
@@ -20,6 +20,7 @@
 - **本地存储**: AsyncStorage
 - **导航**: React Navigation
 - **动画**: React Native Reanimated
+- **Web**: react-native-web + Vite（与移动端共用 `App.tsx` 和 `src/`）
 
 ## 项目结构
 
@@ -31,12 +32,18 @@ BB ESword/
 │   ├── data/           # 数据层
 │   │   └── words.ts    # 词库数据
 │   ├── utils/          # 工具函数
-│   │   └── puzzleGenerator.ts  # 填字谜生成器
+│   │   ├── puzzleGenerator.ts  # 填字谜生成器
+│   │   └── letters.ts  # 字母归一化（去重音，保留 Ñ）
+│   ├── components/     # 通用组件
+│   │   └── Dialog.tsx  # 跨平台弹窗
 │   ├── store/          # 状态管理
 │   │   └── gameStore.ts  # 游戏状态
 │   └── screens/        # 页面组件
 │       ├── HomeScreen.tsx    # 主页
 │       └── GameScreen.tsx    # 游戏页面
+├── web/                # Web 入口（index.html + main.tsx）
+├── __tests__/          # 单元测试
+├── vite.config.ts      # Web 构建配置
 ├── App.tsx             # 应用入口
 ├── package.json        # 依赖配置
 └── tsconfig.json       # TypeScript配置
@@ -63,17 +70,34 @@ npm run android
 
 # iOS
 npm run ios
+
+# Web（浏览器打开 http://localhost:5173）
+npm run web
+```
+
+4. Web 版打包（输出到 `dist-web/`，可直接部署到任何静态网站托管）:
+```bash
+npm run web:build
+```
+
+5. 测试与类型检查:
+```bash
+npm test
+npm run type-check
 ```
 
 ## 游戏说明
 
 ### 填字游戏玩法
 
-1. 根据英文/中文提示填入正确的西语单词
-2. 横向和纵向的单词会在某些字母处交叉
-3. 蓝色字母是提示字母，不可修改
-4. 点击空白格子，使用虚拟键盘输入字母
-5. 完成所有单词即可过关
+1. 选择等级 → 主题 → 难度，点“开始游戏”
+2. 根据英文/中文提示填入正确的西语单词
+3. 横向和纵向的单词会在某些字母处交叉
+4. 蓝色字母是提示字母，不可修改
+5. 点击格子后用屏幕键盘输入；再点同一格可切换横 / 纵方向
+6. 重音可以省略（café 填 CAFE），Ñ 是单独的一个键
+7. Web 版可以直接用电脑键盘输入，方向键移动，退格删除
+8. 完成所有单词即可过关，结束时会列出全部答案
 
 ### 难度等级
 
@@ -94,7 +118,9 @@ npm run ios
 - [x] 核心填字游戏逻辑
 - [x] 词库系统（分级、主题分类）
 - [x] 学习追踪和进度系统
-- [ ] 社交功能（排行榜、好友对战）
+- [x] Web 版本（react-native-web，与移动端共用代码）
+- [x] 词库扩充到约 270 词（A1–C2，每个等级至少 2 个主题）
+- [ ] 社交功能（排行榜、好友对战）— 暂缓
 - [ ] 离线模式完善
 - [ ] 音频发音
 - [ ] 自定义词库
@@ -103,19 +129,13 @@ npm run ios
 
 ## 扩展词库
 
-当前包含20个示例单词。可以通过编辑 `src/data/words.ts` 添加更多单词:
+当前约 270 个单词。在 `src/data/words.ts` 里找到对应的等级和主题分组，加一行即可（ID 自动生成）:
 
 ```typescript
-{
-  id: 'w021',
-  spanish: 'casa',
-  english: 'house',
-  chinese: '房子',
-  level: 'A1',
-  category: 'family',
-  exampleSentence: 'Mi casa es grande.'
-}
+['casa', 'house', '房子', 'Mi casa es grande.'], // [西语, 英语, 中文, 例句（可选）]
 ```
+
+一个主题至少要有 5 个单词才会出现在选择列表里。单词必须是不含空格的单个词，最长 15 个字母。
 
 ## 许可证
 

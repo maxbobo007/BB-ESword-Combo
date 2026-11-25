@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GameSession, UserProgress, CrosswordPuzzle, CrosswordCell } from '@/types/game';
+import { normalizeLetter } from '@/utils/letters';
 
 interface GameState {
   currentPuzzle: CrosswordPuzzle | null;
@@ -8,10 +9,10 @@ interface GameState {
   userProgress: UserProgress | null;
   isLoading: boolean;
 
-  // Actions
   startGame: (puzzle: CrosswordPuzzle) => void;
   updateCell: (row: number, col: number, letter: string) => void;
   useHint: () => void;
+  checkCompletion: () => void;
   completeGame: () => void;
   loadUserProgress: () => Promise<void>;
   saveUserProgress: () => Promise<void>;
@@ -20,6 +21,38 @@ interface GameState {
 
 const STORAGE_KEY = '@bb_esword_progress';
 
+const cloneCells = (cells: CrosswordCell[][]): CrosswordCell[][] =>
+  cells.map(row => row.map(cell => ({ ...cell, wordIds: [...cell.wordIds] })));
+
+const todayString = (d = new Date()) => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
+
+const dayDiff = (from: string, to: string) =>
+  Math.round((new Date(to).getTime() - new Date(from).getTime()) / 86400000);
+
+const countLetters = (cells: CrosswordCell[][]) =>
+  cells.reduce((sum, row) => sum + row.filter(c => c.correctLetter).length, 0);
+
+const defaultProgress = (): UserProgress => ({
+  userId: `user_${Date.now()}`,
+  wordsLearned: [],
+  puzzlesCompleted: [],
+  currentLevel: 'A1',
+  totalScore: 0,
+  streak: 0,
+  lastStudyDate: '',
+  statistics: {
+    totalGamesPlayed: 0,
+    totalWordsLearned: 0,
+    averageAccuracy: 0,
+    totalTimeSpent: 0,
+  },
+});
+
 export const useGameStore = create<GameState>((set, get) => ({
   currentPuzzle: null,
   currentSession: null,
@@ -27,98 +60,81 @@ export const useGameStore = create<GameState>((set, get) => ({
   isLoading: false,
 
   startGame: (puzzle: CrosswordPuzzle) => {
-    const session: GameSession = {
-      puzzleId: puzzle.id,
-      startTime: Date.now(),
-      currentCells: JSON.parse(JSON.stringify(puzzle.cells)),
-      hintsUsed: 0,
-      mistakes: 0,
-      isCompleted: false,
-    };
-
-    set({ currentPuzzle: puzzle, currentSession: session });
+    set({
+      currentPuzzle: puzzle,
+      currentSession: {
+        puzzleId: puzzle.id,
+        startTime: Date.now(),
+        currentCells: cloneCells(puzzle.cells),
+        hintsUsed: 0,
+        mistakes: 0,
+        isCompleted: false,
+      },
+    });
   },
 
   updateCell: (row: number, col: number, letter: string) => {
-    const { currentSession, currentPuzzle } = get();
-    if (!currentSession || !currentPuzzle) return;
+    const { currentSession } = get();
+    if (!currentSession || currentSession.isCompleted) return;
 
-    const cells = currentSession.currentCells;
-    const cell = cells[row][col];
+    const target = currentSession.currentCells[row]?.[col];
+    if (!target || !target.correctLetter || target.isFixed) return;
 
-    if (cell.isFixed) return; // 不能修改提示字母
+    const value = letter ? normalizeLetter(letter) : null;
+    const isMistake = value !== null && value !== target.correctLetter;
 
-    const wasCorrect = cell.letter === cell.correctLetter;
-    cell.letter = letter.toUpperCase();
-    const isCorrect = cell.letter === cell.correctLetter;
-
-    if (!wasCorrect && !isCorrect && letter) {
-      currentSession.mistakes++;
-    }
+    const cells = cloneCells(currentSession.currentCells);
+    cells[row][col].letter = value;
 
     set({
       currentSession: {
         ...currentSession,
         currentCells: cells,
+        mistakes: currentSession.mistakes + (isMistake ? 1 : 0),
       },
     });
 
-    // 检查是否完成
     get().checkCompletion();
   },
 
   useHint: () => {
-    const { currentSession, currentPuzzle } = get();
-    if (!currentSession || !currentPuzzle) return;
+    const { currentSession } = get();
+    if (!currentSession || currentSession.isCompleted) return;
 
-    const cells = currentSession.currentCells;
-    const emptyCells: { row: number; col: number }[] = [];
-
-    for (let row = 0; row < cells.length; row++) {
-      for (let col = 0; col < cells[row].length; col++) {
-        const cell = cells[row][col];
+    const open: { row: number; col: number }[] = [];
+    currentSession.currentCells.forEach((line, row) =>
+      line.forEach((cell, col) => {
         if (!cell.isFixed && cell.correctLetter && cell.letter !== cell.correctLetter) {
-          emptyCells.push({ row, col });
+          open.push({ row, col });
         }
-      }
-    }
+      })
+    );
+    if (open.length === 0) return;
 
-    if (emptyCells.length > 0) {
-      const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-      cells[randomCell.row][randomCell.col].letter =
-        cells[randomCell.row][randomCell.col].correctLetter;
-      cells[randomCell.row][randomCell.col].isFixed = true;
+    const pick = open[Math.floor(Math.random() * open.length)];
+    const cells = cloneCells(currentSession.currentCells);
+    cells[pick.row][pick.col].letter = cells[pick.row][pick.col].correctLetter;
+    cells[pick.row][pick.col].isFixed = true;
 
-      set({
-        currentSession: {
-          ...currentSession,
-          currentCells: cells,
-          hintsUsed: currentSession.hintsUsed + 1,
-        },
-      });
-    }
+    set({
+      currentSession: {
+        ...currentSession,
+        currentCells: cells,
+        hintsUsed: currentSession.hintsUsed + 1,
+      },
+    });
+
+    get().checkCompletion();
   },
 
   checkCompletion: () => {
     const { currentSession } = get();
-    if (!currentSession) return;
+    if (!currentSession || currentSession.isCompleted) return;
 
-    const cells = currentSession.currentCells;
-    let isCompleted = true;
-
-    for (const row of cells) {
-      for (const cell of row) {
-        if (cell.correctLetter && cell.letter !== cell.correctLetter) {
-          isCompleted = false;
-          break;
-        }
-      }
-      if (!isCompleted) break;
-    }
-
-    if (isCompleted) {
-      get().completeGame();
-    }
+    const done = currentSession.currentCells.every(line =>
+      line.every(cell => !cell.correctLetter || cell.letter === cell.correctLetter)
+    );
+    if (done) get().completeGame();
   },
 
   completeGame: () => {
@@ -127,58 +143,56 @@ export const useGameStore = create<GameState>((set, get) => ({
 
     const endTime = Date.now();
     const timeTaken = Math.floor((endTime - currentSession.startTime) / 1000);
-    const accuracy =
-      ((currentPuzzle.words.reduce((sum, w) => sum + w.wordData.spanish.length, 0) -
-        currentSession.mistakes) /
-        currentPuzzle.words.reduce((sum, w) => sum + w.wordData.spanish.length, 0)) *
-      100;
+    const totalLetters = Math.max(1, countLetters(currentSession.currentCells));
+    const accuracy = Math.max(0, ((totalLetters - currentSession.mistakes) / totalLetters) * 100);
 
     const score = Math.max(
       0,
       Math.floor(
-        1000 -
-          currentSession.mistakes * 10 -
-          currentSession.hintsUsed * 20 -
-          timeTaken * 0.5
+        1000 - currentSession.mistakes * 10 - currentSession.hintsUsed * 20 - timeTaken * 0.5
       )
     );
 
-    const updatedSession: GameSession = {
-      ...currentSession,
-      endTime,
-      isCompleted: true,
-      score,
+    const updatedSession: GameSession = { ...currentSession, endTime, isCompleted: true, score };
+
+    if (!userProgress) {
+      set({ currentSession: updatedSession });
+      return;
+    }
+
+    const newWords = currentPuzzle.words
+      .map(w => w.wordData.id)
+      .filter(id => !userProgress.wordsLearned.includes(id));
+
+    // 连续学习天数 (daily streak)
+    const today = todayString();
+    let streak = userProgress.streak;
+    if (!userProgress.lastStudyDate) streak = 1;
+    else {
+      const gap = dayDiff(userProgress.lastStudyDate, today);
+      if (gap === 1) streak += 1;
+      else if (gap > 1) streak = 1;
+      else if (streak === 0) streak = 1;
+    }
+
+    const games = userProgress.statistics.totalGamesPlayed;
+    const updatedProgress: UserProgress = {
+      ...userProgress,
+      wordsLearned: [...userProgress.wordsLearned, ...newWords],
+      puzzlesCompleted: [...userProgress.puzzlesCompleted, currentPuzzle.id],
+      totalScore: userProgress.totalScore + score,
+      streak,
+      lastStudyDate: today,
+      statistics: {
+        totalGamesPlayed: games + 1,
+        totalWordsLearned: userProgress.statistics.totalWordsLearned + newWords.length,
+        averageAccuracy: (userProgress.statistics.averageAccuracy * games + accuracy) / (games + 1),
+        totalTimeSpent: userProgress.statistics.totalTimeSpent + timeTaken,
+      },
     };
 
-    if (userProgress) {
-      const newWordsLearned = currentPuzzle.words
-        .map(w => w.wordData.id)
-        .filter(id => !userProgress.wordsLearned.includes(id));
-
-      const updatedProgress: UserProgress = {
-        ...userProgress,
-        wordsLearned: [...userProgress.wordsLearned, ...newWordsLearned],
-        puzzlesCompleted: [...userProgress.puzzlesCompleted, currentPuzzle.id],
-        totalScore: userProgress.totalScore + score,
-        statistics: {
-          ...userProgress.statistics,
-          totalGamesPlayed: userProgress.statistics.totalGamesPlayed + 1,
-          totalWordsLearned:
-            userProgress.statistics.totalWordsLearned + newWordsLearned.length,
-          averageAccuracy:
-            (userProgress.statistics.averageAccuracy *
-              userProgress.statistics.totalGamesPlayed +
-              accuracy) /
-            (userProgress.statistics.totalGamesPlayed + 1),
-          totalTimeSpent: userProgress.statistics.totalTimeSpent + timeTaken,
-        },
-      };
-
-      set({ currentSession: updatedSession, userProgress: updatedProgress });
-      get().saveUserProgress();
-    } else {
-      set({ currentSession: updatedSession });
-    }
+    set({ currentSession: updatedSession, userProgress: updatedProgress });
+    get().saveUserProgress();
   },
 
   loadUserProgress: async () => {
@@ -186,29 +200,15 @@ export const useGameStore = create<GameState>((set, get) => ({
     try {
       const data = await AsyncStorage.getItem(STORAGE_KEY);
       if (data) {
-        const progress: UserProgress = JSON.parse(data);
-        set({ userProgress: progress });
+        set({ userProgress: { ...defaultProgress(), ...JSON.parse(data) } });
       } else {
-        const defaultProgress: UserProgress = {
-          userId: `user_${Date.now()}`,
-          wordsLearned: [],
-          puzzlesCompleted: [],
-          currentLevel: 'A1',
-          totalScore: 0,
-          streak: 0,
-          lastStudyDate: new Date().toISOString().split('T')[0],
-          statistics: {
-            totalGamesPlayed: 0,
-            totalWordsLearned: 0,
-            averageAccuracy: 0,
-            totalTimeSpent: 0,
-          },
-        };
-        set({ userProgress: defaultProgress });
-        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(defaultProgress));
+        const progress = defaultProgress();
+        set({ userProgress: progress });
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
       }
     } catch (error) {
       console.error('Failed to load user progress:', error);
+      set({ userProgress: defaultProgress() });
     } finally {
       set({ isLoading: false });
     }
@@ -217,7 +217,6 @@ export const useGameStore = create<GameState>((set, get) => ({
   saveUserProgress: async () => {
     const { userProgress } = get();
     if (!userProgress) return;
-
     try {
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(userProgress));
     } catch (error) {
@@ -225,10 +224,5 @@ export const useGameStore = create<GameState>((set, get) => ({
     }
   },
 
-  resetGame: () => {
-    set({
-      currentPuzzle: null,
-      currentSession: null,
-    });
-  },
+  resetGame: () => set({ currentPuzzle: null, currentSession: null }),
 }));

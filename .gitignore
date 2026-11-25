@@ -62,3 +62,6 @@ fastlane/test_output
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# Web build
+dist-web/
