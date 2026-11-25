@@ -98,8 +98,16 @@ export const HomeScreen: React.FC<Props> = ({ navigation }) => {
         large
         right={
           <>
-            <NavAction icon="trophy-outline" onPress={() => navigation.navigate('Achievements')} />
-            <NavAction icon="settings-outline" onPress={() => navigation.navigate('Settings')} />
+            <NavAction
+              icon="trophy-outline"
+              accessibilityLabel="成就"
+              onPress={() => navigation.navigate('Achievements')}
+            />
+            <NavAction
+              icon="settings-outline"
+              accessibilityLabel="设置"
+              onPress={() => navigation.navigate('Settings')}
+            />
           </>
         }
       />
@@ -153,7 +161,7 @@ export const HomeScreen: React.FC<Props> = ({ navigation }) => {
         </Group>
 
         {/* 等级列表 */}
-        <Group header="选择等级和主题" footer="点击等级展开主题；括号内为当前启用词库中的可用词数。">
+        <Group header="选择等级和主题" footer="点击等级展开主题；数字为当前启用词库中的可用词数。">
           {LEVELS.map(({ level, title, description, color }) => {
             const expanded = expandedLevel === level;
             return (

@@ -11,6 +11,7 @@ import { normalizeLetter } from '@/core/engine/normalize';
 import { findWordAt, nextEditableCell, wordCells } from '@/core/engine/cursor';
 import { Direction } from '@/core/types/game';
 import { getDailyPuzzle } from '@/core/daily/daily';
+import { useHardwareKeyboard } from '@/hooks/useHardwareKeyboard';
 import { filterWords, pickRandomWords } from '@/core/data/words';
 import { localDateString } from '@/core/progress/streak';
 import { RootStackParamList } from '@/navigation/types';
@@ -122,6 +123,16 @@ export const GameScreen: React.FC<Props> = ({ route, navigation }) => {
     [activeWord],
   );
 
+  const toggleDirection = () => {
+    if (!selectedCell || !currentPuzzle) {
+      return;
+    }
+    const other: Direction = direction === 'horizontal' ? 'vertical' : 'horizontal';
+    if (findWordAt(currentPuzzle.words, selectedCell.row, selectedCell.col, other)?.direction === other) {
+      setDirection(other);
+    }
+  };
+
   const handleCellPress = (row: number, col: number) => {
     if (!currentSession || !currentPuzzle) {
       return;
@@ -130,10 +141,7 @@ export const GameScreen: React.FC<Props> = ({ route, navigation }) => {
       return;
     }
     if (selectedCell?.row === row && selectedCell?.col === col) {
-      const other: Direction = direction === 'horizontal' ? 'vertical' : 'horizontal';
-      if (findWordAt(currentPuzzle.words, row, col, other)?.direction === other) {
-        setDirection(other);
-      }
+      toggleDirection();
       return;
     }
     setSelectedCell({ row, col });
@@ -172,6 +180,14 @@ export const GameScreen: React.FC<Props> = ({ route, navigation }) => {
       handleLetterInput(ch);
     }
   };
+
+  // 网页端物理键盘（系统键盘模式下由隐藏输入框接管，避免重复输入）
+  useHardwareKeyboard({
+    enabled: !useSystemKeyboard && !!currentSession && !currentSession.isCompleted,
+    onLetter: handleLetterInput,
+    onDelete: () => handleLetterInput(''),
+    onToggleDirection: toggleDirection,
+  });
 
   const title = useMemo(() => {
     const params = route.params;

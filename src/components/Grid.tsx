@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { CrosswordCell } from '@/core/types/game';
 import { GameTheme } from '@/theme/tokens';
 import { useGameTheme } from '@/theme/ThemeProvider';
@@ -14,6 +14,7 @@ interface GridProps {
 
 export const Grid: React.FC<GridProps> = ({ cells, selectedCell, activeWordKeys, onCellPress }) => {
   const theme = useGameTheme();
+  const { width: windowWidth } = useWindowDimensions();
 
   // 裁剪到实际有单词的包围盒，不渲染四周的空白区域
   const visible = useMemo(() => {
@@ -35,7 +36,9 @@ export const Grid: React.FC<GridProps> = ({ cells, selectedCell, activeWordKeys,
   }, [cells]);
 
   const colCount = visible[0]?.length || 1;
-  const cellSize = Math.min((Dimensions.get('window').width - 56) / colCount, 40);
+  // 网页桌面端内容列最宽 520，格子大小按内容列而非整个窗口计算
+  const contentWidth = Math.min(windowWidth, 520);
+  const cellSize = Math.min((contentWidth - 56) / colCount, 40);
   const styles = useMemo(() => createStyles(theme, cellSize), [theme, cellSize]);
 
   return (

@@ -59,6 +59,21 @@ src/
 
 下载后传到手机安装（需允许安装未知来源应用），或 `adb install app-release.apk`。
 
+## 网页版
+
+同一套代码（react-native-web）发布为网页，手机和桌面浏览器都能用，也可"添加到主屏幕"当 App 用（PWA，支持离线）。
+
+- 在线地址：<https://maxbobo007.github.io/BB-ESword-Combo/>
+  （首次需在仓库 **Settings → Pages** 里把来源设为 **Deploy from a branch → `gh-pages` / root**，之后每次推送由 CI 自动发布）
+- 桌面端内容居中为手机宽度单列；支持**物理键盘**：字母直接输入（重音自动归一化，西语键盘的 ñ 可用）、Backspace 删除、空格/Tab 切换横纵方向
+- 浏览器前进/后退键与页面栈同步；学习进度和设置存在浏览器 localStorage
+
+```bash
+npm run web:build   # 构建到 web/dist（esbuild + react-native-web）
+npm run web:test    # 浏览器冒烟测试：持久化 / 后退键 / 物理键盘 / 桌面布局 / 离线
+npx serve web/dist  # 本地预览（需 https 或 localhost 才启用离线缓存）
+```
+
 ## 本地开发
 
 ```bash
@@ -83,8 +98,8 @@ npm run android      # 需要本机 Android SDK + 模拟器/真机
 - [x] 导航 + 深色模式
 - [x] TTS 发音、每日挑战、成就系统
 - [x] 安卓构建 + CI 出包
+- [x] Web 版（react-native-web + PWA + Web Speech 发音，CI 自动发布 gh-pages）
 - [ ] iOS 工程（Xcode 工程初始化 + Podfile 完善）
-- [ ] Web 版（react-native-web + speech/index.web.ts）
 - [ ] macOS（Web 版桌面壳或 react-native-macos）
 - [ ] 数据同步后端（progressStore 已预留接缝）
 - [ ] 社交功能（排行榜、好友对战）

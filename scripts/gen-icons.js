@@ -104,14 +104,18 @@ function makePng(size, round) {
   ]);
 }
 
-const DENSITIES = { mdpi: 48, hdpi: 72, xhdpi: 96, xxhdpi: 144, xxxhdpi: 192 };
-const resDir = path.join(__dirname, '..', 'android', 'app', 'src', 'main', 'res');
+if (require.main === module) {
+  const DENSITIES = { mdpi: 48, hdpi: 72, xhdpi: 96, xxhdpi: 144, xxxhdpi: 192 };
+  const resDir = path.join(__dirname, '..', 'android', 'app', 'src', 'main', 'res');
 
-for (const [density, size] of Object.entries(DENSITIES)) {
-  const dir = path.join(resDir, `mipmap-${density}`);
-  fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(path.join(dir, 'ic_launcher.png'), makePng(size, false));
-  fs.writeFileSync(path.join(dir, 'ic_launcher_round.png'), makePng(size, true));
-  console.log(`mipmap-${density}: ${size}x${size} ok`);
+  for (const [density, size] of Object.entries(DENSITIES)) {
+    const dir = path.join(resDir, `mipmap-${density}`);
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(path.join(dir, 'ic_launcher.png'), makePng(size, false));
+    fs.writeFileSync(path.join(dir, 'ic_launcher_round.png'), makePng(size, true));
+    console.log(`mipmap-${density}: ${size}x${size} ok`);
+  }
+  console.log('done');
 }
-console.log('done');
+
+module.exports = { makePng };
