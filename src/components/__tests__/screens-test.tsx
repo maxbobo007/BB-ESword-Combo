@@ -58,7 +58,7 @@ describe('HomeScreen', () => {
 
   it('动词模式按词尾分组，只出动词', async () => {
     await render(<HomeScreen />);
-    await fireEvent.press(screen.getByText('动词'));
+    await fireEvent.press(screen.getByText('动词原形'));
     expect(screen.getByText('-AR 动词')).toBeTruthy();
     await fireEvent.press(screen.getByText('-ER 动词'));
     await fireEvent.press(screen.getByLabelText(/^开始，A1 -ER 动词/));
@@ -75,6 +75,22 @@ describe('HomeScreen', () => {
 });
 
 const DIR = { horizontal: '横', vertical: '纵' } as const;
+
+describe('HomeScreen · 变位模式', () => {
+  it('变位模式显示当前时态，按设置出题，题目带例句', async () => {
+    await render(<HomeScreen />);
+    await fireEvent.press(screen.getByText('变位'));
+    expect(screen.getByText('不规则动词')).toBeTruthy();
+    expect(screen.getByLabelText('修改要练的时态')).toBeTruthy();
+    await fireEvent.press(screen.getByLabelText(/^开始，A1 -AR 动词/));
+    const puzzle = useGameStore.getState().currentPuzzle!;
+    expect(puzzle.words.length).toBeGreaterThanOrEqual(3);
+    for (const w of puzzle.words) {
+      expect(w.id.startsWith('c:')).toBe(true);
+      expect(w.wordData.exampleSentence).toBeTruthy();
+    }
+  });
+});
 
 describe('GameScreen', () => {
   it('没有关卡时显示返回主页', async () => {

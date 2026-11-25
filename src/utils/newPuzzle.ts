@@ -1,6 +1,10 @@
 import { getTopicWords, MIN_WORDS_PER_PUZZLE, shuffle } from '@/data/words';
 import { BoardSize, CrosswordPuzzle, GameSettings } from '@/types/game';
 import { PuzzleGenerator } from '@/utils/puzzleGenerator';
+import { ConjOptions, ConjTopic, conjugationPool } from '@/conjugation/items';
+import { DEFAULT_TENSES } from '@/conjugation/tenses';
+
+const DEFAULT_CONJ: ConjOptions = { tenses: DEFAULT_TENSES, vosotros: true };
 
 // 棋盘越大，放的词越多
 export const BOARD_SIZES: { size: BoardSize; label: string; maxWords: number }[] = [
@@ -13,8 +17,11 @@ export const BOARD_SIZES: { size: BoardSize; label: string; maxWords: number }[]
 // 放词顺序对结果影响很大，所以多试几种顺序，留下放词最多的那个棋盘。
 const ATTEMPTS = 12;
 
-export const generateForSettings = (settings: GameSettings) => {
-  const pool = getTopicWords(settings.mode, settings.level, settings.topic);
+export const generateForSettings = (settings: GameSettings, conj: ConjOptions = DEFAULT_CONJ) => {
+  const pool =
+    settings.mode === 'conj'
+      ? conjugationPool(settings.level, settings.topic as ConjTopic, conj)
+      : getTopicWords(settings.mode, settings.level, settings.topic);
   if (pool.length < MIN_WORDS_PER_PUZZLE) return null;
   const board = BOARD_SIZES.find(b => b.size === settings.boardSize) ?? BOARD_SIZES[1];
 

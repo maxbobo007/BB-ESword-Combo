@@ -1,6 +1,7 @@
 import { LanguageLevel, PartOfSpeech, Word, WordCategory } from '@/types/game';
 import { NOUNS, NounEntry, VERBS, VerbEntry } from '@/data/vocabulary';
 import { MORE_NOUNS, MORE_VERBS } from '@/data/vocabularyMore';
+import { buildExample } from '@/conjugation/examples';
 
 // 最早的 20 个示例词（保留原 id，已有进度里引用了它们）
 const LEGACY: Omit<Word, 'pos'>[] = [
@@ -159,7 +160,7 @@ const LEGACY: Omit<Word, 'pos'>[] = [
     id: 'w017',
     spanish: 'jefe',
     english: 'boss',
-    chinese: '老板',
+    chinese: '老板；上司',
     level: 'A1',
     category: 'work',
     exampleSentence: 'Mi jefe es muy exigente.',
@@ -223,6 +224,14 @@ const nounsFrom = (table: NounTable): Word[] =>
       )
   );
 
+// 动词原形模式答对时弹出的例句：用现在时 yo 的模板生成
+const verbExample = (inf: string) => {
+  const ex = buildExample(inf, 'presente', 0);
+  return ex
+    ? { exampleSentence: ex.es, exampleTranslation: ex.zh, exampleHighlight: ex.form }
+    : {};
+};
+
 const verbsFrom = (table: VerbTable): Word[] =>
   (Object.entries(table) as [LanguageLevel, VerbEntry[]][]).flatMap(([level, entries]) =>
     entries.map(([spanish, chinese, english]) => ({
@@ -233,6 +242,7 @@ const verbsFrom = (table: VerbTable): Word[] =>
       level,
       category: VERB_CATEGORY,
       pos: 'verb' as const,
+      ...verbExample(spanish),
     }))
   );
 
@@ -247,7 +257,7 @@ export const SAMPLE_WORDS: Word[] = [
 
 // ---------- 模式与主题 ----------
 
-export type Mode = PartOfSpeech;
+export type Mode = PartOfSpeech; // 名词 / 动词原形（变位模式见 src/conjugation/items.ts）
 export type VerbGroup = 'ar' | 'er' | 'ir';
 
 export const VERB_GROUP_NAMES: Record<VerbGroup, string> = {

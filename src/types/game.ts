@@ -34,6 +34,8 @@ export interface Word {
   gender?: 'm' | 'f'; // 名词的阴阳性
   pronunciation?: string; // 发音（IPA）
   exampleSentence?: string; // 例句
+  exampleTranslation?: string; // 例句的中文翻译
+  exampleHighlight?: string; // 例句里要高亮的部分（通常就是答案或完整变位形式）
 }
 
 // 填字游戏单元格
@@ -90,10 +92,12 @@ export interface GameSession {
 // 开局设置，用于"再来一局"
 export type BoardSize = 7 | 9 | 11;
 
+export type GameMode = 'noun' | 'verb' | 'conj';
+
 export interface GameSettings {
-  mode: PartOfSpeech; // 名词模式 / 动词模式
+  mode: GameMode; // 名词 / 动词原形 / 动词变位
   level: LanguageLevel;
-  topic: string; // 名词：WordCategory；动词：'ar' | 'er' | 'ir'
+  topic: string; // 名词：WordCategory；动词和变位：'ar' | 'er' | 'ir'（变位还有 'irr' 不规则）
   difficulty: 'easy' | 'medium' | 'hard';
   boardSize: BoardSize; // 正方形棋盘边长
 }
