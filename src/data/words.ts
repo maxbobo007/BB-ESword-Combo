@@ -1,5 +1,6 @@
 import { LanguageLevel, PartOfSpeech, Word, WordCategory } from '@/types/game';
-import { NOUNS, VERBS } from '@/data/vocabulary';
+import { NOUNS, NounEntry, VERBS, VerbEntry } from '@/data/vocabulary';
+import { MORE_NOUNS, MORE_VERBS } from '@/data/vocabularyMore';
 
 // 最早的 20 个示例词（保留原 id，已有进度里引用了它们）
 const LEGACY: Omit<Word, 'pos'>[] = [
@@ -103,7 +104,7 @@ const LEGACY: Omit<Word, 'pos'>[] = [
     spanish: 'viaje',
     english: 'trip',
     chinese: '旅行',
-    level: 'A2',
+    level: 'A1',
     category: 'travel',
     exampleSentence: 'El viaje fue increíble.',
   },
@@ -112,7 +113,7 @@ const LEGACY: Omit<Word, 'pos'>[] = [
     spanish: 'hotel',
     english: 'hotel',
     chinese: '酒店',
-    level: 'A2',
+    level: 'A1',
     category: 'travel',
     exampleSentence: 'Reservé un hotel cerca de la playa.',
   },
@@ -121,7 +122,7 @@ const LEGACY: Omit<Word, 'pos'>[] = [
     spanish: 'playa',
     english: 'beach',
     chinese: '海滩',
-    level: 'A2',
+    level: 'A1',
     category: 'travel',
     exampleSentence: 'Vamos a la playa este verano.',
   },
@@ -130,7 +131,7 @@ const LEGACY: Omit<Word, 'pos'>[] = [
     spanish: 'avión',
     english: 'airplane',
     chinese: '飞机',
-    level: 'A2',
+    level: 'A1',
     category: 'travel',
     exampleSentence: 'El avión sale a las tres.',
   },
@@ -150,7 +151,7 @@ const LEGACY: Omit<Word, 'pos'>[] = [
     spanish: 'trabajo',
     english: 'work',
     chinese: '工作',
-    level: 'B1',
+    level: 'A1',
     category: 'work',
     exampleSentence: 'Mi trabajo es muy interesante.',
   },
@@ -159,7 +160,7 @@ const LEGACY: Omit<Word, 'pos'>[] = [
     spanish: 'jefe',
     english: 'boss',
     chinese: '老板',
-    level: 'B1',
+    level: 'A1',
     category: 'work',
     exampleSentence: 'Mi jefe es muy exigente.',
   },
@@ -168,7 +169,7 @@ const LEGACY: Omit<Word, 'pos'>[] = [
     spanish: 'oficina',
     english: 'office',
     chinese: '办公室',
-    level: 'B1',
+    level: 'A1',
     category: 'work',
     exampleSentence: 'La oficina está en el centro.',
   },
@@ -177,7 +178,7 @@ const LEGACY: Omit<Word, 'pos'>[] = [
     spanish: 'reunión',
     english: 'meeting',
     chinese: '会议',
-    level: 'B1',
+    level: 'A2',
     category: 'work',
     exampleSentence: 'Tenemos una reunión importante.',
   },
@@ -186,7 +187,7 @@ const LEGACY: Omit<Word, 'pos'>[] = [
     spanish: 'proyecto',
     english: 'project',
     chinese: '项目',
-    level: 'B1',
+    level: 'A2',
     category: 'work',
     exampleSentence: 'Estamos trabajando en un nuevo proyecto.',
   },
@@ -202,25 +203,29 @@ const LEGACY_GENDER: Record<string, 'm' | 'f'> = {
 // 动词的大致主题只用于兼容 Word 类型；动词模式按词尾分组，不按主题
 const VERB_CATEGORY: WordCategory = 'culture';
 
-const nounWords: Word[] = (Object.keys(NOUNS) as WordCategory[]).flatMap(category =>
-  (Object.entries(NOUNS[category]) as [LanguageLevel, (typeof NOUNS)[WordCategory]['A1']][]).flatMap(
-    ([level, entries]) =>
-      (entries ?? []).map(([spanish, chinese, english, gender]) => ({
-        id: `n:${spanish}`,
-        spanish,
-        chinese,
-        english,
-        level,
-        category,
-        pos: 'noun' as const,
-        gender,
-      }))
-  )
-);
+type NounTable = Partial<Record<WordCategory, Partial<Record<LanguageLevel, NounEntry[]>>>>;
+type VerbTable = Partial<Record<LanguageLevel, VerbEntry[]>>;
 
-const verbWords: Word[] = (Object.entries(VERBS) as [LanguageLevel, (typeof VERBS)['A1']][]).flatMap(
-  ([level, entries]) =>
-    (entries ?? []).map(([spanish, chinese, english]) => ({
+const nounsFrom = (table: NounTable): Word[] =>
+  (Object.entries(table) as [WordCategory, Partial<Record<LanguageLevel, NounEntry[]>>][]).flatMap(
+    ([category, byLevel]) =>
+      (Object.entries(byLevel) as [LanguageLevel, NounEntry[]][]).flatMap(([level, entries]) =>
+        entries.map(([spanish, chinese, english, gender]) => ({
+          id: `n:${spanish}`,
+          spanish,
+          chinese,
+          english,
+          level,
+          category,
+          pos: 'noun' as const,
+          gender,
+        }))
+      )
+  );
+
+const verbsFrom = (table: VerbTable): Word[] =>
+  (Object.entries(table) as [LanguageLevel, VerbEntry[]][]).flatMap(([level, entries]) =>
+    entries.map(([spanish, chinese, english]) => ({
       id: `v:${spanish}`,
       spanish,
       chinese,
@@ -229,7 +234,10 @@ const verbWords: Word[] = (Object.entries(VERBS) as [LanguageLevel, (typeof VERB
       category: VERB_CATEGORY,
       pos: 'verb' as const,
     }))
-);
+  );
+
+const nounWords = [...nounsFrom(NOUNS), ...nounsFrom(MORE_NOUNS)];
+const verbWords = [...verbsFrom(VERBS), ...verbsFrom(MORE_VERBS)];
 
 export const SAMPLE_WORDS: Word[] = [
   ...LEGACY.map(w => ({ ...w, pos: 'noun' as const, gender: LEGACY_GENDER[w.spanish] })),
@@ -259,6 +267,11 @@ export const CATEGORY_NAMES: Record<WordCategory, string> = {
   sports: '运动',
   technology: '科技',
   culture: '文化娱乐',
+  home: '家居',
+  clothing: '服装',
+  city: '城市与场所',
+  time: '时间',
+  professions: '职业',
 };
 
 // 一局至少需要的单词数

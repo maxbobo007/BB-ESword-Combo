@@ -12,7 +12,12 @@ export type WordCategory =
   | 'education' // 教育
   | 'sports' // 运动
   | 'technology' // 科技
-  | 'culture'; // 文化
+  | 'culture' // 文化
+  | 'home' // 家居
+  | 'clothing' // 服装
+  | 'city' // 城市与场所
+  | 'time' // 时间
+  | 'professions'; // 职业
 
 // 词性
 export type PartOfSpeech = 'noun' | 'verb';

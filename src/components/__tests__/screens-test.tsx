@@ -35,10 +35,12 @@ describe('HomeScreen', () => {
     await render(<HomeScreen />);
     expect(screen.getByText('食物')).toBeTruthy();
     expect(screen.getByText('家庭')).toBeTruthy();
-    expect(screen.queryByText('工作')).toBeNull(); // A1 没有工作类的词
+    // 新增的主题也能选
+    expect(screen.getByText('家居')).toBeTruthy();
+    expect(screen.getByText('时间')).toBeTruthy();
+    expect(screen.getByText('职业')).toBeTruthy();
 
     await fireEvent.press(screen.getByText('A2'));
-    expect(screen.getByText('工作')).toBeTruthy();
 
     await fireEvent.press(screen.getByText('旅行'));
     await fireEvent.press(screen.getByLabelText(/^开始，A2 旅行/));
