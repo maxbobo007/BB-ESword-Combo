@@ -338,8 +338,13 @@ export class PuzzleGenerator {
 
     for (const pw of this.placedWords) {
       const [dr, dc] = step(pw.direction);
-      const hintsCount = Math.max(1, Math.floor(pw.letters.length * hintRatio));
-      const indices = pw.letters.map((_, i) => i);
+      // 变位题只在词干范围内给提示，要考的词尾一个都不给
+      const limit =
+        pw.word.hintableLength !== undefined
+          ? Math.min(pw.word.hintableLength, pw.letters.length - 1)
+          : pw.letters.length;
+      const indices = pw.letters.map((_, i) => i).filter(i => i < limit);
+      const hintsCount = Math.min(indices.length, Math.max(1, Math.floor(pw.letters.length * hintRatio)));
       // Fisher–Yates 洗牌，用可复现的随机数
       for (let i = indices.length - 1; i > 0; i--) {
         const j = Math.floor(this.rng() * (i + 1));

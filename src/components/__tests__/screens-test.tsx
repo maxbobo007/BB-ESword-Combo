@@ -1,5 +1,5 @@
 import React from 'react';
-import { fireEvent, render as rtlRender, screen } from '@testing-library/react-native';
+import { act, fireEvent, render as rtlRender, screen } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { HomeScreen } from '@/components/HomeScreen';
 import { GameScreen } from '@/components/GameScreen';
@@ -117,6 +117,15 @@ describe('GameScreen', () => {
     await render(<GameScreen />);
 
     for (const word of [...puzzle.words].sort((a, b) => a.clueNumber - b.clueNumber)) {
+      // 答对上一个词后，例句卡会暂时替换线索栏：先点"继续"
+      for (let tries = 0; tries < 5; tries++) {
+        await act(async () => {
+          await new Promise(r => setTimeout(r, 20));
+        });
+        const cont = screen.queryByLabelText('继续');
+        if (cont) await fireEvent.press(cont);
+        else if (screen.queryByLabelText(/^当前线索/)) break;
+      }
       // 点线索条打开"全部线索"，再点目标单词
       await fireEvent.press(screen.getByLabelText(/^当前线索/));
       await fireEvent.press(
@@ -128,8 +137,9 @@ describe('GameScreen', () => {
         const c = word.direction === 'horizontal' ? word.startCol + i : word.startCol;
         const cell = useGameStore.getState().currentSession!.currentCells[r][c];
         if (cell.isFixed || cell.letter === cell.correctLetter) continue;
-        // 键盘没有重音键：用不带重音的字母输入
-        const key = letter === 'Ñ' ? 'Ñ，eñe' : letter.normalize('NFD').replace(/[̀-ͯ]/g, '');
+        // 带重音的字母用第一行的重音键输入
+        const ACCENT: Record<string, string> = { Á: '带重音的 A', É: '带重音的 E', Í: '带重音的 I', Ó: '带重音的 O', Ú: '带重音的 U', Ü: '带分音符的 U' };
+        const key = letter === 'Ñ' ? 'Ñ，eñe' : (ACCENT[letter] ?? letter);
         await fireEvent.press(screen.getByLabelText(key));
       }
     }

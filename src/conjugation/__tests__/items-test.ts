@@ -38,18 +38,36 @@ describe('变位例句', () => {
 
   it('例句示例', () => {
     expect(buildExample('hablar', 'indefinido', 0)).toMatchObject({
-      es: 'Ayer yo hablé con Ana.',
+      es: 'Ayer hablé con Ana.',
       zh: '我昨天和安娜说话了。',
       answer: 'hablé',
     });
     expect(buildExample('comer', 'perfecto', 3)).toMatchObject({
-      es: 'Hoy nosotros hemos comido paella.',
+      es: 'Hoy hemos comido paella.',
       answer: 'comido',
       auxiliary: 'hemos',
     });
     expect(buildExample('ir', 'imperativo', 1)).toMatchObject({ es: '¡Ve al cine!', zh: '（你）去电影院吧！' });
-    expect(buildExample('leer', 'gerundio', 5)).toMatchObject({ es: 'Ahora ellos están leyendo el periódico.' });
-    expect(buildExample('tener', 'subjPresente', 1)).toMatchObject({ es: 'Es importante que tú tengas paciencia.' });
+    expect(buildExample('leer', 'gerundio', 5)).toMatchObject({ es: 'Ahora están leyendo el periódico.' });
+    expect(buildExample('tener', 'subjPresente', 1)).toMatchObject({ es: 'Es importante que tengas paciencia.' });
+  });
+
+  it('状态类动词的过去未完成时不说"常常"；过去时意思会变的动词单独翻译', () => {
+    expect(buildExample('vivir', 'imperfecto', 0)).toMatchObject({
+      es: 'Antes vivía en Madrid.',
+      zh: '我以前住在马德里。',
+    });
+    expect(buildExample('hablar', 'imperfecto', 0)!.es).toBe('Antes hablaba con Ana a menudo.');
+    expect(buildExample('saber', 'indefinido', 0)!.zh).toBe('我昨天得知答案了。');
+    expect(buildExample('conocer', 'indefinido', 0)!.zh).toBe('我昨天结识安娜了。');
+    expect(isUsable('querer', 'indefinido')).toBe(false);
+  });
+
+  it('例句不带主语代词', () => {
+    for (const v of ['hablar', 'comer', 'vivir', 'tener']) {
+      const ex = buildExample(v, 'presente', 3)!;
+      expect(ex.es).not.toMatch(/(yo|tú|él|nosotros|vosotros|ellos)/);
+    }
   });
 
   it('标为 noImp / noProg / skip 的动词不出对应题型', () => {

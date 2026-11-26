@@ -35,6 +35,15 @@ export const conjugationVerbs = (level: string, topic: ConjTopic, tenses: Tense[
 
 const pick = <T,>(items: T[], rng: () => number) => items[Math.floor(rng() * items.length)];
 
+// 变位形式和原形的共同前缀长度 = 词干长度（hablé / hablar → 4；fui / ser → 0）
+const sharedPrefix = (a: string, b: string) => {
+  const x = [...a.toLowerCase()];
+  const y = [...b.toLowerCase()];
+  let i = 0;
+  while (i < x.length && i < y.length && x[i] === y[i]) i++;
+  return i;
+};
+
 // 生成一题：动词 × 时态 × 人称 → 填字用的 Word（答案、提示、例句）
 export const conjugationItem = (verb: Word, tense: Tense, p: Person): Word | null => {
   const ex = buildExample(verb.spanish, tense, p);
@@ -52,6 +61,7 @@ export const conjugationItem = (verb: Word, tense: Tense, p: Person): Word | nul
     exampleSentence: ex.es,
     exampleTranslation: ex.zh,
     exampleHighlight: ex.form,
+    hintableLength: Math.min(sharedPrefix(ex.answer, verb.spanish), verb.spanish.length - 2),
   };
 };
 
