@@ -83,6 +83,28 @@ describe('PuzzleGenerator', () => {
     }
   });
 
+  it('设置了 hintableLength 的词，提示字母只落在词干里', () => {
+    const verbForm = { ...makeWord('c1', 'hablábamos'), hintableLength: 4 };
+    for (let seed = 0; seed < 50; seed++) {
+      const puzzle = new PuzzleGenerator(11).generatePuzzle([], {
+        seed,
+        difficulty: 'easy',
+        square: true,
+        fillers: [verbForm, ...SAMPLE_WORDS.slice(0, 8)],
+      });
+      const w = puzzle.words.find(x => x.id === 'c1');
+      if (!w) continue;
+      toGridWord(w.wordData.spanish).forEach((_, k) => {
+        const r = w.direction === 'horizontal' ? w.startRow : w.startRow + k;
+        const c = w.direction === 'horizontal' ? w.startCol + k : w.startCol;
+        // 词尾的格子不能是开局给出的提示字母（交叉格可能来自别的词，这里只检查本词的提示）
+        if (k >= 4 && puzzle.cells[r][c].wordIds.length === 1) {
+          expect(puzzle.cells[r][c].isFixed).toBe(false);
+        }
+      });
+    }
+  });
+
   it('相同种子生成相同关卡', () => {
     const words = SAMPLE_WORDS.slice(0, 8);
     const a = new PuzzleGenerator().generatePuzzle(words, { seed: 42 });

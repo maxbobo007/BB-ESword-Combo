@@ -32,10 +32,11 @@ export const ExampleSentence: React.FC<{ word: Word; compact?: boolean }> = ({ w
 interface Props {
   word: Word | null;
   onClose: () => void;
+  onReport?: (word: Word) => void;
 }
 
-// 答对一个词后，从键盘上方弹出的例句卡片
-export const ExampleCard: React.FC<Props> = ({ word, onClose }) => {
+// 答对一个词后，暂时替换线索栏显示的例句卡片
+export const ExampleCard: React.FC<Props> = ({ word, onClose, onReport }) => {
   const reducedMotion = useReducedMotion();
   const [anim] = useState(() => new Animated.Value(0));
 
@@ -64,17 +65,28 @@ export const ExampleCard: React.FC<Props> = ({ word, onClose }) => {
       <View style={styles.header}>
         <Text style={styles.badge}>✓ {word.spanish}</Text>
         <Text style={styles.label}>例句</Text>
-        <Pressable
-          role="button"
-          aria-label="关闭例句"
-          hitSlop={10}
-          onPress={onClose}
-          style={s => [styles.close, webFocus(s)]}
-        >
-          <Text style={styles.closeText}>✕</Text>
-        </Pressable>
       </View>
       <ExampleSentence word={word} />
+      <View style={styles.actions}>
+        {onReport && (
+          <Pressable
+            role="button"
+            aria-label={`报错：${word.spanish}`}
+            onPress={() => onReport(word)}
+            style={s => [styles.reportButton, webFocus(s)]}
+          >
+            <Text style={styles.reportText}>报错</Text>
+          </Pressable>
+        )}
+        <Pressable
+          role="button"
+          aria-label="继续"
+          onPress={onClose}
+          style={s => [styles.continueButton, s.pressed && styles.continuePressed, webFocus(s)]}
+        >
+          <Text style={styles.continueText}>继续</Text>
+        </Pressable>
+      </View>
     </Animated.View>
   );
 };
@@ -83,6 +95,7 @@ const styles = StyleSheet.create({
   card: {
     marginHorizontal: space.sm,
     marginBottom: space.sm,
+    minHeight: 52,
     padding: space.md,
     borderRadius: radius.lg,
     backgroundColor: colors.surface,
@@ -103,8 +116,20 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   label: { ...type.caption, color: colors.inkMuted, flex: 1 },
-  close: { width: 28, height: 28, alignItems: 'center', justifyContent: 'center' },
-  closeText: { fontSize: 14, color: colors.inkMuted },
+  actions: { flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', gap: space.sm, marginTop: space.sm },
+  reportButton: { minHeight: 44, paddingHorizontal: space.md, justifyContent: 'center' },
+  reportText: { ...type.caption, color: colors.inkMuted, textDecorationLine: 'underline' },
+  continueButton: {
+    minHeight: 44,
+    minWidth: 96,
+    paddingHorizontal: space.lg,
+    borderRadius: radius.md,
+    backgroundColor: colors.success,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  continuePressed: { opacity: 0.85 },
+  continueText: { color: colors.onPrimary, fontSize: 15, fontWeight: '700' },
   es: { fontSize: 17, lineHeight: 24, color: colors.ink },
   esCompact: { fontSize: 14, lineHeight: 20, color: colors.ink },
   hit: { color: colors.primary },

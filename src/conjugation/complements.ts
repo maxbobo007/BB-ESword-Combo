@@ -1,7 +1,10 @@
 // 每个动词的例句搭配：[西语搭配, 中文动词短语, 选项]
 // 搭配要能放进所有人称和时态的模板里（避免 mi/tu 这类随人称变化的物主词）。
 // 选项：skip = 不出变位题（只用第三人称、或放进模板不通顺）；
-//       noImp = 不出命令式；noProg = 不出进行时。
+//       noImp = 不出命令式；noProg = 不出进行时；stative = 状态类动词；
+//       zhPret = 简单过去时的中文；noTenses = 不出题的时态。
+
+import { Tense } from '@/conjugation/engine';
 
 export interface VerbUsage {
   es: string;
@@ -9,6 +12,12 @@ export interface VerbUsage {
   skip?: boolean;
   noImp?: boolean;
   noProg?: boolean;
+  // 状态类动词：过去未完成时不加"常常"
+  stative?: boolean;
+  // 简单过去时里意思会变的动词，单独给中文（supe = 得知，conocí = 结识）
+  zhPret?: string;
+  // 这些时态不出题（模板放进去意思不对）
+  noTenses?: Tense[];
 }
 
 const U = (es: string, zh: string, opts: Omit<VerbUsage, 'es' | 'zh'> = {}): VerbUsage => ({ es, zh, ...opts });
@@ -17,7 +26,7 @@ const SKIP: VerbUsage = { es: '', zh: '', skip: true };
 export const VERB_USAGE: Record<string, VerbUsage> = {
   // A1
   hablar: U('con Ana', '和安娜说话'),
-  trabajar: U('en una oficina', '在办公室工作'),
+  trabajar: U('en una oficina', '在办公室工作', { stative: true }),
   estudiar: U('español', '学西班牙语'),
   comprar: U('pan', '买面包'),
   tomar: U('un café', '喝一杯咖啡'),
@@ -30,12 +39,12 @@ export const VERB_USAGE: Record<string, VerbUsage> = {
   viajar: U('a México', '去墨西哥旅行'),
   llegar: U('a casa', '到家'),
   pagar: U('la cuenta', '付账'),
-  necesitar: U('ayuda', '需要帮助', { noImp: true, noProg: true }),
+  necesitar: U('ayuda', '需要帮助', { noImp: true, noProg: true, stative: true }),
   ayudar: U('a Ana', '帮助安娜'),
   esperar: U('el autobús', '等公交车'),
   nadar: U('en el mar', '在海里游泳'),
   jugar: U('al fútbol', '踢足球'),
-  estar: U('en casa', '在家', { noProg: true }),
+  estar: U('en casa', '在家', { noProg: true, stative: true }),
   dar: U('un regalo a Ana', '送安娜一份礼物'),
   comer: U('paella', '吃海鲜饭'),
   beber: U('agua', '喝水'),
@@ -44,16 +53,16 @@ export const VERB_USAGE: Record<string, VerbUsage> = {
   correr: U('en el parque', '在公园跑步'),
   vender: U('fruta', '卖水果'),
   ver: U('una película', '看电影'),
-  tener: U('paciencia', '有耐心', { noProg: true }),
+  tener: U('paciencia', '有耐心', { noProg: true, stative: true }),
   hacer: U('los deberes', '做作业'),
-  poder: U('nadar', '能去游泳', { noImp: true, noProg: true }),
-  querer: U('un café', '想要一杯咖啡', { noImp: true, noProg: true }),
-  saber: U('la respuesta', '知道答案', { noImp: true, noProg: true }),
-  ser: U('amable', '待人友善', { noProg: true }),
-  comprender: U('la lección', '理解这一课'),
+  poder: U('nadar', '能去游泳', { noImp: true, noProg: true, stative: true, zhPret: '终于去游泳' }),
+  querer: U('un café', '想要一杯咖啡', { noImp: true, noProg: true, stative: true, noTenses: ['indefinido'] }),
+  saber: U('la respuesta', '知道答案', { noImp: true, noProg: true, stative: true, zhPret: '得知答案' }),
+  ser: U('amable', '待人友善', { noProg: true, stative: true }),
+  comprender: U('la lección', '理解这一课', { stative: true }),
   poner: U('la mesa', '摆餐桌'),
-  creer: U('a Ana', '相信安娜', { noProg: true }),
-  vivir: U('en Madrid', '住在马德里'),
+  creer: U('a Ana', '相信安娜', { noProg: true, stative: true }),
+  vivir: U('en Madrid', '住在马德里', { stative: true }),
   escribir: U('una carta', '写一封信'),
   abrir: U('la ventana', '打开窗户'),
   subir: U('al tercer piso', '上三楼'),
@@ -94,9 +103,9 @@ export const VERB_USAGE: Record<string, VerbUsage> = {
   probar: U('la paella', '尝海鲜饭'),
   acabar: U('los deberes', '做完作业'),
   ganar: U('el partido', '赢得比赛'),
-  amar: U('a su familia', '爱自己的家人', { noProg: true }),
+  amar: U('a su familia', '爱自己的家人', { noProg: true, stative: true }),
   invitar: U('a Ana', '邀请安娜'),
-  deber: U('estudiar más', '应该多学习', { noImp: true, noProg: true }),
+  deber: U('estudiar más', '应该多学习', { noImp: true, noProg: true, stative: true }),
   llover: SKIP,
   levantar: U('la mano', '举手'),
   mandar: U('una carta', '寄一封信'),
@@ -119,8 +128,8 @@ export const VERB_USAGE: Record<string, VerbUsage> = {
   cambiar: U('de trabajo', '换工作'),
   enseñar: U('matemáticas', '教数学'),
   volver: U('a casa', '回家'),
-  entender: U('la pregunta', '明白这个问题', { noProg: true }),
-  conocer: U('a Ana', '认识安娜', { noProg: true }),
+  entender: U('la pregunta', '明白这个问题', { noProg: true, stative: true }),
+  conocer: U('a Ana', '认识安娜', { noProg: true, stative: true, zhPret: '结识安娜' }),
   bajar: U('la escalera', '下楼梯'),
   pasear: U('por la playa', '在海边散步'),
   pintar: U('la pared', '粉刷墙壁'),
@@ -139,7 +148,7 @@ export const VERB_USAGE: Record<string, VerbUsage> = {
   ofrecer: U('ayuda', '提供帮助'),
   responder: U('el correo', '回复邮件'),
   sentir: U('frío', '觉得冷', { noImp: true }),
-  preferir: U('el té', '更喜欢茶', { noImp: true, noProg: true }),
+  preferir: U('el té', '更喜欢茶', { noImp: true, noProg: true, stative: true }),
   repetir: U('la frase', '重复这个句子'),
   servir: U('la cena', '上晚饭'),
   seguir: U('las instrucciones', '按说明做'),
@@ -201,7 +210,7 @@ export const VERB_USAGE: Record<string, VerbUsage> = {
   votar: U('en las elecciones', '在选举中投票'),
   besar: U('a Ana', '亲吻安娜'),
   celebrar: U('el cumpleaños', '庆祝生日'),
-  odiar: U('el ruido', '讨厌噪音', { noImp: true, noProg: true }),
+  odiar: U('el ruido', '讨厌噪音', { noImp: true, noProg: true, stative: true }),
   funcionar: SKIP,
   aparecer: U('en la foto', '出现在照片里', { noImp: true }),
   coger: U('el autobús', '坐公交车'),
@@ -215,19 +224,19 @@ export const VERB_USAGE: Record<string, VerbUsage> = {
   proteger: U('la naturaleza', '保护大自然'),
   recoger: U('a los niños', '去接孩子们'),
   suceder: SKIP,
-  temer: U('a los perros', '害怕狗', { noImp: true, noProg: true }),
+  temer: U('a los perros', '害怕狗', { noImp: true, noProg: true, stative: true }),
   toser: U('mucho', '咳嗽得很厉害', { noImp: true }),
   valer: SKIP,
   vencer: U('al otro equipo', '战胜对手'),
   barrer: U('el suelo', '扫地'),
   coser: U('un botón', '缝一颗纽扣'),
   atender: U('a los clientes', '接待客户'),
-  depender: U('de sus padres', '依靠父母', { noImp: true, noProg: true }),
+  depender: U('de sus padres', '依靠父母', { noImp: true, noProg: true, stative: true }),
   prometer: U('volver pronto', '答应早点回来'),
   sorprender: U('a Ana', '给安娜一个惊喜'),
   convencer: U('a Ana', '说服安娜'),
   reconocer: U('la voz de Ana', '认出安娜的声音', { noImp: true }),
-  merecer: U('un premio', '值得获奖', { noImp: true, noProg: true }),
+  merecer: U('un premio', '值得获奖', { noImp: true, noProg: true, stative: true }),
   añadir: U('sal', '加盐'),
   aplaudir: U('al final', '最后鼓掌'),
   asistir: U('a la reunión', '参加会议'),

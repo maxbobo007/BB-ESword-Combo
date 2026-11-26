@@ -1,6 +1,6 @@
 import { conjugate, Person, Tense } from '@/conjugation/engine';
 import { VERB_USAGE } from '@/conjugation/complements';
-import { IMPERATIVE_PERSON_ZH, PRONOUN_ES, PRONOUN_ZH, TENSE_BY_ID } from '@/conjugation/tenses';
+import { IMPERATIVE_PERSON_ZH, PRONOUN_ZH, TENSE_BY_ID } from '@/conjugation/tenses';
 
 export interface Example {
   es: string;
@@ -18,6 +18,7 @@ export const isUsable = (inf: string, tense: Tense) => {
   if (!u || u.skip) return false;
   if (tense === 'imperativo' && u.noImp) return false;
   if (tense === 'gerundio' && u.noProg) return false;
+  if (u.noTenses?.includes(tense)) return false;
   return true;
 };
 
@@ -28,12 +29,14 @@ export const buildExample = (inf: string, tense: Tense, p: Person): Example | nu
   if (!conj) return null;
   const u = VERB_USAGE[inf];
   const info = TENSE_BY_ID[tense];
-  const es = info.esFrame
-    .replace('{s}', PRONOUN_ES[p])
+  const esFrame = u.stative && info.esFrameStative ? info.esFrameStative : info.esFrame;
+  const zhFrame = u.stative && info.zhFrameStative ? info.zhFrameStative : info.zhFrame;
+  const vp = tense === 'indefinido' && u.zhPret ? u.zhPret : u.zh;
+  const es = esFrame
     .replace('{F}', capitalize(conj.form))
     .replace('{f}', conj.form)
     .replace('{c}', u.es);
   const subjectZh = tense === 'imperativo' ? IMPERATIVE_PERSON_ZH[p] : PRONOUN_ZH[p];
-  const zh = info.zhFrame.replace('{S}', subjectZh).replace('{VP}', u.zh);
+  const zh = zhFrame.replace('{S}', subjectZh).replace('{VP}', vp);
   return { es: capitalize(es), zh, form: conj.form, answer: conj.answer, auxiliary: conj.auxiliary };
 };

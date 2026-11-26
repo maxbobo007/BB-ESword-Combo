@@ -5,6 +5,7 @@ import { useSettingsStore } from '@/store/settingsStore';
 import { TENSES } from '@/conjugation/tenses';
 import { buildExample } from '@/conjugation/examples';
 import { colors, latin, radius, space, type, webFocus } from '@/theme';
+import { appVersion, sendFeedback } from '@/utils/feedback';
 
 interface Props {
   visible: boolean;
@@ -74,6 +75,22 @@ export const SettingsSheet: React.FC<Props> = ({ visible, onClose }) => {
           <Text style={styles.sample}>“你们”的西班牙用法；拉美通常用 ustedes 代替</Text>
         </View>
       </Pressable>
+      <Text role="heading" style={styles.section}>
+        反馈
+      </Text>
+      <Pressable
+        role="button"
+        aria-label="反馈问题或建议"
+        onPress={() => sendFeedback('设置页')}
+        style={s => [styles.row, webFocus(s)]}
+      >
+        <View style={styles.rowText}>
+          <Text style={styles.name}>反馈问题或建议</Text>
+          <Text style={styles.sample}>会带上版本号和机型，可以发到微信或邮件</Text>
+        </View>
+        <Text style={styles.chevron}>›</Text>
+      </Pressable>
+      <Text style={styles.version}>版本 {appVersion()}</Text>
     </Sheet>
   );
 };
@@ -122,4 +139,6 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   levelB1: { color: colors.accent, backgroundColor: colors.accentSoft },
+  chevron: { fontSize: 22, color: colors.inkMuted },
+  version: { ...type.caption, color: colors.inkDisabled, textAlign: 'center', marginTop: space.lg },
 });

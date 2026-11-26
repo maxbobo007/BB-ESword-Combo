@@ -28,18 +28,31 @@ const editableCells = () =>
 describe('gameStore', () => {
   beforeEach(() => useGameStore.getState().resetGame());
 
-  it('不带重音的输入算对，并显示带重音的正确字母', () => {
+  it('重音严格判定：漏写重音的词不算对，只记"错一级"', () => {
     // 找一个 É 不是提示字母的种子
     let accented;
+    let puzzle;
     for (let seed = 0; seed < 50 && !accented; seed++) {
-      start(seed);
+      puzzle = start(seed);
       accented = editableCells().find(c => c.correctLetter === 'É');
     }
-    if (!accented) throw new Error('没有找到可编辑的 É');
-    useGameStore.getState().updateCell(accented.row, accented.col, 'e');
-    const after = useGameStore.getState().currentSession!.currentCells[accented.row][accented.col];
-    expect(after.letter).toBe('É');
-    expect(useGameStore.getState().currentSession!.mistakes).toBe(0);
+    if (!accented || !puzzle) throw new Error('没有找到可编辑的 É');
+    const word = puzzle.words.find(w => w.id === accented.wordIds[0])!;
+    // 把这个词填满：É 写成 E，其余都写对
+    for (const p of wordCells(word)) {
+      const c = useGameStore.getState().currentSession!.currentCells[p.row][p.col];
+      if (c.isFixed) continue;
+      useGameStore.getState().updateCell(p.row, p.col, c.correctLetter === 'É' ? 'e' : c.correctLetter);
+    }
+    const session = useGameStore.getState().currentSession!;
+    expect(session.currentCells[accented.row][accented.col].letter).toBe('E');
+    expect(session.mistakes).toBe(0);
+    expect(session.accentMistakes).toBeGreaterThan(0);
+    expect(session.wrongWordIds).toContain(word.id);
+
+    // 改成带重音的 É 就算对
+    useGameStore.getState().updateCell(accented.row, accented.col, 'É');
+    expect(useGameStore.getState().currentSession!.currentCells[accented.row][accented.col].letter).toBe('É');
   });
 
   it('不逐字判错：整词填满且不对时才按错误字母数计错，且不修改原状态对象', () => {

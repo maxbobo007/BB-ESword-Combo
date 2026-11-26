@@ -44,6 +44,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       mistakes: 0,
       wrongWordIds: [],
       hintedWordIds: [],
+      accentMistakes: 0,
       isCompleted: false,
     };
 
@@ -62,27 +63,33 @@ export const useGameStore = create<GameState>((set, get) => ({
     const cell = before[row][col];
     if (!cell.correctLetter || isCellLocked(before, currentPuzzle.words, { row, col })) return;
 
-    // 键盘没有重音字母：输入 E 可匹配 É，答对后显示带重音的正确字母
-    const input = letter ? letter.toUpperCase() : null;
-    const newLetter = input !== null && isSameLetter(input, cell.correctLetter) ? cell.correctLetter : input;
+    // 重音严格判定：E 和 É 是不同的字母（hable 和 hablé 是两个词）
+    const newLetter = letter ? letter.normalize('NFC').toUpperCase() : null;
     if (newLetter === cell.letter) return;
 
     const cells = replaceCell(before, row, col, { ...cell, letter: newLetter });
 
     // 不逐字判错：只有当一个单词刚好被填满且不正确时，才按错误字母数计错
+    // 只漏了重音（字母对、重音不对）单独计数，算"错一级"
     let mistakes = currentSession.mistakes;
+    let accentMistakes = currentSession.accentMistakes ?? 0;
     const wrongWordIds = [...currentSession.wrongWordIds];
     for (const word of currentPuzzle.words) {
       if (!cell.wordIds.includes(word.id)) continue;
       if (wordStatus(cells, word) === 'wrong') {
-        mistakes += wordCells(word).filter(
-          p => cells[p.row][p.col].letter !== cells[p.row][p.col].correctLetter
-        ).length;
+        for (const p of wordCells(word)) {
+          const c = cells[p.row][p.col];
+          if (c.letter === c.correctLetter) continue;
+          if (c.letter && isSameLetter(c.letter, c.correctLetter)) accentMistakes++;
+          else mistakes++;
+        }
         if (!wrongWordIds.includes(word.id)) wrongWordIds.push(word.id);
       }
     }
 
-    set({ currentSession: { ...currentSession, currentCells: cells, mistakes, wrongWordIds } });
+    set({
+      currentSession: { ...currentSession, currentCells: cells, mistakes, accentMistakes, wrongWordIds },
+    });
     get().checkCompletion();
   },
 
@@ -149,7 +156,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       .filter(cell => cell.correctLetter).length;
     const accuracy =
       totalLetters > 0
-        ? (Math.max(0, totalLetters - currentSession.mistakes) / totalLetters) * 100
+        ? (Math.max(0, totalLetters - currentSession.mistakes - (currentSession.accentMistakes ?? 0) * 0.5) / totalLetters) * 100
         : 0;
 
     const score = Math.max(

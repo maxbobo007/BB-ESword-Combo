@@ -36,6 +36,7 @@ export interface Word {
   exampleSentence?: string; // 例句
   exampleTranslation?: string; // 例句的中文翻译
   exampleHighlight?: string; // 例句里要高亮的部分（通常就是答案或完整变位形式）
+  hintableLength?: number; // 只允许在前 N 个字母里给提示（变位题只给词干，不给要考的词尾）
 }
 
 // 填字游戏单元格
@@ -81,7 +82,8 @@ export interface GameSession {
   endTime?: number;
   currentCells: CrosswordCell[][];
   hintsUsed: number;
-  mistakes: number; // 整词填满但不正确时，按错误字母数累计
+  mistakes: number; // 整词填满但不正确时，按错误字母数累计（不含只漏重音的）
+  accentMistakes?: number; // 字母对但重音不对的格子数（"错一级"）
   wrongWordIds: string[]; // 本局出过错的单词
   hintedWordIds: string[]; // 本局用过提示的单词
   isCompleted: boolean;

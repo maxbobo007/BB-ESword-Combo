@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { colors, latin, type } from '@/theme';
 
-export type TileState = 'default' | 'hint' | 'active' | 'selected' | 'correct' | 'wrong';
+export type TileState = 'default' | 'hint' | 'active' | 'selected' | 'correct' | 'wrong' | 'accent';
 
 interface LetterTileProps {
   size: number;
@@ -23,6 +23,8 @@ const PALETTE: Record<TileState, { bg: string; border: string; edge: string; tex
   selected: { bg: colors.tileSelected, border: colors.tileSelectedEdge, edge: colors.tileSelectedEdge, text: colors.onPrimary },
   correct: { bg: colors.tileCorrectBg, border: colors.tileCorrectEdge, edge: colors.tileCorrectEdge, text: colors.tileCorrectText },
   wrong: { bg: colors.dangerSoft, border: colors.danger, edge: colors.danger, text: colors.ink },
+  // 只漏了重音：藏红花黄，并在右上角加"´"记号（颜色之外的提示）
+  accent: { bg: colors.warningTile, border: '#C99A1E', edge: '#C99A1E', text: colors.ink },
 };
 
 // 有"厚度"的字母方块：上左右细边 + 更深更厚的底边，不用阴影，三端一致
@@ -36,7 +38,8 @@ export const LetterTile: React.FC<LetterTileProps> = ({
   style,
 }) => {
   const p = PALETTE[state];
-  const borderWidth = state === 'selected' ? 2.5 : state === 'active' || state === 'wrong' ? 2 : 1.5;
+  const borderWidth =
+    state === 'selected' ? 2.5 : state === 'active' || state === 'wrong' || state === 'accent' ? 2 : 1.5;
   const edgeWidth = Math.max(3, Math.round(size * 0.07));
   return (
     <View
@@ -89,6 +92,9 @@ export const LetterTile: React.FC<LetterTileProps> = ({
       </Text>
       {/* 错误状态除了颜色还有下划线 */}
       {state === 'wrong' && <View style={styles.wrongMark} />}
+      {state === 'accent' && (
+        <Text style={[styles.accentMark, { fontSize: Math.max(10, Math.round(size * 0.3)) }]}>´</Text>
+      )}
       {value !== undefined && (
         <Text style={[styles.value, latin(700), { color: p.text }]}>{value}</Text>
       )}
@@ -110,5 +116,6 @@ const styles = StyleSheet.create({
     borderRadius: 1,
     backgroundColor: colors.danger,
   },
+  accentMark: { position: 'absolute', top: -2, right: 3, color: colors.ink, fontWeight: '800' },
   value: { position: 'absolute', right: 3, bottom: 1, fontSize: 9 },
 });

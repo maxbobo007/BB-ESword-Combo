@@ -35,12 +35,22 @@ import {
   wordStatus,
 } from "@/utils/wordState";
 import { announce } from "@/utils/announce";
+import { isSameLetter } from "@/utils/letters";
+import { reportWord } from "@/utils/feedback";
 
 type Direction = CrosswordWord["direction"];
 
-const KEY_ROWS = ["QWERTYUIOP", "ASDFGHJKLÑ", "ZXCVBNM"].map((r) =>
-  r.split(""),
-);
+// 第一行是带重音的元音：重音也算对错，必须能直接输入
+const ACCENT_ROW = ["Á", "É", "Í", "Ó", "Ú", "Ü"];
+const KEY_ROWS = [ACCENT_ROW, ..."QWERTYUIOP ASDFGHJKLÑ ZXCVBNM".split(" ").map((r) => r.split(""))];
+const ACCENT_LABEL: Record<string, string> = {
+  Á: "带重音的 A",
+  É: "带重音的 E",
+  Í: "带重音的 I",
+  Ó: "带重音的 O",
+  Ú: "带重音的 U",
+  Ü: "带分音符的 U",
+};
 const WIDE_BREAKPOINT = 768;
 const BOARD_PAD = 6;
 const DIR_NAME: Record<Direction, string> = {
@@ -75,12 +85,7 @@ export const GameScreen: React.FC = () => {
   const [example, setExample] = useState<Word | null>(null);
   const { tenses, vosotros } = useSettingsStore();
 
-  // 例句卡片 6 秒后自动收起
-  useEffect(() => {
-    if (!example) return;
-    const t = setTimeout(() => setExample(null), 6000);
-    return () => clearTimeout(t);
-  }, [example]);
+  // 例句卡片不自动消失：读完点"继续"，或者直接开始输入下一个字母
 
   const cells = session?.currentCells;
   const words = useMemo(
@@ -178,6 +183,7 @@ export const GameScreen: React.FC = () => {
   );
 
   const handleCellPress = (cell: CrosswordCell) => {
+    cancelAutoAdvance();
     if (!cell.correctLetter || !puzzle) return;
     if (
       selected?.row === cell.row &&
@@ -201,6 +207,12 @@ export const GameScreen: React.FC = () => {
 
   // 单词刚好答对时：播报，并在短暂停顿后跳到下一个没完成的词
   const prevStatus = useRef<Record<string, string>>({});
+  // 答对后延迟跳到下一个词；用户在这之前自己操作了，就取消这次跳转
+  const autoAdvance = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cancelAutoAdvance = () => {
+    if (autoAdvance.current) clearTimeout(autoAdvance.current);
+    autoAdvance.current = null;
+  };
   useEffect(() => {
     if (!cells) return;
     for (const w of words) {
@@ -215,7 +227,13 @@ export const GameScreen: React.FC = () => {
           if (word.exampleSentence) setTimeout(() => setExample(word), 0);
           if (activeWord?.id === w.id) {
             const next = nextWord(w, 1);
-            if (next) setTimeout(() => selectWord(next), 350);
+            if (next) {
+              cancelAutoAdvance();
+              autoAdvance.current = setTimeout(() => {
+                autoAdvance.current = null;
+                selectWord(next);
+              }, 350);
+            }
           }
         } else if (s === "wrong") {
           announce(
@@ -234,6 +252,8 @@ export const GameScreen: React.FC = () => {
   const handleLetter = useCallback(
     (letter: string) => {
       if (!selected || !cells) return;
+      cancelAutoAdvance();
+      setExample(null);
       const target = locked(selected) ? moveWithinWord(selected, 1) : selected;
       if (!target) return;
       updateCell(target.row, target.col, letter);
@@ -413,7 +433,10 @@ export const GameScreen: React.FC = () => {
       owners.some((w) => statusOf(w) === "wrong") &&
       cell.letter !== cell.correctLetter
     )
-      return "wrong";
+      // 字母对、只是重音不对：单独标黄
+      return cell.letter && isSameLetter(cell.letter, cell.correctLetter)
+        ? "accent"
+        : "wrong";
     if (activeCells.has(key)) return "active";
     if (cell.isFixed) return "hint";
     return "default";
@@ -432,6 +455,7 @@ export const GameScreen: React.FC = () => {
       cell.letter ?? "空",
       cell.isFixed ? (cell.revealed ? "提示揭示" : "给出的字母") : null,
       state === "wrong" ? "错误" : null,
+      state === "accent" ? "重音不对" : null,
       state === "correct" ? "已答对" : null,
     ].filter(Boolean);
     return [...parts, ...extra].join("，");
@@ -514,6 +538,7 @@ export const GameScreen: React.FC = () => {
                   aria-selected={active}
                   aria-label={`${w.clueNumber}${DIR_NAME[w.direction]}，${wordCells(w).length} 个字母，${clueText(w)}${s === "correct" ? "，已完成" : ""}`}
                   onPress={() => {
+                    cancelAutoAdvance();
                     selectWord(w);
                     setCluesOpen(false);
                   }}
@@ -561,7 +586,7 @@ export const GameScreen: React.FC = () => {
         <Pressable
           role="button"
           aria-label="上一个词"
-          onPress={() => prev && selectWord(prev)}
+          onPress={() => { cancelAutoAdvance(); if (prev) selectWord(prev); }}
           style={(s) => [
             styles.clueArrow,
             s.pressed && styles.clueArrowPressed,
@@ -599,7 +624,7 @@ export const GameScreen: React.FC = () => {
         <Pressable
           role="button"
           aria-label="下一个词"
-          onPress={() => next && selectWord(next)}
+          onPress={() => { cancelAutoAdvance(); if (next) selectWord(next); }}
           style={(s) => [
             styles.clueArrow,
             s.pressed && styles.clueArrowPressed,
@@ -632,11 +657,14 @@ export const GameScreen: React.FC = () => {
             <Pressable
               key={letter}
               role="button"
-              aria-label={letter === "Ñ" ? "Ñ，eñe" : letter}
+              aria-label={
+                letter === "Ñ" ? "Ñ，eñe" : (ACCENT_LABEL[letter] ?? letter)
+              }
               hitSlop={{ top: 3, bottom: 3, left: 3, right: 3 }}
               onPress={() => handleLetter(letter)}
               style={(s) => [
                 styles.key,
+                i === 0 && styles.accentKey,
                 { width: keyWidth },
                 s.pressed && styles.keyPressed,
                 webFocus(s),
@@ -734,15 +762,18 @@ export const GameScreen: React.FC = () => {
       <View style={[styles.body, wide && styles.bodyWide]}>
         <View style={[styles.playColumn, wide && styles.playColumnWide]}>
           {renderGrid()}
-          <View style={styles.trayWrap}>
-            {/* 例句卡片浮在托盘上方，不挤占网格的高度 */}
-            <View style={styles.exampleSlot} pointerEvents="box-none">
-              <ExampleCard word={example} onClose={() => setExample(null)} />
-            </View>
-            <View style={styles.tray}>
-              {renderClueBar()}
-              {renderKeyboard()}
-            </View>
+          <View style={styles.tray}>
+            {/* 答对后，例句卡片暂时替换线索栏，不遮挡棋盘 */}
+            {example ? (
+              <ExampleCard
+                word={example}
+                onClose={() => setExample(null)}
+                onReport={(w) => reportWord(w, "答对后的例句卡")}
+              />
+            ) : (
+              renderClueBar()
+            )}
+            {renderKeyboard()}
           </View>
         </View>
         {wide && (
@@ -833,7 +864,19 @@ export const GameScreen: React.FC = () => {
                   {review ? "需复习" : "✓ 掌握"}
                 </Text>
               </View>
-              <ExampleSentence word={w.wordData} compact />
+              <View style={styles.resultFoot}>
+                <View style={styles.resultExample}>
+                  <ExampleSentence word={w.wordData} compact />
+                </View>
+                <Pressable
+                  role="button"
+                  aria-label={`报错：${w.wordData.spanish}`}
+                  onPress={() => reportWord(w.wordData, "结果页")}
+                  style={(s) => [styles.reportLink, webFocus(s)]}
+                >
+                  <Text style={styles.reportLinkText}>报错</Text>
+                </Pressable>
+              </View>
             </View>
           );
         })}
@@ -1005,6 +1048,7 @@ const styles = StyleSheet.create({
     transform: [{ translateY: 2 }],
   },
   keyText: { fontSize: 20, color: colors.ink },
+  accentKey: { backgroundColor: colors.warningSoft, height: 40 },
   deleteKey: { backgroundColor: "#E9DCC7" },
   deleteText: { fontSize: 20, color: colors.ink },
 
@@ -1064,8 +1108,10 @@ const styles = StyleSheet.create({
     marginTop: space.xl,
     marginBottom: space.sm,
   },
-  trayWrap: { position: "relative" },
-  exampleSlot: { position: "absolute", left: 0, right: 0, bottom: "100%" },
+  resultFoot: { flexDirection: "row", alignItems: "flex-start", gap: space.sm },
+  resultExample: { flex: 1 },
+  reportLink: { minHeight: 32, minWidth: 44, alignItems: "center", justifyContent: "center" },
+  reportLinkText: { ...type.caption, color: colors.inkMuted, textDecorationLine: "underline" },
   resultItem: {
     paddingVertical: space.sm,
     borderBottomWidth: 1,
